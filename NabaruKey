@@ -1,0 +1,147 @@
+-- Konfigurasi
+local kodeRahasia = "KEY-NEOX-9F2L-KDM7-XV3T-PW90-BN41"
+local linkKeyURL = "https://direct-link.net/1365093/DqqC8NRhsmYn"
+local statusFile = "fadhen_code.tdjeueaxmss"
+local KEY_VALID_SECONDS = 86 -- 24 jam
+
+-- Cek validitas key tersimpan
+local function isKeyStillValid()
+	if not isfile(statusFile) then return false end
+	local data = readfile(statusFile)
+	local split = string.split(data, ";")
+	if split[1] ~= "verified" then return false end
+	local timestamp = tonumber(split[2])
+	if not timestamp then return false end
+	return (tick() - timestamp) <= KEY_VALID_SECONDS
+end
+
+-- Jika sudah diverifikasi & masih valid, langsung load
+if isKeyStillValid() then
+	pcall(function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/NabaRuBranrot"))()
+	end)
+	return
+end
+
+-- GUI
+local player = game.Players.LocalPlayer
+local TweenService = game:GetService("TweenService")
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "KeySystemGui"
+gui.Parent = player:WaitForChild("PlayerGui")
+gui.ResetOnSpawn = false
+
+-- Frame utama
+local FINAL_SIZE = UDim2.new(0, 370, 0, 200)
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 0, 0, 0)
+frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+frame.AnchorPoint = Vector2.new(0.5, 0.5)
+frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20) -- Lebih hitam
+frame.Parent = gui
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
+
+-- Border glow tipis
+local border = Instance.new("UIStroke", frame)
+border.Thickness = 1.6
+border.Color = Color3.fromRGB(90, 90, 90)
+border.Transparency = 0.25
+
+-- Deskripsi
+local desc = Instance.new("TextLabel", frame)
+desc.Size = UDim2.new(0.9, 0, 0, 30)
+desc.Position = UDim2.new(0.05, 0, 0.1, 0)
+desc.BackgroundTransparency = 1
+desc.Text = "Enter Key (Valid 24h)"
+desc.Font = Enum.Font.Gotham
+desc.TextColor3 = Color3.fromRGB(235, 235, 235)
+desc.TextSize = 20
+desc.TextWrapped = true
+
+-- Input Key
+local textbox = Instance.new("TextBox", frame)
+textbox.Size = UDim2.new(0.9, 0, 0, 45)
+textbox.Position = UDim2.new(0.05, 0, 0.32, 0)
+textbox.PlaceholderText = "Enter Your Key"
+textbox.PlaceholderColor3 = Color3.fromRGB(170, 170, 170)
+textbox.Font = Enum.Font.Gotham
+textbox.Text = ""
+textbox.TextSize = 20
+textbox.TextColor3 = Color3.new(1, 1, 1)
+textbox.TextXAlignment = Enum.TextXAlignment.Center -- Teks di tengah
+textbox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+Instance.new("UICorner", textbox).CornerRadius = UDim.new(0, 8)
+
+-- Fungsi Membuat Tombol Premium
+local function createButton(parent, text, pos)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(0.42, 0, 0, 40)
+	btn.Position = pos
+	btn.Text = text
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 20
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	btn.AutoButtonColor = false
+	btn.Parent = parent
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+
+	-- Border glow
+	local glow = Instance.new("UIStroke", btn)
+	glow.Thickness = 1
+	glow.Color = Color3.fromRGB(255, 255, 255)
+	glow.Transparency = 0.7
+
+	-- Hover efek
+	btn.MouseEnter:Connect(function()
+		TweenService:Create(btn, TweenInfo.new(0.15), {
+			BackgroundColor3 = Color3.fromRGB(65, 65, 65),
+			Size = UDim2.new(0.44, 0, 0, 42)
+		}):Play()
+	end)
+	btn.MouseLeave:Connect(function()
+		TweenService:Create(btn, TweenInfo.new(0.15), {
+			BackgroundColor3 = Color3.fromRGB(40, 40, 40),
+			Size = UDim2.new(0.42, 0, 0, 40)
+		}):Play()
+	end)
+
+	return btn
+end
+
+-- Tombol Get Key
+local getKey = createButton(frame, "Get Key", UDim2.new(0.05, 0, 0.72, 0))
+getKey.MouseButton1Click:Connect(function()
+	setclipboard(linkKeyURL)
+	pcall(function()
+		game.StarterGui:SetCore("SendNotification", {
+			Title = "Copied",
+			Text = "Link copied to clipboard!",
+			Duration = 3
+		})
+	end)
+end)
+
+-- Tombol Verify
+local verifyBtn = createButton(frame, "Verify", UDim2.new(0.53, 0, 0.72, 0))
+verifyBtn.MouseButton1Click:Connect(function()
+	if string.lower(textbox.Text) == string.lower(kodeRahasia) then
+		verifyBtn.Text = "Verifying..."
+		writefile(statusFile, "verified;" .. tostring(tick()))
+		task.wait(0.5)
+		gui:Destroy()
+		pcall(function()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/NabaRuBranrot"))()
+		end)
+	else
+		verifyBtn.Text = "Key Invalid!"
+		task.wait(1.2)
+		verifyBtn.Text = "Verify"
+	end
+end)
+
+-- Animasi Fade-in + Pop
+frame.BackgroundTransparency = 1
+TweenService:Create(frame, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
+TweenService:Create(frame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = FINAL_SIZE}):Play()
