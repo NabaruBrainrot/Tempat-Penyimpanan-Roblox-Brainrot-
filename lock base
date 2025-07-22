@@ -76,7 +76,7 @@ end
 
 local function wiggleWhileCountdown(hrp, label, hitbox)
     local mySession = _sessionId
-    local countdownSet = {["4s"]=true, ["3s"]=true, ["2s"]=true, ["0s"]=true, ["0s"]=true}
+    local countdownSet = {["4s"]=true, ["3s"]=true, ["2s"]=true, ["1s"]=true, ["0s"]=true}
     if not hrp or not hrp.Parent then return end
     local char = hrp.Parent
     local hum = char:FindFirstChildOfClass("Humanoid")
