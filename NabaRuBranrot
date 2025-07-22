@@ -24,7 +24,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat
 
 -- Tambahkan toggle di tab Main
 _G.FaDhenAddToggle("Main", {
-    Name = "Auto Lock",
+    Name = "Lock base",
     Callback = function(on)
         if getgenv().AutoLockBase_SetEnabled then
             getgenv().AutoLockBase_SetEnabled(on)
