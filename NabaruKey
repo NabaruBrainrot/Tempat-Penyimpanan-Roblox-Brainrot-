@@ -1,8 +1,8 @@
 -- Konfigurasi
-local kodeRahasia = "KEY-ZYRX-8H1L-VDQ3-XM7T-KP80-GH24"
+local kodeRahasia = "KEY-AXEL-3P9F-WTN6-YQ2J-BR45-CM17"
 local linkKeyURL = "https://link-center.net/1365093/13RoDLLWVg1j"
 local statusFile = "fadhen_code.TheJusDingin"
-local KEY_VALID_SECONDS = 172800 -- 48 jam
+local KEY_VALID_SECONDS = 86400 -- 24 jam
 
 -- Cek validitas key tersimpan
 local function isKeyStillValid()
@@ -35,10 +35,11 @@ gui.ResetOnSpawn = false
 -- Frame utama
 local FINAL_SIZE = UDim2.new(0, 370, 0, 200)
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 0, 0, 0)
+frame.Size = FINAL_SIZE -- langsung ukuran final
 frame.Position = UDim2.new(0.5, 0, 0.5, 0)
 frame.AnchorPoint = Vector2.new(0.5, 0.5)
 frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20) -- Lebih hitam
+frame.BackgroundTransparency = 0
 frame.Parent = gui
 Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
 
@@ -53,7 +54,7 @@ local desc = Instance.new("TextLabel", frame)
 desc.Size = UDim2.new(0.9, 0, 0, 30)
 desc.Position = UDim2.new(0.05, 0, 0.1, 0)
 desc.BackgroundTransparency = 1
-desc.Text = "Enter Key (Valid 48h)"
+desc.Text = "Enter Key (Valid 24h)"
 desc.Font = Enum.Font.Gotham
 desc.TextColor3 = Color3.fromRGB(235, 235, 235)
 desc.TextSize = 20
@@ -69,7 +70,7 @@ textbox.Font = Enum.Font.Gotham
 textbox.Text = ""
 textbox.TextSize = 20
 textbox.TextColor3 = Color3.new(1, 1, 1)
-textbox.TextXAlignment = Enum.TextXAlignment.Center -- Teks di tengah
+textbox.TextXAlignment = Enum.TextXAlignment.Center
 textbox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 Instance.new("UICorner", textbox).CornerRadius = UDim.new(0, 8)
 
@@ -140,8 +141,3 @@ verifyBtn.MouseButton1Click:Connect(function()
 		verifyBtn.Text = "Verify"
 	end
 end)
-
--- Animasi Fade-in + Pop
-frame.BackgroundTransparency = 1
-TweenService:Create(frame, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
-TweenService:Create(frame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = FINAL_SIZE}):Play()
