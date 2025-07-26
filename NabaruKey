@@ -4,10 +4,16 @@ local linkKeyURL = "https://link-center.net/1365093/13RoDLLWVg1j"
 local statusFile = "fadhen_code.TheJusDingin"
 local KEY_VALID_SECONDS = 86400 -- 24 jam
 
+-- Cek fungsi tersedia
+local isfile = isfile or function() return false end
+local readfile = readfile or function() return "" end
+local writefile = writefile or function() end
+
 -- Cek validitas key tersimpan
 local function isKeyStillValid()
 	if not isfile(statusFile) then return false end
-	local data = readfile(statusFile)
+	local success, data = pcall(readfile, statusFile)
+	if not success then return false end
 	local split = string.split(data, ";")
 	if split[1] ~= "verified" then return false end
 	local timestamp = tonumber(split[2])
@@ -24,21 +30,22 @@ if isKeyStillValid() then
 end
 
 -- GUI
-local player = game.Players.LocalPlayer
 local TweenService = game:GetService("TweenService")
 
 local gui = Instance.new("ScreenGui")
 gui.Name = "KeySystemGui"
-gui.Parent = player:WaitForChild("PlayerGui")
 gui.ResetOnSpawn = false
+pcall(function()
+	gui.Parent = game:GetService("CoreGui")
+end)
 
 -- Frame utama
 local FINAL_SIZE = UDim2.new(0, 370, 0, 200)
 local frame = Instance.new("Frame")
-frame.Size = FINAL_SIZE -- langsung ukuran final
-frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+frame.Size = FINAL_SIZE
+frame.Position = UDim2.new(0.5, 0, 0.41, 0)
 frame.AnchorPoint = Vector2.new(0.5, 0.5)
-frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20) -- Lebih hitam
+frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 frame.BackgroundTransparency = 0
 frame.Parent = gui
 Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
@@ -129,7 +136,9 @@ local verifyBtn = createButton(frame, "Verify", UDim2.new(0.53, 0, 0.72, 0))
 verifyBtn.MouseButton1Click:Connect(function()
 	if string.lower(textbox.Text) == string.lower(kodeRahasia) then
 		verifyBtn.Text = "Verifying..."
-		writefile(statusFile, "verified;" .. tostring(tick()))
+		pcall(function()
+			writefile(statusFile, "verified;" .. tostring(tick()))
+		end)
 		task.wait(0.5)
 		gui:Destroy()
 		pcall(function()
