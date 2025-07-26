@@ -89,8 +89,8 @@ local function wiggleWhileCountdown(hrp, label, hitbox)
     _activeWiggleLoop = true
 
     local centerPos = hitbox and hitbox.Position or hrp.Position
-    local amplitude = 3
-    local radiusLock = 5
+    local amplitude = 4
+    local radiusLock = 7
     local stepTime = 0
     local direction = 1
     local run = true
