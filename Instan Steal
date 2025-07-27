@@ -106,8 +106,8 @@ local function runDelivery()
 	local myHitbox = findMyHitbox()
 	if not myHitbox then warn("Tidak menemukan DeliveryHitbox sendiri.") return end
 
-	local closestHitbox = getClosestHitbox(myHitbox, 47)
-	if not closestHitbox then warn("Tidak ada DeliveryHitbox lain dalam 47 studs.") return end
+	local closestHitbox = getClosestHitbox(myHitbox, 50)
+	if not closestHitbox then warn("Tidak ada DeliveryHitbox lain dalam 50 studs.") return end
 
 	local currentGoal = closestHitbox.Position + Vector3.new(0, 3, 0)
 	local phase = "ToClosest"
