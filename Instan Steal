@@ -117,7 +117,7 @@ local function runDelivery()
 		while active and not arrived do
 			if phase == "ToClosest" or phase == "ToMyBase" then
 				humanoidRootPart.Velocity = Vector3.new(humanoidRootPart.Velocity.X, 120, humanoidRootPart.Velocity.Z)
-				task.wait(phase == "ToClosest" and 0.2 or 1.5)
+				task.wait(phase == "ToClosest" and 0.5 or 1.5)
 			else
 				task.wait(0.5)
 			end
