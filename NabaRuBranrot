@@ -2,6 +2,23 @@
 loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Ui%20library"))()
 
 
+
+-- Tambahkan toggle di tab Main
+_G.FaDhenAddToggle("Main", {
+    Name = "Instan Steal",
+    Callback = function(on)
+        if on then
+            -- Eksekusi script hanya saat toggle ON
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Instan%20Steal"))()
+        else
+            print("Instan Steal dimatikan.")
+        end
+    end
+})
+
+
+
+
 -- Load Anti Steal
 loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Anti%20Steal"))()
 
@@ -172,7 +189,8 @@ _G.FaDhenAddToggle("Main", {
 })
 
 
-_G.FaDhenAddToggle("Main", {
+
+_G.FaDhenAddToggle("Visual", {
 	Name = "ESP Target",
 	Callback = function(v)
 		if v then
@@ -196,11 +214,15 @@ _G.FaDhenAddToggle("Main", {
 
 
 
+
+
+
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 
-local boostedSpeed = 43
+local boostedSpeed = 42
 local normalSpeed = 38
 local enforceConnection
 local speedBoosterAktif = false
@@ -247,44 +269,6 @@ player.CharacterAdded:Connect(function()
 		aktifkanSpeedBooster()
 	end
 end)
-
--- Ganti toggle ke FaDhenAddToggle
-
--- Tambahkan toggle di tab Main
-_G.FaDhenAddToggle("Visual", {
-    Name = "Instan Steal | 1 Arbix",
-    Callback = function(on)
-        if on then
-            -- Eksekusi script hanya saat toggle ON
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Youifpg/Steal-a-Brainrot-op/refs/heads/main/THXZ1N.lua"))()
-        else
-            print("Instan Steal dimatikan.")
-        end
-    end
-})
-
-
-
-
-
-
--- Tambahkan toggle di tab Main
-_G.FaDhenAddToggle("Visual", {
-    Name = "Instan Steal | 2 Arbix",
-    Callback = function(on)
-        if on then
-            -- Eksekusi script hanya saat toggle ON
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Youifpg/Steal-a-Brainrot-op/refs/heads/main/Arbixhub-obfuscated.lua"))()
-        else
-            print("Instan Steal dimatikan.")
-        end
-    end
-})
-
-
-
-
-
 _G.FaDhenAddToggle("Visual", {
 	Name = "SpeedBooster",
 	Callback = function(on)
@@ -301,7 +285,7 @@ _G.FaDhenAddToggle("Visual", {
 
 
 
-local boostedJump = 150
+local boostedJump = 130
 local normalJump = 50
 local isEnabled = false
 local Players = game:GetService("Players")
