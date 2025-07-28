@@ -9,7 +9,7 @@ _G.FaDhenAddToggle("Main", {
     Callback = function(on)
         if on then
             -- Eksekusi script hanya saat toggle ON
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Instan%20Steal"))()
+         loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Instan%20Steal%20FaDhen"))()
         else
             print("Instan Steal dimatikan.")
         end
