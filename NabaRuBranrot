@@ -2,23 +2,6 @@
 loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Ui%20library"))()
 
 
-
--- Tambahkan toggle di tab Main
-_G.FaDhenAddToggle("Main", {
-    Name = "Instan Steal Need Cloak",
-    Callback = function(on)
-        if on then
-            -- Eksekusi script hanya saat toggle ON
-         loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Instan%20Steal%20FaDhen"))()
-        else
-            print("Instan Steal dimatikan.")
-        end
-    end
-})
-
-
-
-
 -- Load Anti Steal
 loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Anti%20Steal"))()
 
@@ -189,26 +172,129 @@ _G.FaDhenAddToggle("Main", {
 })
 
 
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local gui = player:WaitForChild("PlayerGui")
 
-_G.FaDhenAddToggle("Visual", {
-	Name = "ESP Target",
-	Callback = function(v)
-		if v then
-			-- Saat Toggle ON: jalankan ESP dari Pastebin
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/esp%20target"))()
-			task.delay(0.1, function()
-				if getgenv().activateESP then
-					getgenv().activateESP()
-				end
-			end)
-		else
-			-- Saat Toggle OFF: hentikan dan bersihkan semuanya
-			if getgenv().disableESP then
-				getgenv().disableESP()
-			end
-		end
-	end
+local screenGui
+local function createMainGui()
+    if screenGui then return screenGui end
+
+    screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "UtilityGui"
+    screenGui.ResetOnSpawn = false
+    screenGui.IgnoreGuiInset = true
+    screenGui.Parent = gui
+
+    -- FRAME UTAMA UNTUK BUTTON
+    local frame = Instance.new("Frame")
+    frame.Name = "MainFrame"
+    frame.Size = UDim2.new(0, 200, 0, 32)
+    frame.Position = UDim2.new(0.5, 0, 0.02, 0)
+    frame.AnchorPoint = Vector2.new(0.5, 0)
+    frame.BackgroundTransparency = 1
+    frame.Parent = screenGui
+
+    -- RESET BUTTON
+    local resetBtn = Instance.new("TextButton")
+    resetBtn.Size = UDim2.new(0, 90, 1, 0)
+    resetBtn.Position = UDim2.new(0, 0, 0, 0)
+    resetBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+    resetBtn.TextColor3 = Color3.new(1, 1, 1)
+    resetBtn.Text = "Reset"
+    resetBtn.Font = Enum.Font.GothamBold
+    resetBtn.TextSize = 14
+    resetBtn.Parent = frame
+    Instance.new("UICorner", resetBtn).CornerRadius = UDim.new(0, 6)
+
+    resetBtn.MouseButton1Click:Connect(function()
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then humanoid.Health = 0 end
+    end)
+
+    -- LEAVE BUTTON
+    local leaveBtn = Instance.new("TextButton")
+    leaveBtn.Size = UDim2.new(0, 90, 1, 0)
+    leaveBtn.Position = UDim2.new(0, 100, 0, 0)
+    leaveBtn.BackgroundColor3 = Color3.fromRGB(44, 44, 44)
+    leaveBtn.TextColor3 = Color3.new(1, 1, 1)
+    leaveBtn.Text = "Leave"
+    leaveBtn.Font = Enum.Font.GothamBold
+    leaveBtn.TextSize = 14
+    leaveBtn.Parent = frame
+    Instance.new("UICorner", leaveBtn).CornerRadius = UDim.new(0, 6)
+
+    leaveBtn.MouseButton1Click:Connect(function()
+        game:Shutdown()
+    end)
+
+    player.CharacterAdded:Connect(function()
+        task.wait(0.1)
+        if not gui:FindFirstChild("UtilityGui") then
+            screenGui.Parent = gui
+        end
+    end)
+
+    return screenGui
+end
+
+_G.FaDhenAddToggle("Main", {
+    Name = "Exit Button",
+    Callback = function(on)
+        if on then
+            createMainGui().Enabled = true
+        else
+            if screenGui then
+                screenGui.Enabled = false
+            end
+        end
+    end
 })
+
+
+
+
+
+
+
+
+
+
+
+-- Tambahkan toggle di tab Visual
+_G.FaDhenAddToggle("Visual", {
+    Name = "Steal Helper |100",
+    Callback = function(on)
+        if on then
+            -- Eksekusi script hanya saat toggle ON
+         loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Instan%20Steal%20FaDhen"))()
+        else
+            print("Instan Steal dimatikan.")
+        end
+    end
+})
+
+
+
+
+-- Tambahkan toggle di tab Visual
+_G.FaDhenAddToggle("Visual", {
+    Name = "Steal Helper |50",
+    Callback = function(on)
+        if on then
+            -- Eksekusi script hanya saat toggle ON
+         loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Instan%20Steal%20Normal"))()
+        else
+            print("Instan Steal dimatikan.")
+        end
+    end
+})
+
+
+
+
+
 
 
 
@@ -329,6 +415,31 @@ _G.FaDhenAddToggle("Visual", {
 
 -- Tambahkan toggle di tab Misc
 
+
+_G.FaDhenAddToggle("Misc", {
+	Name = "ESP Target",
+	Callback = function(v)
+		if v then
+			-- Saat Toggle ON: jalankan ESP dari Pastebin
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/esp%20target"))()
+			task.delay(0.1, function()
+				if getgenv().activateESP then
+					getgenv().activateESP()
+				end
+			end)
+		else
+			-- Saat Toggle OFF: hentikan dan bersihkan semuanya
+			if getgenv().disableESP then
+				getgenv().disableESP()
+			end
+		end
+	end
+})
+
+
+
+
+
 _G.FaDhenAddToggle("Misc", {
 	Name = "Server hop",
 	Callback = function(v)
@@ -387,85 +498,9 @@ _G.FaDhenAddToggle("Misc", {
 
 
 
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local gui = player:WaitForChild("PlayerGui")
 
-local screenGui
-local function createMainGui()
-    if screenGui then return screenGui end
 
-    screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "UtilityGui"
-    screenGui.ResetOnSpawn = false
-    screenGui.IgnoreGuiInset = true
-    screenGui.Parent = gui
 
-    -- FRAME UTAMA UNTUK BUTTON
-    local frame = Instance.new("Frame")
-    frame.Name = "MainFrame"
-    frame.Size = UDim2.new(0, 200, 0, 32)
-    frame.Position = UDim2.new(0.5, 0, 0.02, 0)
-    frame.AnchorPoint = Vector2.new(0.5, 0)
-    frame.BackgroundTransparency = 1
-    frame.Parent = screenGui
-
-    -- RESET BUTTON
-    local resetBtn = Instance.new("TextButton")
-    resetBtn.Size = UDim2.new(0, 90, 1, 0)
-    resetBtn.Position = UDim2.new(0, 0, 0, 0)
-    resetBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-    resetBtn.TextColor3 = Color3.new(1, 1, 1)
-    resetBtn.Text = "Reset"
-    resetBtn.Font = Enum.Font.GothamBold
-    resetBtn.TextSize = 14
-    resetBtn.Parent = frame
-    Instance.new("UICorner", resetBtn).CornerRadius = UDim.new(0, 6)
-
-    resetBtn.MouseButton1Click:Connect(function()
-        local character = player.Character or player.CharacterAdded:Wait()
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then humanoid.Health = 0 end
-    end)
-
-    -- LEAVE BUTTON
-    local leaveBtn = Instance.new("TextButton")
-    leaveBtn.Size = UDim2.new(0, 90, 1, 0)
-    leaveBtn.Position = UDim2.new(0, 100, 0, 0)
-    leaveBtn.BackgroundColor3 = Color3.fromRGB(44, 44, 44)
-    leaveBtn.TextColor3 = Color3.new(1, 1, 1)
-    leaveBtn.Text = "Leave"
-    leaveBtn.Font = Enum.Font.GothamBold
-    leaveBtn.TextSize = 14
-    leaveBtn.Parent = frame
-    Instance.new("UICorner", leaveBtn).CornerRadius = UDim.new(0, 6)
-
-    leaveBtn.MouseButton1Click:Connect(function()
-        game:Shutdown()
-    end)
-
-    player.CharacterAdded:Connect(function()
-        task.wait(0.1)
-        if not gui:FindFirstChild("UtilityGui") then
-            screenGui.Parent = gui
-        end
-    end)
-
-    return screenGui
-end
-
-_G.FaDhenAddToggle("Misc", {
-    Name = "Exit Button",
-    Callback = function(on)
-        if on then
-            createMainGui().Enabled = true
-        else
-            if screenGui then
-                screenGui.Enabled = false
-            end
-        end
-    end
-})
 
 
 --Script lain
