@@ -178,3 +178,13 @@ Players.LocalPlayer.CharacterAdded:Connect(function(newChar)
 	cleanup()
 	if active then task.wait(1) runDelivery() end
 end)
+
+
+
+
+        task.wait(1) -- beri jeda biar GUI keburu siap
+game:GetService("StarterGui"):SetCore("SendNotification", {
+	Title = "Equip Invisibility Cloak!",
+	Text = "The script only works if you equip Invisibility Cloak",
+	Duration = 4
+})
