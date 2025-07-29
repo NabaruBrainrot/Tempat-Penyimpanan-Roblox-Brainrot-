@@ -264,7 +264,7 @@ _G.FaDhenAddToggle("Main", {
 
 -- Tambahkan toggle di tab Visual
 _G.FaDhenAddToggle("Visual", {
-    Name = "Steal Helper |100",
+    Name = "Steal Helper 100",
     Callback = function(on)
         if on then
             -- Eksekusi script hanya saat toggle ON
@@ -280,7 +280,7 @@ _G.FaDhenAddToggle("Visual", {
 
 -- Tambahkan toggle di tab Visual
 _G.FaDhenAddToggle("Visual", {
-    Name = "Steal Helper |50",
+    Name = "Steal Helper 50",
     Callback = function(on)
         if on then
             -- Eksekusi script hanya saat toggle ON
