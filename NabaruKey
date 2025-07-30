@@ -1,7 +1,7 @@
 -- Konfigurasi
-local kodeRahasia = "KEY-AXEL-3P9F-WTN6-YQ2J-BR45-CM17"
+local kodeRahasia = "KEY-MQRT-7L5H-ZDC4-VB9Y-NK38-TP60"
 local linkKeyURL = "https://link-center.net/1365093/13RoDLLWVg1j"
-local statusFile = "fadhen_code.TheJusDingin"
+local statusFile = "fadhen_code.TheJusDingin1"
 local KEY_VALID_SECONDS = 86400 -- 24 jam
 
 -- Cek fungsi tersedia
@@ -81,6 +81,22 @@ textbox.TextXAlignment = Enum.TextXAlignment.Center
 textbox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 Instance.new("UICorner", textbox).CornerRadius = UDim.new(0, 8)
 
+-- TextLabel untuk info key invalid
+local infoLabel = Instance.new("TextLabel", frame)
+infoLabel.Size = UDim2.new(0.9, 0, 0, 30)
+infoLabel.Position = UDim2.new(0.05, 0, 0.53, 0)
+infoLabel.BackgroundTransparency = 1
+infoLabel.Text = "If the key is invalid, please try getting a new key."
+infoLabel.Font = Enum.Font.Gotham
+infoLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+infoLabel.TextSize = 16
+infoLabel.TextWrapped = true
+infoLabel.TextXAlignment = Enum.TextXAlignment.Center
+infoLabel.TextTransparency = 1
+infoLabel.Visible = false
+
+local showingInfo = false -- Status boolean untuk mencegah tumpang tindih
+
 -- Fungsi Membuat Tombol Premium
 local function createButton(parent, text, pos)
 	local btn = Instance.new("TextButton")
@@ -146,6 +162,25 @@ verifyBtn.MouseButton1Click:Connect(function()
 		end)
 	else
 		verifyBtn.Text = "Key Invalid!"
+
+		if not showingInfo then
+			showingInfo = true
+			infoLabel.Visible = true
+			infoLabel.TextTransparency = 1
+			TweenService:Create(infoLabel, TweenInfo.new(0.3), {
+				TextTransparency = 0
+			}):Play()
+
+			task.delay(5, function()
+				TweenService:Create(infoLabel, TweenInfo.new(0.4), {
+					TextTransparency = 1
+				}):Play()
+				task.wait(0.4)
+				infoLabel.Visible = false
+				showingInfo = false
+			end)
+		end
+
 		task.wait(1.2)
 		verifyBtn.Text = "Verify"
 	end
