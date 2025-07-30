@@ -128,7 +128,7 @@ local function runDelivery()
 	jumpLoop = task.spawn(function()
 		while active and not arrived do
 			if humanoid.FloorMaterial ~= Enum.Material.Air then
-				humanoid.JumpPower = phase == "ToClosest" and 50 or 150
+				humanoid.JumpPower = phase == "ToClosest" and 50 or 100
 				humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
 			end
 			task.wait(0.3)
