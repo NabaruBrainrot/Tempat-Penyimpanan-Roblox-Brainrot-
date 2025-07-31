@@ -254,7 +254,18 @@ _G.FaDhenAddToggle("Main", {
 
 
 
-
+-- Tambahkan toggle di tab Visual
+_G.FaDhenAddToggle("Visual", {
+    Name = "Ken Hub Script",
+    Callback = function(on)
+        if on then
+            -- Eksekusi script hanya saat toggle ON
+         loadstring(game:HttpGet("https://raw.githubusercontent.com/Gregy677/Gunmods-strucid/main/Steal%20a%20brain%20rot",true))()
+        else
+            print("Instan Steal dimatikan.")
+        end
+    end
+})
 
 
 
@@ -371,6 +382,32 @@ _G.FaDhenAddToggle("Visual", {
 
 
 
+-- Tambahkan toggle di tab Misc
+
+
+_G.FaDhenAddToggle("Misc", {
+	Name = "ESP Target",
+	Callback = function(v)
+		if v then
+			-- Saat Toggle ON: jalankan ESP dari Pastebin
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/esp%20target"))()
+			task.delay(0.1, function()
+				if getgenv().activateESP then
+					getgenv().activateESP()
+				end
+			end)
+		else
+			-- Saat Toggle OFF: hentikan dan bersihkan semuanya
+			if getgenv().disableESP then
+				getgenv().disableESP()
+			end
+		end
+	end
+})
+
+
+
+
 local boostedJump = 130
 local normalJump = 50
 local isEnabled = false
@@ -395,7 +432,7 @@ if player.Character then
 end
 
 -- Ganti toggle ke FaDhenAddToggle
-_G.FaDhenAddToggle("Visual", {
+_G.FaDhenAddToggle("Misc", {
 	Name = "JumpBooster",
 	Callback = function(state)
 		isEnabled = state
@@ -410,31 +447,6 @@ _G.FaDhenAddToggle("Visual", {
 	end
 })
 
-
-
-
--- Tambahkan toggle di tab Misc
-
-
-_G.FaDhenAddToggle("Misc", {
-	Name = "ESP Target",
-	Callback = function(v)
-		if v then
-			-- Saat Toggle ON: jalankan ESP dari Pastebin
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/esp%20target"))()
-			task.delay(0.1, function()
-				if getgenv().activateESP then
-					getgenv().activateESP()
-				end
-			end)
-		else
-			-- Saat Toggle OFF: hentikan dan bersihkan semuanya
-			if getgenv().disableESP then
-				getgenv().disableESP()
-			end
-		end
-	end
-})
 
 
 
