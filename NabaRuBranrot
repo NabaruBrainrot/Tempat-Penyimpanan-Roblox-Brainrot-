@@ -429,7 +429,44 @@ _G.FaDhenAddToggle("Misc", {
 
 
 
+local boostedJump = 130
+local normalJump = 50
+local isEnabled = false
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 
+local function applyJumpPower(humanoid)
+	if humanoid then
+		humanoid.UseJumpPower = true
+		humanoid.JumpPower = isEnabled and boostedJump or normalJump
+	end
+end
+
+local function onCharacterAdded(character)
+	local humanoid = character:WaitForChild("Humanoid")
+	applyJumpPower(humanoid)
+end
+
+player.CharacterAdded:Connect(onCharacterAdded)
+if player.Character then
+	onCharacterAdded(player.Character)
+end
+
+-- Ganti toggle ke FaDhenAddToggle
+_G.FaDhenAddToggle("Misc", {
+	Name = "JumpBooster",
+	Callback = function(state)
+		isEnabled = state
+		print("JumpBooster:", state)
+		local character = player.Character
+		if character then
+			local humanoid = character:FindFirstChild("Humanoid")
+			if humanoid then
+				applyJumpPower(humanoid)
+			end
+		end
+	end
+})
 
 
 
@@ -448,9 +485,6 @@ _G.FaDhenAddToggle("Misc", {
 		end
 	end
 })
-
-
-
 
 
 
