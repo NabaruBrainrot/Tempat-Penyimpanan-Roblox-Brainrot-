@@ -69,7 +69,7 @@ toggleBtn.BorderSizePixel = 0
 Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0, 8)
 
 -- Logic
-local speed = 50
+local speed = 42
 local arrived = false
 local active = false
 local jumpLoop = nil
