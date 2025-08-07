@@ -11,65 +11,68 @@ local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 local humanoid = character:WaitForChild("Humanoid")
 local plots = workspace:WaitForChild("Plots")
 
--- GUI Setup
+-- GUI Baru Setup
 local gui = Instance.new("ScreenGui", CoreGui)
 gui.Name = "PremiumDeliveryGUI"
 gui.ResetOnSpawn = false
 
 local frame = Instance.new("Frame")
 frame.Name = "MainFrame"
-frame.Size = UDim2.new(0, 210, 0, 100)
-frame.Position = UDim2.new(0, 30, 0.4, 0)
-frame.BackgroundColor3 = Color3.fromRGB(20, 20, 22)
+frame.Size = UDim2.new(0, 176, 0, 104)
+frame.Position = UDim2.new(0.1, 0, 0.1, 0)
+frame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
 frame.BorderSizePixel = 0
-frame.BackgroundTransparency = 0
-frame.Parent = gui
 frame.Active = true
 frame.Draggable = true
+frame.Parent = gui
 
--- Style
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
-local stroke = Instance.new("UIStroke", frame)
-stroke.Color = Color3.fromRGB(0, 200, 255)
-stroke.Thickness = 2
-stroke.Transparency = 0.15
-
-local shadow = Instance.new("ImageLabel", frame)
-shadow.Size = UDim2.new(1, 30, 1, 30)
-shadow.Position = UDim2.new(0, -15, 0, -15)
-shadow.BackgroundTransparency = 1
-shadow.Image = "rbxassetid://1316045217"
-shadow.ImageColor3 = Color3.new(0, 0, 0)
-shadow.ImageTransparency = 0.8
-shadow.ZIndex = 0
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
 
 -- Judul
 local title = Instance.new("TextLabel", frame)
-title.Name = "TitleLabel"
-title.Size = UDim2.new(1, 0, 0, 30)
+title.Name = "Title"
+title.Size = UDim2.new(1, 0, 0, 25)
 title.Position = UDim2.new(0, 0, 0, 0)
 title.BackgroundTransparency = 1
-title.Text = "Steal Helper  |  50 Speed"
-title.Font = Enum.Font.GothamBold
+title.Text = "Steal Helper"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextSize = 15
-title.TextStrokeTransparency = 0.7
+title.Font = Enum.Font.GothamBold
+title.TextSize = 16
 
--- Tombol
+-- Garis bawah judul
+local garis = Instance.new("Frame", frame)
+garis.Size = UDim2.new(1, -20, 0, 1)
+garis.Position = UDim2.new(0, 10, 0, 25)
+garis.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+garis.BorderSizePixel = 0
+
+-- Tombol Toggle
 local toggleBtn = Instance.new("TextButton", frame)
 toggleBtn.Name = "ToggleButton"
-toggleBtn.Size = UDim2.new(1, -30, 0, 45)
-toggleBtn.Position = UDim2.new(0, 15, 0, 45)
-toggleBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-toggleBtn.Text = "▶ Start"
-toggleBtn.Font = Enum.Font.GothamBlack
-toggleBtn.TextSize = 16
+toggleBtn.Size = UDim2.new(0.8, 0, 0, 28)
+toggleBtn.Position = UDim2.new(0.1, 0, 0, 45)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
 toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-toggleBtn.BorderSizePixel = 0
-Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0, 8)
+toggleBtn.Font = Enum.Font.GothamSemibold
+toggleBtn.TextSize = 14
+toggleBtn.Text = "▶ Start"
+toggleBtn.AutoButtonColor = false
+Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0, 6)
+
+-- Hover Effect
+toggleBtn.MouseEnter:Connect(function()
+	toggleBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 90)
+end)
+toggleBtn.MouseLeave:Connect(function()
+	if active then
+		toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 120)
+	else
+		toggleBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+	end
+end)
 
 -- Logic
-local speed = 42
+local speed = 47
 local arrived = false
 local active = false
 local jumpLoop = nil
@@ -146,7 +149,7 @@ local function runDelivery()
 				cleanup()
 				active = false
 				toggleBtn.Text = "▶ Start"
-				toggleBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+				toggleBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
 			end
 			return
 		end
@@ -159,7 +162,7 @@ toggleBtn.MouseButton1Click:Connect(function()
 	if active then
 		active = false
 		toggleBtn.Text = "▶ Start"
-		toggleBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+		toggleBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
 		cleanup()
 	else
 		if not humanoidRootPart or not humanoid then return warn("Karakter belum siap.") end
