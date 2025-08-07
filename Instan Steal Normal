@@ -178,3 +178,14 @@ button.MouseButton1Click:Connect(function()
 	local jmjParts = buatJMJSemua()
 	dorongKeJMJ(jmjParts)
 end)
+
+
+
+
+
+task.wait(1) -- beri jeda biar GUI keburu siap
+game:GetService("StarterGui"):SetCore("SendNotification", {
+	Title = "Tips Message!",
+	Text = "For Base Flor 1",
+	Duration = 4
+})
