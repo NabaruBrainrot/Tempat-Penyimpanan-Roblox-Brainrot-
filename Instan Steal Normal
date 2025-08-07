@@ -13,7 +13,7 @@ local plots = workspace:WaitForChild("Plots")
 
 -- GUI Baru Setup
 local gui = Instance.new("ScreenGui", CoreGui)
-gui.Name = "PremiumDeliveryGUI"
+gui.Name = "StealHelper"
 gui.ResetOnSpawn = false
 
 local frame = Instance.new("Frame")
