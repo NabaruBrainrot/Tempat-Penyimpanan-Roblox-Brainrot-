@@ -1,5 +1,5 @@
 -- Hapus GUI lama jika ada
-pcall(function() game.CoreGui:FindFirstChild("PremiumDeliveryGUI"):Destroy() end)
+pcall(function() game.CoreGui:FindFirstChild("StealHelper"):Destroy() end)
 
 -- Ambil service dan data pemain
 local CoreGui = game:GetService("CoreGui")
