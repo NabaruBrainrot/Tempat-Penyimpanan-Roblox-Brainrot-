@@ -41,7 +41,7 @@ corner.CornerRadius = UDim.new(0, 20)
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -20, 0, 40)
 title.Position = UDim2.new(0, 10, 0, 4)
-title.Text = "Steal Helper"
+title.Text = "Steal Helper | choose "
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.BackgroundTransparency = 1
 title.Font = Enum.Font.GothamBold
@@ -94,14 +94,14 @@ local function createButton(name, yPos, callback)
 end
 
 -- Tambahkan tombol
-createButton("Flor 1", 60, function()
+createButton("Base Flor 1", 60, function()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Instan%20Steal%20Normal"))()
 end)
 
-createButton("Flor 2", 110, function()
+createButton("Base Flor 2", 110, function()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Steal%20Helper%20Flor%202"))()
 end)
 
-createButton("Flor 3", 160, function()
+createButton("Base Flor 3", 160, function()
 	loadstring(game:HttpGet("https://pastebin.com/raw/zzzzzFlor3"))()
 end)
