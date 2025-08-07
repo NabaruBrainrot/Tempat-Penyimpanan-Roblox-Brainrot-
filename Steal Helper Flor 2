@@ -24,7 +24,7 @@ local title = Instance.new("TextLabel", frame)
 title.Size = UDim2.new(1, 0, 0, 25)
 title.Position = UDim2.new(0, 0, 0, 0)
 title.BackgroundTransparency = 1
-title.Text = "Steal Helper"
+title.Text = "Steal Helper 2"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 16
@@ -42,7 +42,7 @@ button.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
 button.TextColor3 = Color3.fromRGB(255, 255, 255)
 button.Font = Enum.Font.GothamSemibold
 button.TextSize = 14
-button.Text = "Aktifkan"
+button.Text = "▶ Start"
 button.AutoButtonColor = false
 
 local btnCorner = Instance.new("UICorner", button)
@@ -136,7 +136,7 @@ local function dorongKeJMJ(jmj)
 			humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
 			hrp.Velocity = Vector3.new(0, 160, 0)
 			move = false
-			button.Text = "Aktifkan"
+			button.Text = "▶ Start"
 			active = false
 			if moveConn then moveConn:Disconnect() end
 			if touchConn then touchConn:Disconnect() end
@@ -151,7 +151,7 @@ end
 -- Tombol Klik
 button.MouseButton1Click:Connect(function()
 	active = not active
-	button.Text = active and "Nonaktifkan" or "Aktifkan"
+	button.Text = active and "■ Stop" or "▶ Start"
 
 	if moveConn then moveConn:Disconnect() end
 	if touchConn then touchConn:Disconnect() end
