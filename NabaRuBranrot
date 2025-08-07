@@ -252,12 +252,26 @@ _G.FaDhenAddToggle("Main", {
     end
 })
 
+_G.FaDhenAddToggle("Visual", {
+    Name = "New Instan Steal",
+    Callback = function(on)
+        if on then
+            -- Eksekusi script hanya saat toggle ON
+         loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Steal%20Flor%201%202%203"))()
+        else
+            print("Instan Steal dimatikan.")
+        end
+    end
+})
+
+
+
 
 
 
 -- Tambahkan toggle di tab Visual
 _G.FaDhenAddToggle("Visual", {
-    Name = "Steal Helper 100",
+    Name = "Steal Helper + Cloak",
     Callback = function(on)
         if on then
             -- Eksekusi script hanya saat toggle ON
@@ -269,20 +283,6 @@ _G.FaDhenAddToggle("Visual", {
 })
 
 
-
-
--- Tambahkan toggle di tab Visual
-_G.FaDhenAddToggle("Visual", {
-    Name = "Steal Helper 50",
-    Callback = function(on)
-        if on then
-            -- Eksekusi script hanya saat toggle ON
-         loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Instan%20Steal%20Normal"))()
-        else
-            print("Instan Steal dimatikan.")
-        end
-    end
-})
 
 
 
