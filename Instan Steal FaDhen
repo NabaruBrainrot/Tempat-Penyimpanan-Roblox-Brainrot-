@@ -49,8 +49,8 @@ garis.BorderSizePixel = 0
 -- Tombol Toggle
 local toggleBtn = Instance.new("TextButton", frame)
 toggleBtn.Name = "ToggleButton"
-toggleBtn.Size = UDim2.new(0.8, 0, 0, 28)
-toggleBtn.Position = UDim2.new(0.1, 0, 0, 45)
+toggleBtn.Size = UDim2.new(0.90, 0, 0, 34) -- Dibesar 20% dari ukuran awal
+toggleBtn.Position = UDim2.new(0.05, 0, 0, 42) -- Disesuaikan agar tetap di tengah
 toggleBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
 toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 toggleBtn.Font = Enum.Font.GothamSemibold
@@ -58,7 +58,7 @@ toggleBtn.TextSize = 14
 toggleBtn.Text = "▶ Start"
 toggleBtn.AutoButtonColor = false
 Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0, 6)
-
+--
 -- Hover Effect
 toggleBtn.MouseEnter:Connect(function()
 	toggleBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 90)
