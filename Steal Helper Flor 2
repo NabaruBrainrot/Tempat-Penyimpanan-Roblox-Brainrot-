@@ -127,7 +127,7 @@ local function dorongKeJMJ(jmj)
 
 	moveConn = game:GetService("RunService").Heartbeat:Connect(function()
 		if not move or not hrp then return end
-		local newVel = direction * 50
+		local newVel = direction * 43
 		hrp.Velocity = Vector3.new(newVel.X, hrp.Velocity.Y, newVel.Z)
 	end)
 
