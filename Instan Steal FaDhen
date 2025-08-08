@@ -72,7 +72,7 @@ toggleBtn.MouseLeave:Connect(function()
 end)
 
 -- Logic
-local speed = 95
+local speed = 75
 local arrived = false
 local active = false
 local jumpLoop = nil
