@@ -1,7 +1,7 @@
 -- Konfigurasi
 local kodeRahasia = "KEY-ZKTY-40BX-CM97-LW83-YTR0-KD15"
 local linkKeyURL = "https://link-center.net/1365093/13RoDLLWVg1j"
-local statusFile = "fadhen_code.TheJusDingin"
+local statusFile = "fadhen_code.TheJusDingin1"
 local KEY_VALID_SECONDS = 86400 -- 24 jam
 
 local isfile = isfile or function() return false end
