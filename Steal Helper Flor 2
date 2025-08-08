@@ -34,17 +34,17 @@ garis.Size = UDim2.new(1, -20, 0, 1)
 garis.Position = UDim2.new(0, 10, 0, 25)
 garis.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 garis.BorderSizePixel = 0
-
+--
 local button = Instance.new("TextButton", frame)
-button.Size = UDim2.new(0.8, 0, 0, 28)
-button.Position = UDim2.new(0.1, 0, 0, 45)
+button.Size = UDim2.new(0.90, 0, 0, 34) -- Dibesar 20%
+button.Position = UDim2.new(0.05, 0, 0, 42) -- Disesuaikan agar tetap rata tengah
 button.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
 button.TextColor3 = Color3.fromRGB(255, 255, 255)
 button.Font = Enum.Font.GothamSemibold
 button.TextSize = 14
 button.Text = "▶ Start"
 button.AutoButtonColor = false
-
+--
 local btnCorner = Instance.new("UICorner", button)
 btnCorner.CornerRadius = UDim.new(0, 6)
 
