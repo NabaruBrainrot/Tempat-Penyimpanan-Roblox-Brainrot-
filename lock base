@@ -305,3 +305,23 @@ local function AutoLockBase_SetEnabled(state)
 end
 
 getgenv().AutoLockBase_SetEnabled = AutoLockBase_SetEnabled
+
+
+
+
+
+--Control 
+-- Load Lock Base
+loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/lock%20base"))()
+
+-- Tambahkan toggle di tab Main
+_G.FaDhenAddToggle("Main", {
+    Name = "Lock base",
+    Callback = function(on)
+        if getgenv().AutoLockBase_SetEnabled then
+            getgenv().AutoLockBase_SetEnabled(on)
+        else
+            warn("Auto Lock Base belum siap!")
+        end
+    end
+})
