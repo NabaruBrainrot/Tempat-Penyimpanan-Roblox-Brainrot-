@@ -2,6 +2,22 @@
 loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Ui%20library"))()
 
 
+
+_G.FaDhenAddToggle("Main", {
+    Name = "Steal Helper",
+    Callback = function(on)
+        if on then
+            -- Eksekusi script hanya saat toggle ON
+         loadstring(game:HttpGet("https://raw.githubusercontent.com/ily123950/Vulkan/refs/heads/main/Trx"))()
+        else
+            print("Instan Steal dimatikan.")
+        end
+    end
+})
+
+
+
+
 -- Load Anti Steal
 loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Anti%20Steal"))()
 
@@ -18,21 +34,6 @@ _G.FaDhenAddToggle("Main", {
 })
 
 
-
--- Load Lock Base
-loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/lock%20base"))()
-
--- Tambahkan toggle di tab Main
-_G.FaDhenAddToggle("Main", {
-    Name = "Lock base",
-    Callback = function(on)
-        if getgenv().AutoLockBase_SetEnabled then
-            getgenv().AutoLockBase_SetEnabled(on)
-        else
-            warn("Auto Lock Base belum siap!")
-        end
-    end
-})
 
 
 --=== ESP PLAYER (FaDhen Toggle) ===--
@@ -172,6 +173,43 @@ _G.FaDhenAddToggle("Main", {
 })
 
 
+
+_G.FaDhenAddToggle("Main", {
+    Name = "New Lock Base",
+    Callback = function(on)
+        if on then
+            -- Eksekusi script hanya saat toggle ON
+         loadstring(game:HttpGet("https://pastebin.com/raw/makzCS0N"))()
+        else
+            print("Instan Steal dimatikan.")
+        end
+    end
+})
+
+
+
+_G.FaDhenAddToggle("Visual", {
+	Name = "Rejoin",
+	Callback = function(v)
+		print("rejoin:", v)
+		if v then
+			local TeleportService = game:GetService("TeleportService")
+			local Players = game:GetService("Players")
+			local player = Players.LocalPlayer
+			local placeId = game.PlaceId
+			local jobId = game.JobId
+
+			TeleportService:TeleportToPlaceInstance(placeId, jobId, player)
+		end
+	end
+})
+
+
+
+
+
+
+
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local gui = player:WaitForChild("PlayerGui")
@@ -239,7 +277,7 @@ local function createMainGui()
     return screenGui
 end
 
-_G.FaDhenAddToggle("Main", {
+_G.FaDhenAddToggle("Visual", {
     Name = "Exit Button",
     Callback = function(on)
         if on then
@@ -252,109 +290,27 @@ _G.FaDhenAddToggle("Main", {
     end
 })
 
+
+
 _G.FaDhenAddToggle("Visual", {
-    Name = "New Instan Steal",
-    Callback = function(on)
-        if on then
-            -- Eksekusi script hanya saat toggle ON
-         loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Steal%20Flor%201%202%203"))()
-        else
-            print("Instan Steal dimatikan.")
-        end
-    end
-})
-
-
-
-
-
-
--- Tambahkan toggle di tab Visual
-_G.FaDhenAddToggle("Visual", {
-    Name = "Steal Helper + Cloak",
-    Callback = function(on)
-        if on then
-            -- Eksekusi script hanya saat toggle ON
-         loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Instan%20Steal%20FaDhen"))()
-        else
-            print("Instan Steal dimatikan.")
-        end
-    end
-})
-
-
-
-
-
-
-
-
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local player = Players.LocalPlayer
-
-local boostedSpeed = 42
-local normalSpeed = 38
-local enforceConnection
-local speedBoosterAktif = false
-
-local function enforceSpeed(humanoid)
-	if enforceConnection then
-		enforceConnection:Disconnect()
-	end
-	enforceConnection = RunService.Heartbeat:Connect(function()
-		if humanoid and humanoid.WalkSpeed ~= boostedSpeed then
-			humanoid.WalkSpeed = boostedSpeed
-		end
-	end)
-
-	humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
-		if speedBoosterAktif and humanoid.WalkSpeed ~= boostedSpeed then
-			humanoid.WalkSpeed = boostedSpeed
-		end
-	end)
-end
-
-local function aktifkanSpeedBooster()
-	local character = player.Character or player.CharacterAdded:Wait()
-	local humanoid = character:WaitForChild("Humanoid")
-	enforceSpeed(humanoid)
-end
-
-local function nonaktifkanSpeedBooster()
-	if enforceConnection then
-		enforceConnection:Disconnect()
-		enforceConnection = nil
-	end
-	local character = player.Character
-	if character then
-		local humanoid = character:FindFirstChildOfClass("Humanoid")
-		if humanoid then
-			humanoid.WalkSpeed = normalSpeed
-		end
-	end
-end
-
-player.CharacterAdded:Connect(function()
-	if speedBoosterAktif then
-		aktifkanSpeedBooster()
-	end
-end)
-_G.FaDhenAddToggle("Visual", {
-	Name = "SpeedBooster",
-	Callback = function(on)
-		speedBoosterAktif = on
-		if on then
-			aktifkanSpeedBooster()
-			print("✅ Speed Booster AKTIF (WalkSpeed = " .. boostedSpeed .. ")")
+	Name = "ESP Target",
+	Callback = function(v)
+		if v then
+			-- Saat Toggle ON: jalankan ESP dari Pastebin
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/esp%20target"))()
+			task.delay(0.1, function()
+				if getgenv().activateESP then
+					getgenv().activateESP()
+				end
+			end)
 		else
-			nonaktifkanSpeedBooster()
-			print("⛔ Speed Booster NONAKTIF (WalkSpeed kembali ke " .. normalSpeed .. ")")
+			-- Saat Toggle OFF: hentikan dan bersihkan semuanya
+			if getgenv().disableESP then
+				getgenv().disableESP()
+			end
 		end
 	end
 })
-
-
 
 
 
@@ -370,7 +326,6 @@ _G.FaDhenAddToggle("Visual", {
         end
     end
 })
-
 
 
 
@@ -407,84 +362,7 @@ _G.FaDhenAddToggle("Misc", {
 
 
 
-_G.FaDhenAddToggle("Misc", {
-	Name = "ESP Target",
-	Callback = function(v)
-		if v then
-			-- Saat Toggle ON: jalankan ESP dari Pastebin
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/esp%20target"))()
-			task.delay(0.1, function()
-				if getgenv().activateESP then
-					getgenv().activateESP()
-				end
-			end)
-		else
-			-- Saat Toggle OFF: hentikan dan bersihkan semuanya
-			if getgenv().disableESP then
-				getgenv().disableESP()
-			end
-		end
-	end
-})
 
-
-
-local boostedJump = 130
-local normalJump = 50
-local isEnabled = false
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-
-local function applyJumpPower(humanoid)
-	if humanoid then
-		humanoid.UseJumpPower = true
-		humanoid.JumpPower = isEnabled and boostedJump or normalJump
-	end
-end
-
-local function onCharacterAdded(character)
-	local humanoid = character:WaitForChild("Humanoid")
-	applyJumpPower(humanoid)
-end
-
-player.CharacterAdded:Connect(onCharacterAdded)
-if player.Character then
-	onCharacterAdded(player.Character)
-end
-
--- Ganti toggle ke FaDhenAddToggle
-_G.FaDhenAddToggle("Misc", {
-	Name = "JumpBooster",
-	Callback = function(state)
-		isEnabled = state
-		print("JumpBooster:", state)
-		local character = player.Character
-		if character then
-			local humanoid = character:FindFirstChild("Humanoid")
-			if humanoid then
-				applyJumpPower(humanoid)
-			end
-		end
-	end
-})
-
-
-
-_G.FaDhenAddToggle("Misc", {
-	Name = "Rejoin",
-	Callback = function(v)
-		print("rejoin:", v)
-		if v then
-			local TeleportService = game:GetService("TeleportService")
-			local Players = game:GetService("Players")
-			local player = Players.LocalPlayer
-			local placeId = game.PlaceId
-			local jobId = game.JobId
-
-			TeleportService:TeleportToPlaceInstance(placeId, jobId, player)
-		end
-	end
-})
 
 
 
