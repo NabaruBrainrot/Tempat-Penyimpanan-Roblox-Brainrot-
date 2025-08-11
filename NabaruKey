@@ -2,7 +2,7 @@
 local kodeRahasia = "KEY-BMWC-86ZN-LRY1-TK30-HQU9-EP47"
 local linkKeyURL = "https://link-center.net/1365093/13RoDLLWVg1j"
 local statusFile = "fadhen_code.TheJusDingin"
-local KEY_VALID_SECONDS = 86400 -- 24 jam
+local KEY_VALID_SECONDS = 259200 -- 72 jam
 
 local isfile = isfile or function() return false end
 local readfile = readfile or function() return "" end
@@ -85,7 +85,7 @@ local desc = Instance.new("TextLabel", frame)
 desc.Size = UDim2.new(0.9, 0, 0, 30)
 desc.Position = UDim2.new(0.05, 0, 0.1, 0)
 desc.BackgroundTransparency = 1
-desc.Text = "Enter Key (Valid 24h)"
+desc.Text = "Enter Key (Valid 3 days)"
 desc.Font = Enum.Font.Gotham
 desc.TextColor3 = Color3.fromRGB(235, 235, 235)
 desc.TextSize = 20
