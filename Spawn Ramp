@@ -1,0 +1,123 @@
+local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
+local player = Players.LocalPlayer
+
+-- Hapus GUI lama jika ada
+pcall(function()
+    CoreGui:FindFirstChild("RampButtonGui"):Destroy()
+end)
+
+-- Variabel ramp
+local currentRamp = nil
+
+-- Fungsi buat ramp baru
+local function spawnRamp()
+    local character = player.Character or player.CharacterAdded:Wait()
+    local hrp = character:WaitForChild("HumanoidRootPart")
+
+    -- Hapus ramp lama jika ada
+    if currentRamp and currentRamp.Parent then
+        currentRamp:Destroy()
+    end
+
+    -- Buat ramp baru
+    local part = Instance.new("Part")
+    part.Name = "RampPart"
+    part.Anchored = true
+    part.CanCollide = true
+    part.Size = Vector3.new(16, 1, 60) -- panjang ramp
+    part.Color = Color3.fromRGB(255, 255, 255)
+    part.Material = Enum.Material.SmoothPlastic
+    part.Parent = workspace
+
+    -- Hitung posisi
+    local depan = hrp.CFrame.LookVector * 0
+    local posisi = hrp.Position + depan + Vector3.new(0, (part.Size.Y/2) - 3, 0)
+
+    -- Miring 40 derajat ke depan
+    local miring = CFrame.Angles(math.rad(40), 0, 0)
+    part.CFrame = CFrame.new(posisi, posisi + hrp.CFrame.LookVector) * miring
+
+    currentRamp = part
+end
+
+-- GUI di CoreGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "RampButtonGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = CoreGui
+
+-- Tombol Spawn (kecilkan 20%)
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(0, 130, 0, 42) -- 20% lebih kecil
+button.Position = UDim2.new(0.4, 0, 0.62, 0)
+button.Text = "Spawn Ramp"
+button.BackgroundColor3 = Color3.fromRGB(20, 20, 30) -- Biru gelap elegan
+button.TextColor3 = Color3.fromRGB(0, 255, 200) -- Warna neon
+button.Font = Enum.Font.GothamBold
+button.TextSize = 18
+button.BorderSizePixel = 0
+button.AutoButtonColor = false
+button.Parent = screenGui
+
+-- Efek glow
+local uiGradient = Instance.new("UIGradient")
+uiGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 170, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 255, 200))
+}
+uiGradient.Rotation = 45
+uiGradient.Parent = button
+
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 8)
+uiCorner.Parent = button
+
+local uiStroke = Instance.new("UIStroke")
+uiStroke.Thickness = 2
+uiStroke.Color = Color3.fromRGB(0, 255, 200)
+uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+uiStroke.Parent = button
+
+-- Fungsi klik
+button.MouseButton1Click:Connect(function()
+    spawnRamp()
+end)
+
+-- Fungsi drag GUI
+local dragging = false
+local dragInput, mousePos, framePos
+
+local function update(input)
+    local delta = input.Position - mousePos
+    button.Position = UDim2.new(
+        framePos.X.Scale, framePos.X.Offset + delta.X,
+        framePos.Y.Scale, framePos.Y.Offset + delta.Y
+    )
+end
+
+button.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        mousePos = input.Position
+        framePos = button.Position
+
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+button.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
+end)
