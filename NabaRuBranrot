@@ -333,11 +333,11 @@ _G.FaDhenAddToggle("Visual", {
 
 -- Tambahkan toggle di tab Visual
 _G.FaDhenAddToggle("Misc", {
-    Name = "KenHub Script",
+    Name = "Other Script",
     Callback = function(on)
         if on then
             -- Eksekusi script hanya saat toggle ON
-         loadstring(game:HttpGet("https://raw.githubusercontent.com/Gregy677/Gunmods-strucid/main/Steal%20a%20brain%20rot",true))()
+         loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/other%20"))()
         else
             print("Instan Steal dimatikan.")
         end
@@ -347,18 +347,7 @@ _G.FaDhenAddToggle("Misc", {
 
 
 
--- Tambahkan toggle di tab Visual
-_G.FaDhenAddToggle("Misc", {
-    Name = "Kurdhub Script",
-    Callback = function(on)
-        if on then
-            -- Eksekusi script hanya saat toggle ON
-         loadstring(game:HttpGet("https://raw.githubusercontent.com/Ninja10908/S4/refs/heads/main/Kurdhub"))()
-        else
-            print("Instan Steal dimatikan.")
-        end
-    end
-})
+
 
 
 
