@@ -1,0 +1,169 @@
+--// ======= THEME =========
+local THEME = {
+    FrameBg        = Color3.fromRGB(30, 34, 50),   
+    FrameBg2       = Color3.fromRGB(45, 50, 65),   
+    Accent         = Color3.fromRGB(255, 100, 180),  
+    AccentHover    = Color3.fromRGB(255, 120, 200),
+    TabIdle        = Color3.fromRGB(60, 70, 110),
+    TabActive      = Color3.fromRGB(255, 100, 180),
+    ToggleBg       = Color3.fromRGB(50, 55, 75),
+    ToggleHover    = Color3.fromRGB(65, 70, 90),
+    ToggleOffTrack = Color3.fromRGB(100, 100, 100),
+    ToggleOnTrack  = Color3.fromRGB(0, 200, 150),
+    TextLight      = Color3.fromRGB(230, 230, 230),
+    TitleText      = Color3.fromRGB(255, 255, 255),
+}
+
+--// ======= SERVICES =======
+local CoreGui      = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local UIS          = game:GetService("UserInputService")
+
+-- Bersihkan UI lama
+local OLD = CoreGui:FindFirstChild("FaDhenModernSafe")
+if OLD then OLD:Destroy() end
+
+-- ScreenGui baru
+local gui = Instance.new("ScreenGui")
+gui.Name = "FaDhenModernSafe"
+gui.ResetOnSpawn = false
+gui.Parent = CoreGui
+
+-- MAIN FRAME
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 260, 0, 280)
+mainFrame.Position = UDim2.new(0.5, -130, 0.5, -140)
+mainFrame.BackgroundColor3 = THEME.FrameBg
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Visible = false
+mainFrame.Parent = gui
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
+
+local mainStroke = Instance.new("UIStroke")
+mainStroke.Thickness = 2
+mainStroke.Color = THEME.Accent
+mainStroke.Transparency = 0.15
+mainStroke.Parent = mainFrame
+
+-- Soft Shadow
+local shadow = Instance.new("ImageLabel")
+shadow.AnchorPoint = Vector2.new(0.5, 0.5)
+shadow.Position = UDim2.new(0.5, 0, 0.5, 0)
+shadow.Size = UDim2.new(1, 36, 1, 36)
+shadow.ZIndex = 0
+shadow.BackgroundTransparency = 1
+shadow.Image = "rbxassetid://5028857084"
+shadow.ImageColor3 = Color3.new(0,0,0)
+shadow.ImageTransparency = 0.55
+shadow.ScaleType = Enum.ScaleType.Slice
+shadow.SliceCenter = Rect.new(24, 24, 276, 276)
+shadow.Parent = mainFrame
+
+-- TITLE BAR
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 32)
+title.BackgroundColor3 = THEME.Accent
+title.Text = "  FaDhen Safe UI"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 14
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.TextColor3 = THEME.TitleText
+title.Parent = mainFrame
+Instance.new("UICorner", title).CornerRadius = UDim.new(0, 12)
+
+-- TAB CONTAINER
+local tabContainer = Instance.new("Frame")
+tabContainer.Size = UDim2.new(1, -20, 0, 28)
+tabContainer.Position = UDim2.new(0, 10, 0, 42)
+tabContainer.BackgroundTransparency = 1
+tabContainer.Parent = mainFrame
+
+local tabLayout = Instance.new("UIListLayout")
+tabLayout.FillDirection = Enum.FillDirection.Horizontal
+tabLayout.Padding = UDim.new(0, 6)
+tabLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
+tabLayout.Parent = tabContainer
+
+-- CONTENT FRAME
+local contentFrame = Instance.new("Frame")
+contentFrame.Position = UDim2.new(0, 10, 0, 80)
+contentFrame.Size = UDim2.new(1, -20, 1, -90)
+contentFrame.BackgroundTransparency = 1
+contentFrame.Parent = mainFrame
+
+-- Tabs dengan ScrollingFrame
+local tabs, tabButtons = {}, {}
+local function createTab(name)
+    local tab = Instance.new("ScrollingFrame")
+    tab.Name = name .. "Tab"
+    tab.Size = UDim2.new(1, 0, 1, 0)
+    tab.BackgroundTransparency = 1
+    tab.Visible = false
+    tab.CanvasSize = UDim2.new(0,0,0,0)
+    tab.ScrollBarThickness = 6
+    tab.Parent = contentFrame
+
+    local layout = Instance.new("UIListLayout")
+    layout.Padding = UDim.new(0, 8)
+    layout.VerticalAlignment = Enum.VerticalAlignment.Top
+    layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+    layout.Parent = tab
+
+    layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        tab.CanvasSize = UDim2.new(0,0,0,layout.AbsoluteContentSize.Y + 10)
+    end)
+
+    tabs[name] = tab
+    return tab
+end
+
+local mainTab  = createTab("Main")
+local visualTab = createTab("Visual")
+local miscTab   = createTab("Misc")
+
+-- fungsi setActiveTab dan createTabButton tetap sama
+-- ... (tidak diubah agar logic tetap sama)
+
+-- HOTKEY SHOW/HIDE (RightShift)
+UIS.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    if input.KeyCode == Enum.KeyCode.RightShift then
+        mainFrame.Visible = not mainFrame.Visible
+    end
+end)
+
+-- Open Button
+local toggleBtn = Instance.new("ImageButton", gui)
+toggleBtn.Size = UDim2.new(0, 55, 0, 55)
+toggleBtn.Position = UDim2.new(0, 10, 0.2, 0)
+toggleBtn.Image = "rbxassetid://121962590520433"
+toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+toggleBtn.BackgroundTransparency = 0.7
+toggleBtn.Active = true
+toggleBtn.Draggable = true
+Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0, 9)
+
+local stroke = Instance.new("UIStroke")
+stroke.Parent = toggleBtn
+stroke.Thickness = 2
+stroke.Color = Color3.fromRGB(255, 255, 255)
+stroke.Transparency = 0.3
+
+toggleBtn.MouseEnter:Connect(function()
+    TweenService:Create(toggleBtn, TweenInfo.new(0.15), {Size = UDim2.new(0, 60, 0, 60)}):Play()
+end)
+toggleBtn.MouseLeave:Connect(function()
+    TweenService:Create(toggleBtn, TweenInfo.new(0.15), {Size = UDim2.new(0, 55, 0, 55)}):Play()
+end)
+
+local isOpen = false
+toggleBtn.MouseButton1Click:Connect(function()
+    isOpen = not isOpen
+    mainFrame.Visible = isOpen
+end)
+
+-- Tab default tetap Main
+setActiveTab("Main")
