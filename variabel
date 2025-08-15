@@ -120,12 +120,13 @@ local function createButton(name, callback)
 end
 
 -- Tambahkan tombol
-createButton("Chilli Hub", function()
+createButton("Spawn Ramp", function()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua"))()
 end)
 
-createButton("Kurdhub", function()
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/Ninja10908/S4/refs/heads/main/Kurdhub"))()
+
+createButton("lock base", function()
+	loadstring(game:HttpGet("https://pastebin.com/raw/makzCS0N"))()
 end)
 
 createButton("KenHub", function()
