@@ -33,7 +33,7 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 local gui = Instance.new("ScreenGui")
-gui.Name = "KeySystemGui"
+gui.Name = "KeySystemGuis3c"
 gui.ResetOnSpawn = false
 gui.Parent = playerGui
 
