@@ -20,7 +20,7 @@ local TweenService = game:GetService("TweenService")
 local UIS          = game:GetService("UserInputService")
 
 -- Bersihkan UI lama
-local OLD = CoreGui:FindFirstChild("FaDhenModernMini")
+local OLD = CoreGui:FindFirstChild("UilibraryCool")
 if OLD then OLD:Destroy() end
 
 -- ScreenGui
