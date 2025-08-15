@@ -121,7 +121,7 @@ end
 
 -- Tambahkan tombol
 createButton("Spawn Ramp", function()
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua"))()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Spawn%20Ramp"))()
 end)
 
 
@@ -137,10 +137,8 @@ end)
 
 
 
-createButton("dafoug", function()
-	loadstring(game:HttpGet("https://pastebin.com/raw/2WEXn2UR"))()
-end)
-
+createButton("Anti Steal", function()
+	
 
 
 createButton("Tween Base", function()
