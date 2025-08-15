@@ -1,6 +1,6 @@
 -- Hapus GUI lama
 pcall(function()
-	game.CoreGui:FindFirstChild("ScriptGui"):Destroy()
+	game.CoreGui:FindFirstChild("Jarwo"):Destroy()
 end)
 
 -- Ambil service
@@ -8,7 +8,7 @@ local CoreGui = game:GetService("CoreGui")
 
 -- GUI Utama
 local gui = Instance.new("ScreenGui")
-gui.Name = "ScriptGui"
+gui.Name = "Jarwo"
 gui.ResetOnSpawn = false
 gui.Parent = CoreGui
 
@@ -134,8 +134,16 @@ end)
 
 
 
+
+
 createButton("dafoug", function()
 	loadstring(game:HttpGet("https://pastebin.com/raw/2WEXn2UR"))()
+end)
+
+
+
+createButton("Tween Base", function()
+	loadstring(game:HttpGet("https://pastefy.app/mTbfVy0H/raw", true))()
 end)
 
 
