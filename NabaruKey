@@ -1,211 +1,375 @@
--- Konfigurasi
-local kodeRahasia = "KEY-AXEL-3P9F-WTN6-YQ2J-BR45-CM17"
-local linkKeyURL = "https://link-center.net/1365093/13RoDLLWVg1j"
-local statusFile = "fadhen_code.TheJusDingin"
-local KEY_VALID_SECONDS = 259200 -- 72 jam
+-- Services
+local CoreGui = game:GetService("CoreGui")
 
-local isfile = isfile or function() return false end
-local readfile = readfile or function() return "" end
-local writefile = writefile or function() end
+-- Hapus GUI lama
+pcall(function()
+    if CoreGui:FindFirstChild("FaDhenGui") then
+        CoreGui.FaDhenGui:Destroy()
+    end
+end)
 
-local function isKeyStillValid()
-	if not isfile(statusFile) then return false end
-	local success, data = pcall(readfile, statusFile)
-	if not success then return false end
-	local split = string.split(data, ";")
-	if split[1] ~= "verified" then return false end
-	local timestamp = tonumber(split[2])
-	if not timestamp then return false end
-	return (tick() - timestamp) <= KEY_VALID_SECONDS
+-- ScreenGui utama
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "FaDhenGui"
+ScreenGui.Parent = CoreGui
+
+-- Tombol Open di kiri atas
+local openButton = Instance.new("TextButton")
+openButton.Size = UDim2.new(0, 70, 0, 35)
+openButton.Position = UDim2.new(0, 20, 0, 20)
+openButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+openButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+openButton.Text = "Open"
+openButton.Font = Enum.Font.SourceSansBold
+openButton.TextSize = 16
+openButton.Parent = ScreenGui
+
+local openCorner = Instance.new("UICorner")
+openCorner.CornerRadius = UDim.new(0,8)
+openCorner.Parent = openButton
+
+-- Frame GUI utama
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 200, 0, 300)
+mainFrame.Position = UDim2.new(0.5, -100, 0.5, -150)
+mainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+mainFrame.BorderSizePixel = 0
+mainFrame.Visible = false
+mainFrame.Parent = ScreenGui
+
+local frameCorner = Instance.new("UICorner")
+frameCorner.CornerRadius = UDim.new(0,12)
+frameCorner.Parent = mainFrame
+
+-- Tombol Close di pojok kanan atas frame
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 35, 0, 25)
+closeButton.Position = UDim2.new(1, -40, 0, 10)
+closeButton.BackgroundColor3 = Color3.fromRGB(180,50,50)
+closeButton.TextColor3 = Color3.fromRGB(255,255,255)
+closeButton.Text = "X"
+closeButton.Font = Enum.Font.SourceSansBold
+closeButton.TextSize = 18
+closeButton.Parent = mainFrame
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0,6)
+closeCorner.Parent = closeButton
+
+-- ScrollingFrame untuk toggle buttons
+local scrollFrame = Instance.new("ScrollingFrame")
+scrollFrame.Size = UDim2.new(1, -20, 1, -50)
+scrollFrame.Position = UDim2.new(0, 10, 0, 40)
+scrollFrame.BackgroundTransparency = 1
+scrollFrame.BorderSizePixel = 0
+scrollFrame.CanvasSize = UDim2.new(0,0,0,0)
+scrollFrame.ScrollBarThickness = 6
+scrollFrame.Parent = mainFrame
+
+local layout = Instance.new("UIListLayout")
+layout.Parent = scrollFrame
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+layout.Padding = UDim.new(0,6)
+
+-- Tabel global toggle buttons
+_G.FaDhenToggles = {}
+
+-- Fungsi AddToggle
+function _G.FaDhenAddToggle(name, props)
+    local callback = props.Callback
+
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1,0,0,35)
+    btn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+    btn.TextColor3 = Color3.fromRGB(255,255,255)
+    btn.Text = name.." [OFF]"
+    btn.Font = Enum.Font.SourceSansBold
+    btn.TextSize = 16
+    btn.Parent = scrollFrame
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0,8)
+    corner.Parent = btn
+
+    local toggled = false
+    btn.MouseButton1Click:Connect(function()
+        toggled = not toggled
+        btn.Text = name.." ["..(toggled and "ON" or "OFF").."]"
+        if callback then
+            callback(toggled)
+        end
+        scrollFrame.CanvasSize = UDim2.new(0,0,0,layout.AbsoluteContentSize.Y + 10)
+    end)
+
+    _G.FaDhenToggles[name] = btn
 end
 
-if isKeyStillValid() then
-	pcall(function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/NabaRuBranrot"))()
-	end)
-	return
-end
-
--- GUI
-local TweenService = game:GetService("TweenService")
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
-
-local gui = Instance.new("ScreenGui")
-gui.Name = "KeySystemGuis3c"
-gui.ResetOnSpawn = false
-gui.Parent = playerGui
-
--- Frame utama
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 370, 0, 200)
-frame.Position = UDim2.new(0.5, 0, 0.41, 0)
-frame.AnchorPoint = Vector2.new(0.5, 0.5)
-frame.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-frame.BackgroundTransparency = 0
-frame.Active = true
-frame.Draggable = true
-frame.Parent = gui
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
-
-local border = Instance.new("UIStroke", frame)
-border.Thickness = 1.5
-border.Color = Color3.fromRGB(80, 80, 100)
-border.Transparency = 0.3
+-- Tombol Open
+openButton.MouseButton1Click:Connect(function()
+    mainFrame.Visible = true
+end)
 
 -- Tombol Close
-local closeBtn = Instance.new("TextButton", frame)
-closeBtn.Size = UDim2.new(0, 24, 0, 24)
-closeBtn.Position = UDim2.new(1, -28, 0, 4)
-closeBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
-closeBtn.Text = ">"
-closeBtn.Font = Enum.Font.GothamBold
-closeBtn.TextSize = 16
-closeBtn.TextColor3 = Color3.new(1, 1, 1)
-closeBtn.AutoButtonColor = false
-Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(1, 0)
-
-closeBtn.MouseEnter:Connect(function()
-	TweenService:Create(closeBtn, TweenInfo.new(0.15), {
-		BackgroundColor3 = Color3.fromRGB(80, 40, 40)
-	}):Play()
-end)
-closeBtn.MouseLeave:Connect(function()
-	TweenService:Create(closeBtn, TweenInfo.new(0.15), {
-		BackgroundColor3 = Color3.fromRGB(60, 60, 80)
-	}):Play()
-end)
-closeBtn.MouseButton1Click:Connect(function()
-	gui:Destroy()
+closeButton.MouseButton1Click:Connect(function()
+    mainFrame.Visible = false
 end)
 
--- Deskripsi
-local desc = Instance.new("TextLabel", frame)
-desc.Size = UDim2.new(0.9, 0, 0, 30)
-desc.Position = UDim2.new(0.05, 0, 0.1, 0)
-desc.BackgroundTransparency = 1
-desc.Text = "Enter Key (Valid 3 days)"
-desc.Font = Enum.Font.Gotham
-desc.TextColor3 = Color3.fromRGB(235, 235, 235)
-desc.TextSize = 20
-desc.TextWrapped = true
 
--- Input Key
-local textbox = Instance.new("TextBox", frame)
-textbox.Size = UDim2.new(0.9, 0, 0, 45)
-textbox.Position = UDim2.new(0.05, 0, 0.32, 0)
-textbox.PlaceholderText = "Enter Your Key"
-textbox.PlaceholderColor3 = Color3.fromRGB(170, 170, 170)
-textbox.Font = Enum.Font.Gotham
-textbox.Text = ""
-textbox.TextSize = 20
-textbox.TextColor3 = Color3.new(1, 1, 1)
-textbox.TextXAlignment = Enum.TextXAlignment.Center
-textbox.BackgroundColor3 = Color3.fromRGB(50, 50, 65)
-Instance.new("UICorner", textbox).CornerRadius = UDim.new(0, 8)
 
-local stroke = Instance.new("UIStroke", textbox)
-stroke.Color = Color3.fromRGB(80, 80, 100)
-stroke.Thickness = 1
-stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+_G.FaDhenAddToggle("UpWalk", {
+    Name = "UpWalk",
+    Callback = function(on)
+        if on then
+            
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/wanjir%20berjalan%20up"))()
+        end
+    end
+})
 
--- TextLabel info invalid
-local infoLabel = Instance.new("TextLabel", frame)
-infoLabel.Size = UDim2.new(0.9, 0, 0, 30)
-infoLabel.Position = UDim2.new(0.05, 0, 0.53, 0)
-infoLabel.BackgroundTransparency = 1
-infoLabel.Text = "If the key is invalid, please try getting a new key."
-infoLabel.Font = Enum.Font.Gotham
-infoLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-infoLabel.TextSize = 16
-infoLabel.TextWrapped = true
-infoLabel.TextXAlignment = Enum.TextXAlignment.Center
-infoLabel.TextTransparency = 1
-infoLabel.Visible = false
 
-local showingInfo = false
 
--- Tombol
-local function createButton(parent, text, pos)
-	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(0.42, 0, 0, 40)
-	btn.Position = pos
-	btn.Text = text
-	btn.Font = Enum.Font.Gotham
-	btn.TextSize = 18
-	btn.TextColor3 = Color3.fromRGB(230, 230, 230)
-	btn.BackgroundColor3 = Color3.fromRGB(50, 50, 65)
-	btn.AutoButtonColor = false
-	btn.Parent = parent
-	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
 
-	local stroke = Instance.new("UIStroke", btn)
-	stroke.Thickness = 1
-	stroke.Color = Color3.fromRGB(80, 80, 100)
-	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-	btn.MouseEnter:Connect(function()
-		TweenService:Create(btn, TweenInfo.new(0.12), {
-			BackgroundColor3 = Color3.fromRGB(60, 60, 80)
-		}):Play()
-	end)
-	btn.MouseLeave:Connect(function()
-		TweenService:Create(btn, TweenInfo.new(0.12), {
-			BackgroundColor3 = Color3.fromRGB(50, 50, 65)
-		}):Play()
-	end)
 
-	return btn
+_G.FaDhenAddToggle("Lock Base", {
+    Name = "Lock Base",
+    Callback = function(on)
+        if on then
+            
+            loadstring(game:HttpGet("https://pastebin.com/raw/makzCS0N"))()
+        end
+    end
+})
+
+
+-- Load Anti Steal
+loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Anti%20Steal"))()
+
+-- Tambahkan toggle di GUI
+_G.FaDhenAddToggle("Anti Steal", {
+    Name = "Anti Steal",
+    Callback = function(on)
+        if getgenv().AntiSteal_SetEnabled then
+            getgenv().AntiSteal_SetEnabled(on)
+        else
+            warn("Anti Steal belum siap!")
+        end
+    end
+})
+
+
+
+
+
+
+
+
+
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local gui = player:WaitForChild("PlayerGui")
+
+local screenGui
+local function createMainGui()
+    if screenGui then return screenGui end
+
+    screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "UtilityGui"
+    screenGui.ResetOnSpawn = false
+    screenGui.IgnoreGuiInset = true
+    screenGui.Parent = gui
+
+    -- FRAME UTAMA UNTUK BUTTON
+    local frame = Instance.new("Frame")
+    frame.Name = "MainFrame"
+    frame.Size = UDim2.new(0, 200, 0, 32)
+    frame.Position = UDim2.new(0.5, 0, 0.02, 0)
+    frame.AnchorPoint = Vector2.new(0.5, 0)
+    frame.BackgroundTransparency = 1
+    frame.Parent = screenGui
+
+    -- RESET BUTTON
+    local resetBtn = Instance.new("TextButton")
+    resetBtn.Size = UDim2.new(0, 90, 1, 0)
+    resetBtn.Position = UDim2.new(0, 0, 0, 0)
+    resetBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+    resetBtn.TextColor3 = Color3.new(1, 1, 1)
+    resetBtn.Text = "Reset"
+    resetBtn.Font = Enum.Font.GothamBold
+    resetBtn.TextSize = 14
+    resetBtn.Parent = frame
+    Instance.new("UICorner", resetBtn).CornerRadius = UDim.new(0, 6)
+
+    resetBtn.MouseButton1Click:Connect(function()
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then humanoid.Health = 0 end
+    end)
+
+    -- LEAVE BUTTON
+    local leaveBtn = Instance.new("TextButton")
+    leaveBtn.Size = UDim2.new(0, 90, 1, 0)
+    leaveBtn.Position = UDim2.new(0, 100, 0, 0)
+    leaveBtn.BackgroundColor3 = Color3.fromRGB(44, 44, 44)
+    leaveBtn.TextColor3 = Color3.new(1, 1, 1)
+    leaveBtn.Text = "Leave"
+    leaveBtn.Font = Enum.Font.GothamBold
+    leaveBtn.TextSize = 14
+    leaveBtn.Parent = frame
+    Instance.new("UICorner", leaveBtn).CornerRadius = UDim.new(0, 6)
+
+    leaveBtn.MouseButton1Click:Connect(function()
+        game:Shutdown()
+    end)
+
+    player.CharacterAdded:Connect(function()
+        task.wait(0.1)
+        if not gui:FindFirstChild("UtilityGui") then
+            screenGui.Parent = gui
+        end
+    end)
+
+    return screenGui
 end
 
--- Get Key button
-local getKey = createButton(frame, "Get Key", UDim2.new(0.05, 0, 0.72, 0))
-getKey.MouseButton1Click:Connect(function()
-	setclipboard(linkKeyURL)
-	pcall(function()
-		game.StarterGui:SetCore("SendNotification", {
-			Title = "Copied",
-			Text = "Link copied to clipboard!",
-			Duration = 3
-		})
-	end)
-end)
+--=== Toggle baru pakai FaDhen ===--
+_G.FaDhenAddToggle("Exit Button", {
+    Callback = function(on)
+        if on then
+            createMainGui().Enabled = true
+        else
+            if screenGui then
+                screenGui.Enabled = false
+            end
+        end
+    end
+})
 
--- Verify button
-local verifyBtn = createButton(frame, "Verify", UDim2.new(0.53, 0, 0.72, 0))
-verifyBtn.MouseButton1Click:Connect(function()
-	if string.lower(textbox.Text) == string.lower(kodeRahasia) then
-		verifyBtn.Text = "Verifying..."
-		pcall(function()
-			writefile(statusFile, "verified;" .. tostring(tick()))
-		end)
-		task.wait(0.5)
-		gui:Destroy()
-		pcall(function()
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/NabaRuBranrot"))()
-		end)
-	else
-		verifyBtn.Text = "Key Invalid!"
 
-		if not showingInfo then
-			showingInfo = true
-			infoLabel.Visible = true
-			TweenService:Create(infoLabel, TweenInfo.new(0.3), {
-				TextTransparency = 0
-			}):Play()
 
-			task.delay(5, function()
-				TweenService:Create(infoLabel, TweenInfo.new(0.4), {
-					TextTransparency = 1
-				}):Play()
-				task.wait(0.4)
-				infoLabel.Visible = false
-				showingInfo = false
-			end)
-		end
 
-		task.wait(1.2)
-		verifyBtn.Text = "Verify"
+--=== ESP PLAYER (FaDhen Toggle) ===--
+local Players = game:GetService("Players")
+local localPlayer = Players.LocalPlayer
+
+-- reuse global table supaya aman kalau script di-execute ulang
+local FaESP = getgenv().FaDhenESP or {}
+getgenv().FaDhenESP = FaESP
+
+FaESP.Enabled = FaESP.Enabled or false
+FaESP.Connections = FaESP.Connections or {}
+
+local function destroyESPFromCharacter(character)
+	if character:FindFirstChild("ESP_Highlight") then
+		character.ESP_Highlight:Destroy()
 	end
-end)
+	local head = character:FindFirstChild("Head")
+	if head and head:FindFirstChild("ESP_Name") then
+		head.ESP_Name:Destroy()
+	end
+end
+
+local function applyESPToCharacter(player, character)
+	if player == localPlayer then return end
+	if not character then return end
+
+	local head = character:FindFirstChild("Head") or character:WaitForChild("Head", 5)
+	if not head then return end
+
+	destroyESPFromCharacter(character)
+
+	local billboard = Instance.new("BillboardGui")
+	billboard.Name = "ESP_Name"
+	billboard.Adornee = head
+	billboard.Size = UDim2.new(0, 100, 0, 40)
+	billboard.StudsOffset = Vector3.new(0, 1.5, 0)
+	billboard.AlwaysOnTop = true
+	billboard.Parent = head
+
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(1, 0, 1, 0)
+	label.BackgroundTransparency = 1
+	label.Text = player.Name
+	label.TextColor3 = Color3.new(1, 1, 1)
+	label.TextStrokeTransparency = 0.5
+	label.Font = Enum.Font.SourceSansBold
+	label.TextScaled = true
+	label.Parent = billboard
+
+	local highlight = Instance.new("Highlight")
+	highlight.Name = "ESP_Highlight"
+	highlight.Adornee = character
+	highlight.FillColor = Color3.new(1, 0, 0)
+	highlight.FillTransparency = 0.5
+	highlight.OutlineColor = Color3.new(0, 0, 0)
+	highlight.OutlineTransparency = 0.2
+	highlight.Parent = character
+end
+
+local function trackPlayer(player)
+	if player == localPlayer then return end
+	if player.Character then
+		applyESPToCharacter(player, player.Character)
+	end
+	FaESP.Connections[player] = player.CharacterAdded:Connect(function(character)
+		applyESPToCharacter(player, character)
+	end)
+end
+
+local function untrackPlayer(player)
+	if FaESP.Connections[player] then
+		FaESP.Connections[player]:Disconnect()
+		FaESP.Connections[player] = nil
+	end
+	if player ~= localPlayer and player.Character then
+		destroyESPFromCharacter(player.Character)
+	end
+end
+
+function FaESP:Enable()
+	if self.Enabled then return end
+	self.Enabled = true
+	for _, plr in ipairs(Players:GetPlayers()) do
+		trackPlayer(plr)
+	end
+	self.Connections._PlayerAdded = Players.PlayerAdded:Connect(function(plr)
+		trackPlayer(plr)
+	end)
+	self.Connections._PlayerRemoving = Players.PlayerRemoving:Connect(function(plr)
+		untrackPlayer(plr)
+	end)
+end
+
+function FaESP:Disable()
+	if not self.Enabled then return end
+	self.Enabled = false
+	for key, conn in pairs(self.Connections) do
+		if conn and conn.Disconnect then
+			conn:Disconnect()
+		end
+		self.Connections[key] = nil
+	end
+	for _, plr in ipairs(Players:GetPlayers()) do
+		if plr ~= localPlayer and plr.Character then
+			destroyESPFromCharacter(plr.Character)
+		end
+	end
+end
+
+--=== Toggle baru pakai FaDhen ===--
+_G.FaDhenAddToggle("ESP Player", {
+    Callback = function(on)
+        if on then
+            FaESP:Enable()
+        else
+            FaESP:Disable()
+        end
+    end
+})
+
+
+_G.FaDhenAddToggle("SpeedBoster", {
+    Callback = function(on)
+    end
+})
