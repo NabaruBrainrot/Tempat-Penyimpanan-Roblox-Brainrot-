@@ -54,7 +54,7 @@ button.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
 button.TextColor3 = Color3.fromRGB(255, 255, 255)
 button.Font = Enum.Font.GothamBold
 button.TextSize = 16
-button.Text = "Lift: OFF"
+button.Text = "upwalk: OFF"
 button.Parent = frame
 
 -- Rounded corners tombol
