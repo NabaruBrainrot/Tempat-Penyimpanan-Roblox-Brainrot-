@@ -1,0 +1,155 @@
+-- Services
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local UserInputService = game:GetService("UserInputService")
+
+local lp = Players.LocalPlayer
+
+-- Hapus GUI lama kalau ada
+pcall(function()
+	if CoreGui:FindFirstChild("LiftGui") then
+		CoreGui.LiftGui:Destroy()
+	end
+end)
+
+-- ScreenGui
+local gui = Instance.new("ScreenGui")
+gui.Name = "LiftGui"
+gui.Parent = CoreGui
+
+-- Frame utama
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 160, 0, 70)
+frame.Position = UDim2.new(0.5, -80, 0.8, 0)
+frame.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+frame.BorderSizePixel = 0
+frame.Parent = gui
+frame.Active = true
+frame.Draggable = true
+
+-- Rounded corners frame
+local frameCorner = Instance.new("UICorner")
+frameCorner.CornerRadius = UDim.new(0, 12)
+frameCorner.Parent = frame
+
+-- Shadow frame
+local shadow = Instance.new("Frame")
+shadow.Size = UDim2.new(1, 4, 1, 4)
+shadow.Position = UDim2.new(0, -2, 0, -2)
+shadow.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+shadow.BorderSizePixel = 0
+shadow.ZIndex = 0
+shadow.Parent = frame
+
+local shadowCorner = Instance.new("UICorner")
+shadowCorner.CornerRadius = UDim.new(0, 12)
+shadowCorner.Parent = shadow
+
+-- Tombol lift
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(0.8, 0, 0.6, 0)
+button.Position = UDim2.new(0.1, 0, 0.2, 0)
+button.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+button.TextColor3 = Color3.fromRGB(255, 255, 255)
+button.Font = Enum.Font.GothamBold
+button.TextSize = 16
+button.Text = "Lift: OFF"
+button.Parent = frame
+
+-- Rounded corners tombol
+local btnCorner = Instance.new("UICorner")
+btnCorner.CornerRadius = UDim.new(0, 10)
+btnCorner.Parent = button
+
+-- Border tipis semi-transparan
+local btnStroke = Instance.new("UIStroke")
+btnStroke.Color = Color3.fromRGB(255, 255, 255)
+btnStroke.Thickness = 1
+btnStroke.Transparency = 0.5
+btnStroke.Parent = button
+
+-- Shadow tombol
+local btnShadow = Instance.new("Frame")
+btnShadow.Size = UDim2.new(1, 4, 1, 4)
+btnShadow.Position = UDim2.new(0, -2, 0, -2)
+btnShadow.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+btnShadow.BorderSizePixel = 0
+btnShadow.ZIndex = 0
+btnShadow.Parent = button
+
+local btnShadowCorner = Instance.new("UICorner")
+btnShadowCorner.CornerRadius = UDim.new(0, 10)
+btnShadowCorner.Parent = btnShadow
+
+-- Animasi hover
+UserInputService.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		local mousePos = input.Position
+		local absPos = button.AbsolutePosition
+		local absSize = button.AbsoluteSize
+
+		if mousePos.X >= absPos.X and mousePos.X <= absPos.X + absSize.X and
+		   mousePos.Y >= absPos.Y and mousePos.Y <= absPos.Y + absSize.Y then
+			button.BackgroundColor3 = Color3.fromRGB(255, 100, 100) -- hover
+		else
+			if active then
+				button.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+			else
+				button.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+			end
+		end
+	end
+end)
+
+-- Variabel lift
+local active = false
+local platform
+local tween
+
+-- Fungsi mulai lift
+local function startLift()
+	local char = lp.Character or lp.CharacterAdded:Wait()
+	local hrp = char:WaitForChild("HumanoidRootPart")
+
+	if platform then platform:Destroy() end
+
+	platform = Instance.new("Part")
+	platform.Name = "LiftPlatform"
+	platform.Size = Vector3.new(1000, 3, 1000)
+	platform.Anchored = true
+	platform.CanCollide = true
+	platform.Transparency = 0.7
+	platform.TopSurface = Enum.SurfaceType.Smooth
+	platform.BottomSurface = Enum.SurfaceType.Smooth
+	platform.Parent = workspace
+
+	local startPos = hrp.Position - Vector3.new(0, 4, 0)
+	platform.CFrame = CFrame.new(startPos)
+
+	local endPos = hrp.Position + Vector3.new(0, 20, 0)
+	tween = TweenService:Create(platform, TweenInfo.new(2, Enum.EasingStyle.Linear), {
+		CFrame = CFrame.new(endPos)
+	})
+	tween:Play()
+end
+
+-- Fungsi stop lift
+local function stopLift()
+	if tween then tween:Cancel() end
+	if platform then platform:Destroy() end
+end
+
+-- Klik tombol
+button.MouseButton1Click:Connect(function()
+	active = not active
+	if active then
+		button.Text = "upwalk: ON"
+		button.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+		startLift()
+	else
+		button.Text = "upwalk: OFF"
+		button.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+		stopLift()
+	end
+end)
