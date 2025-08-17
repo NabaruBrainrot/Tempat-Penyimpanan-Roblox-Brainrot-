@@ -160,7 +160,16 @@ _G.FaDhenAddToggle("Anti Steal", {
 
 
 
-
+_G.FaDhenAddToggle(""Another script", {
+    Name = "Another script",
+    Callback = function(on)
+        if on then
+            
+           loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/other%20"))()
+end)
+        end
+    end
+})
 
 
 
@@ -369,7 +378,3 @@ _G.FaDhenAddToggle("ESP Player", {
 })
 
 
-_G.FaDhenAddToggle("SpeedBoster", {
-    Callback = function(on)
-    end
-})
