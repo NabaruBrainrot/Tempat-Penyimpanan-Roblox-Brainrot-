@@ -132,6 +132,18 @@ _G.FaDhenAddToggle("Steal Helper", {
 
 
 
+_G.FaDhenAddToggle("Pets Finder", {
+    Name = "Pets Finder",
+    Callback = function(on)
+        if on then
+            
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Ninja10908/S4/refs/heads/main/Kurdhub"))()
+        end
+    end
+})
+
+
+
 
 
 _G.FaDhenAddToggle("UpWalk", {
