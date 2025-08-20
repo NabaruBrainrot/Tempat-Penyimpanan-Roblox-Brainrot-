@@ -120,8 +120,19 @@ end)
 
 
 
-_G.FaDhenAddToggle("Steal Helper", {
-    Name = "Steal Helper",
+_G.FaDhenAddToggle("Steal Helper1", {
+    Name = "Steal Helper1",
+    Callback = function(on)
+        if on then
+            
+            loadstring(game:HttpGet("https://pastefy.app/mTbfVy0H/raw", true))()
+        end
+    end
+})
+
+
+_G.FaDhenAddToggle("Steal Helper2", {
+    Name = "Steal Helper2",
     Callback = function(on)
         if on then
             
