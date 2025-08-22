@@ -120,38 +120,18 @@ end)
 
 
 
-_G.FaDhenAddToggle("Steal Helper1", {
-    Name = "Steal Helper1",
+_G.FaDhenAddToggle("Chilli Hub", {
+    Name = "Chilli Hub",
     Callback = function(on)
         if on then
             
-            loadstring(game:HttpGet("https://pastefy.app/mTbfVy0H/raw", true))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua"))()
+end)
         end
     end
 })
 
 
-_G.FaDhenAddToggle("Steal Helper2", {
-    Name = "Steal Helper2",
-    Callback = function(on)
-        if on then
-            
-            loadstring(game:HttpGet("https://gist.githubusercontent.com/UCT-hub/5b11d10386f1b8ce08feb803861e0b79/raw/b2917b398d4b0cc80fb2aca73a3137ba494ebcf0/gistfile1.txt"))()
-        end
-    end
-})
-
-
-
-_G.FaDhenAddToggle("Pets Finder", {
-    Name = "Pets Finder",
-    Callback = function(on)
-        if on then
-            
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Ninja10908/S4/refs/heads/main/Kurdhub"))()
-        end
-    end
-})
 
 
 
@@ -169,14 +149,6 @@ _G.FaDhenAddToggle("UpWalk", {
 
 
 
-_G.FaDhenAddToggle("other script", {
-    Name = "other script",
-    Callback = function(on)
-        if on then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/other%20"))()
-        end
-    end
-})
 
 
 
@@ -462,37 +434,3 @@ task.defer(function()
 end)
 
 workspace.DescendantAdded:Connect(processBillboardIfNeeded)
-
-local function shouldRemoveTrapTouch(tt)
-	if not (tt:IsA("TouchTransmitter") and tt.Name == "TouchInterest") then return false end
-	local p = tt.Parent
-	if not (p and p:IsA("MeshPart") and p.Name == "Open") then return false end
-	local m = p:FindFirstAncestorOfClass("Model")
-	if not (m and m.Name == "Trap") then return false end
-	return true
-end
-
-local function removeTrapTouch(tt)
-	if tt.Parent then
-		tt:Destroy()
-		dprint("🔥 TouchInterest Dihapus:", (tt.Parent and tt.Parent:GetFullName()) or "?")
-	end
-end
-
-task.defer(function()
-	local root = SEARCH_TRAPS_IN_GAME and game or workspace
-	local all = root:GetDescendants()
-	for i = 1, #all do
-		local o = all[i]
-		if o:IsA("TouchTransmitter") and shouldRemoveTrapTouch(o) then
-			removeTrapTouch(o)
-		end
-		if i % BATCH_SIZE == 0 then task.wait() end
-	end
-end)
-
-workspace.DescendantAdded:Connect(function(obj)
-	if obj:IsA("TouchTransmitter") and shouldRemoveTrapTouch(obj) then
-		removeTrapTouch(obj)
-	end
-end)
