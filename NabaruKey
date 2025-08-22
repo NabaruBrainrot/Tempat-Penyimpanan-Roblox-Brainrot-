@@ -124,9 +124,7 @@ _G.FaDhenAddToggle("Chilli Hub", {
     Name = "Chilli Hub",
     Callback = function(on)
         if on then
-            
             loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua"))()
-end)
         end
     end
 })
