@@ -16,7 +16,7 @@ ScreenGui.Parent = CoreGui
 -- Tombol Open di kiri atas
 local openButton = Instance.new("TextButton")
 openButton.Size = UDim2.new(0, 70, 0, 35)
-openButton.Position = UDim2.new(0, 20, 0, 20)
+openButton.Position = UDim2.new(0, 35, 0, 20)
 openButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 openButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 openButton.Text = "Open"
