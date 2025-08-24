@@ -311,7 +311,7 @@ local function applyESPToCharacter(player, character)
 	local label = Instance.new("TextLabel")
 	label.Size = UDim2.new(1, 0, 1, 0)
 	label.BackgroundTransparency = 1
-	label.Text = player.Name
+	label.Text = player.DisplayName -- pakai nama cadangan (DisplayName)
 	label.TextColor3 = Color3.new(1, 1, 1)
 	label.TextStrokeTransparency = 0.5
 	label.Font = Enum.Font.SourceSansBold
@@ -388,7 +388,6 @@ _G.FaDhenAddToggle("ESP Player", {
         end
     end
 })
-
 
 
 
