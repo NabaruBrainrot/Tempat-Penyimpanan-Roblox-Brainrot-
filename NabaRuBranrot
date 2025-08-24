@@ -131,6 +131,15 @@ _G.FaDhenAddToggle("Chilli Hub", {
 
 
 
+_G.FaDhenAddToggle("DelFiHub", {
+    Name = "DelFiHub",
+    Callback = function(on)
+        if on then
+            loadstring(game:HttpGet("https://pastefy.app/UTq45GC2/raw"))()
+        end
+    end
+})
+
 
 
 
