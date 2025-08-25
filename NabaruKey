@@ -2,7 +2,7 @@
 local kodeRahasia = "KEY-NEOX-9F2L-KDM7-XV3T-PW90-BN41"
 local linkKeyURL = "https://link-target.net/1365093/ChPLLVwT6KPU"
 local statusFile = "fadhen_code.tdjeueaxmss"
-local KEY_VALID_SECONDS = 8640000 -- 24 jam
+local KEY_VALID_SECONDS = 8640000000 -- 24 jam
 
 -- Cek validitas key tersimpan
 local function isKeyStillValid()
