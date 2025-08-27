@@ -141,33 +141,6 @@ _G.FaDhenAddToggle("Chilli Hub", {
 
 
 
-_G.FaDhenAddToggle("DelFiHub", {
-    Name = "DelFiHub",
-    Callback = function(on)
-        if on then
-            loadstring(game:HttpGet("https://pastefy.app/UTq45GC2/raw"))()
-        end
-    end
-})
-
-
-
-
-
-_G.FaDhenAddToggle("UpWalk", {
-    Name = "UpWalk",
-    Callback = function(on)
-        if on then
-            
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/wanjir%20berjalan%20up"))()
-        end
-    end
-})
-
-
-
-
-
 
 
 
