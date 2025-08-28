@@ -119,17 +119,6 @@ closeButton.MouseButton1Click:Connect(function()
 end)
 
 
-_G.FaDhenAddToggle("🪐Instan Steal", {
-    Name = "🪐Instan Steal",
-    Callback = function(on)
-        if on then
-     loadstring(game:HttpGet("https://pastefy.app/J3oDjwQ5/raw"))()
-    
-        end
-    end
-})
-
-
 _G.FaDhenAddToggle("Chilli Hub", {
     Name = "Chilli Hub",
     Callback = function(on)
@@ -138,6 +127,130 @@ _G.FaDhenAddToggle("Chilli Hub", {
         end
     end
 })
+
+
+
+
+--=== ESP PLAYER (FaDhen Toggle) ===--
+local Players = game:GetService("Players")
+local localPlayer = Players.LocalPlayer
+
+-- reuse global table supaya aman kalau script di-execute ulang
+local FaESP = getgenv().FaDhenESP or {}
+getgenv().FaDhenESP = FaESP
+
+FaESP.Enabled = FaESP.Enabled or false
+FaESP.Connections = FaESP.Connections or {}
+
+local function destroyESPFromCharacter(character)
+	if character:FindFirstChild("ESP_Highlight") then
+		character.ESP_Highlight:Destroy()
+	end
+	local head = character:FindFirstChild("Head")
+	if head and head:FindFirstChild("ESP_Name") then
+		head.ESP_Name:Destroy()
+	end
+end
+
+local function applyESPToCharacter(player, character)
+	if player == localPlayer then return end
+	if not character then return end
+
+	local head = character:FindFirstChild("Head") or character:WaitForChild("Head", 5)
+	if not head then return end
+
+	destroyESPFromCharacter(character)
+
+	local billboard = Instance.new("BillboardGui")
+	billboard.Name = "ESP_Name"
+	billboard.Adornee = head
+	billboard.Size = UDim2.new(0, 100, 0, 40)
+	billboard.StudsOffset = Vector3.new(0, 1.5, 0)
+	billboard.AlwaysOnTop = true
+	billboard.Parent = head
+
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(1, 0, 1, 0)
+	label.BackgroundTransparency = 1
+	label.Text = player.DisplayName -- pakai nama cadangan (DisplayName)
+	label.TextColor3 = Color3.new(1, 1, 1)
+	label.TextStrokeTransparency = 0.5
+	label.Font = Enum.Font.SourceSansBold
+	label.TextScaled = true
+	label.Parent = billboard
+
+	local highlight = Instance.new("Highlight")
+	highlight.Name = "ESP_Highlight"
+	highlight.Adornee = character
+	highlight.FillColor = Color3.new(1, 0, 0)
+	highlight.FillTransparency = 0.5
+	highlight.OutlineColor = Color3.new(0, 0, 0)
+	highlight.OutlineTransparency = 0.2
+	highlight.Parent = character
+end
+
+local function trackPlayer(player)
+	if player == localPlayer then return end
+	if player.Character then
+		applyESPToCharacter(player, player.Character)
+	end
+	FaESP.Connections[player] = player.CharacterAdded:Connect(function(character)
+		applyESPToCharacter(player, character)
+	end)
+end
+
+local function untrackPlayer(player)
+	if FaESP.Connections[player] then
+		FaESP.Connections[player]:Disconnect()
+		FaESP.Connections[player] = nil
+	end
+	if player ~= localPlayer and player.Character then
+		destroyESPFromCharacter(player.Character)
+	end
+end
+
+function FaESP:Enable()
+	if self.Enabled then return end
+	self.Enabled = true
+	for _, plr in ipairs(Players:GetPlayers()) do
+		trackPlayer(plr)
+	end
+	self.Connections._PlayerAdded = Players.PlayerAdded:Connect(function(plr)
+		trackPlayer(plr)
+	end)
+	self.Connections._PlayerRemoving = Players.PlayerRemoving:Connect(function(plr)
+		untrackPlayer(plr)
+	end)
+end
+
+function FaESP:Disable()
+	if not self.Enabled then return end
+	self.Enabled = false
+	for key, conn in pairs(self.Connections) do
+		if conn and conn.Disconnect then
+			conn:Disconnect()
+		end
+		self.Connections[key] = nil
+	end
+	for _, plr in ipairs(Players:GetPlayers()) do
+		if plr ~= localPlayer and plr.Character then
+			destroyESPFromCharacter(plr.Character)
+		end
+	end
+end
+
+--=== Toggle baru pakai FaDhen ===--
+_G.FaDhenAddToggle("ESP Player", {
+    Callback = function(on)
+        if on then
+            FaESP:Enable()
+        else
+            FaESP:Disable()
+        end
+    end
+})
+
+
 
 
 
@@ -317,124 +430,7 @@ _G.FaDhenAddToggle("Exit Button", {
 
 
 
---=== ESP PLAYER (FaDhen Toggle) ===--
-local Players = game:GetService("Players")
-local localPlayer = Players.LocalPlayer
 
--- reuse global table supaya aman kalau script di-execute ulang
-local FaESP = getgenv().FaDhenESP or {}
-getgenv().FaDhenESP = FaESP
-
-FaESP.Enabled = FaESP.Enabled or false
-FaESP.Connections = FaESP.Connections or {}
-
-local function destroyESPFromCharacter(character)
-	if character:FindFirstChild("ESP_Highlight") then
-		character.ESP_Highlight:Destroy()
-	end
-	local head = character:FindFirstChild("Head")
-	if head and head:FindFirstChild("ESP_Name") then
-		head.ESP_Name:Destroy()
-	end
-end
-
-local function applyESPToCharacter(player, character)
-	if player == localPlayer then return end
-	if not character then return end
-
-	local head = character:FindFirstChild("Head") or character:WaitForChild("Head", 5)
-	if not head then return end
-
-	destroyESPFromCharacter(character)
-
-	local billboard = Instance.new("BillboardGui")
-	billboard.Name = "ESP_Name"
-	billboard.Adornee = head
-	billboard.Size = UDim2.new(0, 100, 0, 40)
-	billboard.StudsOffset = Vector3.new(0, 1.5, 0)
-	billboard.AlwaysOnTop = true
-	billboard.Parent = head
-
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.new(1, 0, 1, 0)
-	label.BackgroundTransparency = 1
-	label.Text = player.DisplayName -- pakai nama cadangan (DisplayName)
-	label.TextColor3 = Color3.new(1, 1, 1)
-	label.TextStrokeTransparency = 0.5
-	label.Font = Enum.Font.SourceSansBold
-	label.TextScaled = true
-	label.Parent = billboard
-
-	local highlight = Instance.new("Highlight")
-	highlight.Name = "ESP_Highlight"
-	highlight.Adornee = character
-	highlight.FillColor = Color3.new(1, 0, 0)
-	highlight.FillTransparency = 0.5
-	highlight.OutlineColor = Color3.new(0, 0, 0)
-	highlight.OutlineTransparency = 0.2
-	highlight.Parent = character
-end
-
-local function trackPlayer(player)
-	if player == localPlayer then return end
-	if player.Character then
-		applyESPToCharacter(player, player.Character)
-	end
-	FaESP.Connections[player] = player.CharacterAdded:Connect(function(character)
-		applyESPToCharacter(player, character)
-	end)
-end
-
-local function untrackPlayer(player)
-	if FaESP.Connections[player] then
-		FaESP.Connections[player]:Disconnect()
-		FaESP.Connections[player] = nil
-	end
-	if player ~= localPlayer and player.Character then
-		destroyESPFromCharacter(player.Character)
-	end
-end
-
-function FaESP:Enable()
-	if self.Enabled then return end
-	self.Enabled = true
-	for _, plr in ipairs(Players:GetPlayers()) do
-		trackPlayer(plr)
-	end
-	self.Connections._PlayerAdded = Players.PlayerAdded:Connect(function(plr)
-		trackPlayer(plr)
-	end)
-	self.Connections._PlayerRemoving = Players.PlayerRemoving:Connect(function(plr)
-		untrackPlayer(plr)
-	end)
-end
-
-function FaESP:Disable()
-	if not self.Enabled then return end
-	self.Enabled = false
-	for key, conn in pairs(self.Connections) do
-		if conn and conn.Disconnect then
-			conn:Disconnect()
-		end
-		self.Connections[key] = nil
-	end
-	for _, plr in ipairs(Players:GetPlayers()) do
-		if plr ~= localPlayer and plr.Character then
-			destroyESPFromCharacter(plr.Character)
-		end
-	end
-end
-
---=== Toggle baru pakai FaDhen ===--
-_G.FaDhenAddToggle("ESP Player", {
-    Callback = function(on)
-        if on then
-            FaESP:Enable()
-        else
-            FaESP:Disable()
-        end
-    end
-})
 
 
 
