@@ -155,6 +155,61 @@ _G.FaDhenAddToggle("Lock Base", {
 })
 
 
+
+-- Services
+local CoreGui = game:GetService("CoreGui")
+local protect = syn and syn.protect_gui or fluxus and fluxus.protect_gui or function() end
+
+-- Buat GUI (default disembunyikan)
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "SentryTeleportGUI"
+ScreenGui.ResetOnSpawn = false
+protect(ScreenGui)
+ScreenGui.Parent = (gethui and gethui()) or CoreGui
+ScreenGui.Enabled = false  -- awalnya tidak tampil
+
+local Button = Instance.new("TextButton")
+Button.Size = UDim2.new(0, 100, 0, 30)  
+Button.Position = UDim2.new(0, 10, 0, 60) 
+Button.AnchorPoint = Vector2.new(0,0)
+Button.Text = "Tp Sentry"
+Button.BackgroundColor3 = Color3.fromRGB(100, 200, 255)
+Button.TextColor3 = Color3.new(0, 0, 0)
+Button.BorderSizePixel = 2
+Button.Parent = ScreenGui
+
+-- Fungsi teleport
+local function teleportParts()
+    local player = game.Players.LocalPlayer
+    if not player or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+
+    local hrp = player.Character.HumanoidRootPart
+
+    for _, obj in pairs(workspace:GetChildren()) do
+        if obj:IsA("BasePart") and obj.Name:match("^Sentry_") then
+            local targetCFrame = hrp.CFrame + hrp.CFrame.LookVector * 2
+            obj.Anchored = false
+            obj.CFrame = targetCFrame
+        end
+    end
+end
+
+Button.MouseButton1Click:Connect(teleportParts)
+
+-- 🔥 Hubungkan ke toggle
+_G.FaDhenAddToggle("Tp Sentry", {
+    Callback = function(on)
+        if on then
+            ScreenGui.Enabled = true   -- munculkan GUI
+        else
+            ScreenGui.Enabled = false  -- sembunyikan GUI
+        end
+    end
+})
+
+
+
+
 -- Load Anti Steal
 loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Anti%20Steal"))()
 
