@@ -182,7 +182,7 @@ for _, tool in pairs(LocalPlayer.Backpack:GetChildren()) do
 end
 
 -- Toggle UI
-_G.FaDhenAddToggle("Auto Aim", {
+_G.FaDhenAddToggle("Auto AimBot", {
     Callback = function(on)
         getgenv().FaDhenAutoAim = on
     end
