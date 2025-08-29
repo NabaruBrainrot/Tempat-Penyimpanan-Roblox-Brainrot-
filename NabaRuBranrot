@@ -130,6 +130,67 @@ _G.FaDhenAddToggle("Chilli Hub", {
 
 
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local Net = require(ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"))
+
+-- flag toggle
+getgenv().FaDhenAutoAim = false
+
+-- cari player terdekat
+local function getNearestPlayer()
+    local nearestPlayer = nil
+    local shortestDistance = math.huge
+    local myChar = LocalPlayer.Character
+    if not myChar or not myChar:FindFirstChild("HumanoidRootPart") then return nil end
+
+    local myPos = myChar.HumanoidRootPart.Position
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local dist = (player.Character.HumanoidRootPart.Position - myPos).Magnitude
+            if dist < shortestDistance then
+                shortestDistance = dist
+                nearestPlayer = player
+            end
+        end
+    end
+    return nearestPlayer
+end
+
+-- cek semua tool di backpack
+for _, tool in pairs(LocalPlayer.Backpack:GetChildren()) do
+    if tool:IsA("Tool") then
+        tool.Activated:Connect(function()
+            if getgenv().FaDhenAutoAim then
+                -- Auto Aim aktif
+                local nearest = getNearestPlayer()
+                if nearest and nearest.Character and nearest.Character:FindFirstChild("HumanoidRootPart") then
+                    local hrp = nearest.Character.HumanoidRootPart
+                    Net:RemoteEvent("UseItem"):FireServer(hrp.Position, hrp)
+                    return
+                end
+            end
+
+            -- fallback: mode normal (pakai mouse)
+            local PlayerMouse = require(ReplicatedStorage.Packages.PlayerMouse)
+            Net:RemoteEvent("UseItem"):FireServer(PlayerMouse.Hit.Position, PlayerMouse.Target)
+        end)
+    end
+end
+
+-- Toggle UI
+_G.FaDhenAddToggle("Auto Aim", {
+    Callback = function(on)
+        getgenv().FaDhenAutoAim = on
+    end
+})
+
+
+
+
 
 --=== ESP PLAYER (FaDhen Toggle) ===--
 local Players = game:GetService("Players")
