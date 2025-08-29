@@ -130,14 +130,16 @@ _G.FaDhenAddToggle("Chilli Hub", {
 
 
 
+
+
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-
 local Net = require(ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"))
 
 -- flag toggle
-getgenv().FaDhenAutoAim = false
+getgenv().FaDhenAutoAim = getgenv().FaDhenAutoAim or false
 
 -- cari player terdekat
 local function getNearestPlayer()
@@ -147,7 +149,6 @@ local function getNearestPlayer()
     if not myChar or not myChar:FindFirstChild("HumanoidRootPart") then return nil end
 
     local myPos = myChar.HumanoidRootPart.Position
-
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local dist = (player.Character.HumanoidRootPart.Position - myPos).Magnitude
@@ -160,12 +161,15 @@ local function getNearestPlayer()
     return nearestPlayer
 end
 
--- cek semua tool di backpack
-for _, tool in pairs(LocalPlayer.Backpack:GetChildren()) do
-    if tool:IsA("Tool") then
+-- fungsi pasang auto aim ke tool
+local function hookTool(tool)
+    if tool:IsA("Tool") and not tool:FindFirstChild("FaDhenHooked") then
+        local marker = Instance.new("BoolValue")
+        marker.Name = "FaDhenHooked"
+        marker.Parent = tool
+
         tool.Activated:Connect(function()
             if getgenv().FaDhenAutoAim then
-                -- Auto Aim aktif
                 local nearest = getNearestPlayer()
                 if nearest and nearest.Character and nearest.Character:FindFirstChild("HumanoidRootPart") then
                     local hrp = nearest.Character.HumanoidRootPart
@@ -174,19 +178,38 @@ for _, tool in pairs(LocalPlayer.Backpack:GetChildren()) do
                 end
             end
 
-            -- fallback: mode normal (pakai mouse)
+            -- fallback: pakai mouse
             local PlayerMouse = require(ReplicatedStorage.Packages.PlayerMouse)
             Net:RemoteEvent("UseItem"):FireServer(PlayerMouse.Hit.Position, PlayerMouse.Target)
         end)
     end
 end
 
+-- pasang hook ke semua tool di backpack
+local function hookBackpack()
+    for _, tool in pairs(LocalPlayer.Backpack:GetChildren()) do
+        hookTool(tool)
+    end
+    LocalPlayer.Backpack.ChildAdded:Connect(hookTool)
+end
+
+-- saat karakter respawn, pasang ulang
+LocalPlayer.CharacterAdded:Connect(function()
+    task.wait(1) -- beri delay kecil supaya Backpack terisi
+    hookBackpack()
+end)
+
+-- pertama kali load
+hookBackpack()
+
 -- Toggle UI
-_G.FaDhenAddToggle("Auto AimBot", {
+_G.FaDhenAddToggle("AimBot", {
     Callback = function(on)
         getgenv().FaDhenAutoAim = on
     end
 })
+
+
 
 
 
