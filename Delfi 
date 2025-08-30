@@ -2,7 +2,7 @@
 local kodeRahasia = "KEY-ZXTR-9H2L-MQ8V-YD5A-BK73-NE41"
 local linkKeyURL = "https://link-center.net/1365093/13RoDLLWVg1j"
 local statusFile = "fadhen_code.TheJusDingin"
-local KEY_VALID_SECONDS = 864080 -- 24 jam
+local KEY_VALID_SECONDS = 86400 -- 24 jam
 
 local isfile = isfile or function() return false end
 local readfile = readfile or function() return "" end
