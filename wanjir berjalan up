@@ -71,7 +71,7 @@ toggleBtn.Text = "▶ Start"
 Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0, 7)
 
 -- Logic Speed
-local speed = 40
+local speed = 38
 local active = false
 local mover
 local heartbeatConn
