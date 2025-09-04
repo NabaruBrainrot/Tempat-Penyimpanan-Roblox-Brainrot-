@@ -1,7 +1,7 @@
 -- Hapus GUI lama jika ada
 pcall(function() game.CoreGui:FindFirstChild("PremiumDeliveryGUI"):Destroy() end)
 
--- Service & Player
+-- Services
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -13,33 +13,30 @@ local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 local humanoid = character:WaitForChild("Humanoid")
 
--- GUI Setup
+-- GUI
 local gui = Instance.new("ScreenGui", CoreGui)
 gui.Name = "PremiumDeliveryGUI"
 gui.ResetOnSpawn = false
 
--- Main Frame (lebar dikurangi & tambahkan UIStroke)
 local frame = Instance.new("Frame")
 frame.Name = "MainFrame"
-frame.Size = UDim2.new(0, 170, 0, 50) -- dari 180-an jadi 150 biar gak kepanjangan
+frame.Size = UDim2.new(0, 170, 0, 50)
 frame.Position = UDim2.new(0, 20, 0, 20)
 frame.BackgroundColor3 = Color3.fromRGB(30, 33, 45)
 frame.BorderSizePixel = 0
 frame.Parent = gui
 Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
 
--- Tambahkan UIStroke agar lebih bagus
 local stroke = Instance.new("UIStroke", frame)
 stroke.Thickness = 2
 stroke.Color = Color3.fromRGB(0, 200, 120)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Transparency = 0.2
 
--- Label (judul fitur) -> TextButton biar bisa di klik & drag
 local label = Instance.new("TextButton", frame)
 label.AnchorPoint = Vector2.new(0, 0.5)
 label.Position = UDim2.new(0, 10, 0.5, 0)
-label.Size = UDim2.new(0.5, 0, 1, 0) -- agak dipendekin
+label.Size = UDim2.new(0.5, 0, 1, 0)
 label.BackgroundTransparency = 1
 label.Text = "Speed Booster"
 label.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -48,17 +45,15 @@ label.TextSize = 14
 label.TextXAlignment = Enum.TextXAlignment.Left
 label.AutoButtonColor = false
 
--- Switch Container (lonjong)
 local switch = Instance.new("TextButton", frame)
 switch.AnchorPoint = Vector2.new(1, 0.5)
 switch.Position = UDim2.new(1, -8, 0.5, 0)
-switch.Size = UDim2.new(0, 46, 0, 22) -- lebih kecil biar pas di frame baru
-switch.BackgroundColor3 = Color3.fromRGB(70, 70, 70) -- warna OFF
+switch.Size = UDim2.new(0, 46, 0, 22)
+switch.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 switch.Text = ""
 switch.AutoButtonColor = false
 Instance.new("UICorner", switch).CornerRadius = UDim.new(1, 0)
 
--- Bulatan (indikator ON/OFF)
 local circle = Instance.new("Frame", switch)
 circle.Size = UDim2.new(0, 18, 0, 18)
 circle.Position = UDim2.new(0, 2, 0.5, -9)
@@ -66,29 +61,37 @@ circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 circle.BorderSizePixel = 0
 Instance.new("UICorner", circle).CornerRadius = UDim.new(1, 0)
 
--- Logic Speed
+-- Logic Speed (Optimized)
 local speed = 40
 local active = false
 local heartbeatConn
+local lastUpdate = 0
+local updateInterval = 0.03 -- update physics tiap 0.03 detik
 
 local function startSpeed()
 	if heartbeatConn then heartbeatConn:Disconnect() end
-	heartbeatConn = RunService.Heartbeat:Connect(function()
+	heartbeatConn = RunService.Heartbeat:Connect(function(delta)
+		lastUpdate = lastUpdate + delta
+		if lastUpdate < updateInterval then return end
+		lastUpdate = 0
+
 		if active and humanoid and humanoidRootPart then
 			local moveDir = humanoid.MoveDirection
 			if moveDir.Magnitude > 0 then
-				humanoidRootPart.AssemblyLinearVelocity =
-					moveDir * speed + Vector3.new(0, humanoidRootPart.AssemblyLinearVelocity.Y, 0)
+				humanoidRootPart.AssemblyLinearVelocity = moveDir * speed + Vector3.new(0, humanoidRootPart.AssemblyLinearVelocity.Y, 0)
 			end
 		end
 	end)
 end
 
 local function stopSpeed()
-	if heartbeatConn then heartbeatConn:Disconnect() heartbeatConn = nil end
+	if heartbeatConn then
+		heartbeatConn:Disconnect()
+		heartbeatConn = nil
+	end
 end
 
--- Toggle Switch Animasi + Script ON/OFF
+-- Toggle
 local function toggleSwitch()
 	if active then
 		active = false
@@ -103,10 +106,9 @@ local function toggleSwitch()
 	end
 end
 
--- Klik toggle ON/OFF
 switch.MouseButton1Click:Connect(toggleSwitch)
 
--- Respawn Handler
+-- Respawn
 Players.LocalPlayer.CharacterAdded:Connect(function(newChar)
 	character = newChar
 	humanoidRootPart = character:WaitForChild("HumanoidRootPart")
@@ -117,20 +119,15 @@ Players.LocalPlayer.CharacterAdded:Connect(function(newChar)
 	end
 end)
 
--- Drag Function lewat label (bedakan klik vs drag)
+-- Drag
 local dragging, dragInput, dragStart, startPos
-local dragThreshold = 5 -- minimal pixel biar dianggap drag
+local dragThreshold = 5
 local hasDragged = false
 
 local function update(input)
 	local delta = input.Position - dragStart
-	if delta.Magnitude > dragThreshold then
-		hasDragged = true
-	end
-	frame.Position = UDim2.new(
-		startPos.X.Scale, startPos.X.Offset + delta.X,
-		startPos.Y.Scale, startPos.Y.Offset + delta.Y
-	)
+	if delta.Magnitude > dragThreshold then hasDragged = true end
+	frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 end
 
 label.InputBegan:Connect(function(input)
@@ -139,13 +136,10 @@ label.InputBegan:Connect(function(input)
 		hasDragged = false
 		dragStart = input.Position
 		startPos = frame.Position
-
 		input.Changed:Connect(function()
 			if input.UserInputState == Enum.UserInputState.End then
 				dragging = false
-				if not hasDragged then
-					toggleSwitch()
-				end
+				if not hasDragged then toggleSwitch() end
 			end
 		end)
 	end
@@ -158,7 +152,5 @@ label.InputChanged:Connect(function(input)
 end)
 
 UserInputService.InputChanged:Connect(function(input)
-	if input == dragInput and dragging then
-		update(input)
-	end
+	if input == dragInput and dragging then update(input) end
 end)
