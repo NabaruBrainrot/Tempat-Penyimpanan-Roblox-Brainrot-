@@ -5,6 +5,7 @@ pcall(function() game.CoreGui:FindFirstChild("PremiumDeliveryGUI"):Destroy() end
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
@@ -17,99 +18,93 @@ local gui = Instance.new("ScreenGui", CoreGui)
 gui.Name = "PremiumDeliveryGUI"
 gui.ResetOnSpawn = false
 
+-- Main Frame (lebar dikurangi & tambahkan UIStroke)
 local frame = Instance.new("Frame")
 frame.Name = "MainFrame"
-frame.Size = UDim2.new(0, 170, 0, 85) -- diperbesar 5% dari versi kecil (160x80)
-frame.Position = UDim2.new(0.1, 0, 0.4, 0)
-frame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+frame.Size = UDim2.new(0, 170, 0, 50) -- dari 180-an jadi 150 biar gak kepanjangan
+frame.Position = UDim2.new(0, 20, 0, 20)
+frame.BackgroundColor3 = Color3.fromRGB(30, 33, 45)
 frame.BorderSizePixel = 0
-frame.Active = true
-frame.Draggable = false
 frame.Parent = gui
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
 
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 11)
-
+-- Tambahkan UIStroke agar lebih bagus
 local stroke = Instance.new("UIStroke", frame)
 stroke.Thickness = 2
-stroke.Color = Color3.fromRGB(0, 200, 255)
+stroke.Color = Color3.fromRGB(0, 200, 120)
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Transparency = 0.2
 
--- Judul
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1, -26, 0, 22)
-title.Position = UDim2.new(0, 9, 0, 4)
-title.BackgroundTransparency = 1
-title.Text = "⚡ Speed Booster"
-title.TextColor3 = Color3.fromRGB(0, 200, 255)
-title.Font = Enum.Font.GothamBold
-title.TextSize = 14 -- naik sedikit
-title.TextXAlignment = Enum.TextXAlignment.Left
+-- Label (judul fitur) -> TextButton biar bisa di klik & drag
+local label = Instance.new("TextButton", frame)
+label.AnchorPoint = Vector2.new(0, 0.5)
+label.Position = UDim2.new(0, 10, 0.5, 0)
+label.Size = UDim2.new(0.5, 0, 1, 0) -- agak dipendekin
+label.BackgroundTransparency = 1
+label.Text = "Speed Booster"
+label.TextColor3 = Color3.fromRGB(255, 255, 255)
+label.Font = Enum.Font.GothamSemibold
+label.TextSize = 14
+label.TextXAlignment = Enum.TextXAlignment.Left
+label.AutoButtonColor = false
 
--- Tombol Close
-local closeBtn = Instance.new("TextButton", frame)
-closeBtn.Size = UDim2.new(0, 22, 0, 22)
-closeBtn.Position = UDim2.new(1, -26, 0, 4)
-closeBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-closeBtn.Text = "X"
-closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeBtn.Font = Enum.Font.GothamBold
-closeBtn.TextSize = 13
-Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 5)
+-- Switch Container (lonjong)
+local switch = Instance.new("TextButton", frame)
+switch.AnchorPoint = Vector2.new(1, 0.5)
+switch.Position = UDim2.new(1, -8, 0.5, 0)
+switch.Size = UDim2.new(0, 46, 0, 22) -- lebih kecil biar pas di frame baru
+switch.BackgroundColor3 = Color3.fromRGB(70, 70, 70) -- warna OFF
+switch.Text = ""
+switch.AutoButtonColor = false
+Instance.new("UICorner", switch).CornerRadius = UDim.new(1, 0)
 
-closeBtn.MouseButton1Click:Connect(function()
-	gui:Destroy()
-end)
-
--- Tombol Toggle
-local toggleBtn = Instance.new("TextButton", frame)
-toggleBtn.Size = UDim2.new(0.9, 0, 0, 34)
-toggleBtn.Position = UDim2.new(0.05, 0, 0, 38)
-toggleBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
-toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-toggleBtn.Font = Enum.Font.GothamSemibold
-toggleBtn.TextSize = 13
-toggleBtn.Text = "▶ Start"
-Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0, 7)
+-- Bulatan (indikator ON/OFF)
+local circle = Instance.new("Frame", switch)
+circle.Size = UDim2.new(0, 18, 0, 18)
+circle.Position = UDim2.new(0, 2, 0.5, -9)
+circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+circle.BorderSizePixel = 0
+Instance.new("UICorner", circle).CornerRadius = UDim.new(1, 0)
 
 -- Logic Speed
-local speed = 38
+local speed = 40
 local active = false
-local mover
 local heartbeatConn
 
 local function startSpeed()
-	if mover then mover:Destroy() end
-	mover = Instance.new("BodyVelocity")
-	mover.Velocity = Vector3.new(0, 0, 0)
-	mover.MaxForce = Vector3.new(9e9, 0, 9e9)
-	mover.Parent = humanoidRootPart
-
 	if heartbeatConn then heartbeatConn:Disconnect() end
 	heartbeatConn = RunService.Heartbeat:Connect(function()
-		if active and mover then
+		if active and humanoid and humanoidRootPart then
 			local moveDir = humanoid.MoveDirection
-			mover.Velocity = moveDir * speed
+			if moveDir.Magnitude > 0 then
+				humanoidRootPart.AssemblyLinearVelocity =
+					moveDir * speed + Vector3.new(0, humanoidRootPart.AssemblyLinearVelocity.Y, 0)
+			end
 		end
 	end)
 end
 
 local function stopSpeed()
-	if mover then mover:Destroy() mover = nil end
 	if heartbeatConn then heartbeatConn:Disconnect() heartbeatConn = nil end
 end
 
-toggleBtn.MouseButton1Click:Connect(function()
+-- Toggle Switch Animasi + Script ON/OFF
+local function toggleSwitch()
 	if active then
 		active = false
-		toggleBtn.Text = "▶ Start"
-		toggleBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
 		stopSpeed()
+		TweenService:Create(switch, TweenInfo.new(0.25), {BackgroundColor3 = Color3.fromRGB(70,70,70)}):Play()
+		TweenService:Create(circle, TweenInfo.new(0.25), {Position = UDim2.new(0, 2, 0.5, -9)}):Play()
 	else
 		active = true
-		toggleBtn.Text = "■ Stop"
-		toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 120)
 		startSpeed()
+		TweenService:Create(switch, TweenInfo.new(0.25), {BackgroundColor3 = Color3.fromRGB(0,200,120)}):Play()
+		TweenService:Create(circle, TweenInfo.new(0.25), {Position = UDim2.new(1, -20, 0.5, -9)}):Play()
 	end
-end)
+end
+
+-- Klik toggle ON/OFF
+switch.MouseButton1Click:Connect(toggleSwitch)
 
 -- Respawn Handler
 Players.LocalPlayer.CharacterAdded:Connect(function(newChar)
@@ -122,31 +117,41 @@ Players.LocalPlayer.CharacterAdded:Connect(function(newChar)
 	end
 end)
 
--- Drag Function
+-- Drag Function lewat label (bedakan klik vs drag)
 local dragging, dragInput, dragStart, startPos
+local dragThreshold = 5 -- minimal pixel biar dianggap drag
+local hasDragged = false
+
 local function update(input)
 	local delta = input.Position - dragStart
+	if delta.Magnitude > dragThreshold then
+		hasDragged = true
+	end
 	frame.Position = UDim2.new(
 		startPos.X.Scale, startPos.X.Offset + delta.X,
 		startPos.Y.Scale, startPos.Y.Offset + delta.Y
 	)
 end
 
-frame.InputBegan:Connect(function(input)
+label.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 		dragging = true
+		hasDragged = false
 		dragStart = input.Position
 		startPos = frame.Position
 
 		input.Changed:Connect(function()
 			if input.UserInputState == Enum.UserInputState.End then
 				dragging = false
+				if not hasDragged then
+					toggleSwitch()
+				end
 			end
 		end)
 	end
 end)
 
-frame.InputChanged:Connect(function(input)
+label.InputChanged:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
 		dragInput = input
 	end
