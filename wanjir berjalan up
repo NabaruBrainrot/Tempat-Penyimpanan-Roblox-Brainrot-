@@ -1,155 +1,159 @@
--- Services
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
+-- Hapus GUI lama jika ada
+pcall(function() game.CoreGui:FindFirstChild("PremiumDeliveryGUI"):Destroy() end)
+
+-- Service & Player
 local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
-local lp = Players.LocalPlayer
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local humanoid = character:WaitForChild("Humanoid")
 
--- Hapus GUI lama kalau ada
-pcall(function()
-	if CoreGui:FindFirstChild("LiftGui") then
-		CoreGui.LiftGui:Destroy()
-	end
-end)
+-- GUI Setup
+local gui = Instance.new("ScreenGui", CoreGui)
+gui.Name = "PremiumDeliveryGUI"
+gui.ResetOnSpawn = false
 
--- ScreenGui
-local gui = Instance.new("ScreenGui")
-gui.Name = "LiftGui"
-gui.Parent = CoreGui
-
--- Frame utama
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 160, 0, 70)
-frame.Position = UDim2.new(0.5, -80, 0.8, 0)
-frame.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+frame.Name = "MainFrame"
+frame.Size = UDim2.new(0, 170, 0, 85) -- diperbesar 5% dari versi kecil (160x80)
+frame.Position = UDim2.new(0.1, 0, 0.4, 0)
+frame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 frame.BorderSizePixel = 0
-frame.Parent = gui
 frame.Active = true
-frame.Draggable = true
+frame.Draggable = false
+frame.Parent = gui
 
--- Rounded corners frame
-local frameCorner = Instance.new("UICorner")
-frameCorner.CornerRadius = UDim.new(0, 12)
-frameCorner.Parent = frame
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 11)
 
--- Shadow frame
-local shadow = Instance.new("Frame")
-shadow.Size = UDim2.new(1, 4, 1, 4)
-shadow.Position = UDim2.new(0, -2, 0, -2)
-shadow.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-shadow.BorderSizePixel = 0
-shadow.ZIndex = 0
-shadow.Parent = frame
+local stroke = Instance.new("UIStroke", frame)
+stroke.Thickness = 2
+stroke.Color = Color3.fromRGB(0, 200, 255)
 
-local shadowCorner = Instance.new("UICorner")
-shadowCorner.CornerRadius = UDim.new(0, 12)
-shadowCorner.Parent = shadow
+-- Judul
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, -26, 0, 22)
+title.Position = UDim2.new(0, 9, 0, 4)
+title.BackgroundTransparency = 1
+title.Text = "⚡ Speed Booster"
+title.TextColor3 = Color3.fromRGB(0, 200, 255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 14 -- naik sedikit
+title.TextXAlignment = Enum.TextXAlignment.Left
 
--- Tombol lift
-local button = Instance.new("TextButton")
-button.Size = UDim2.new(0.8, 0, 0.6, 0)
-button.Position = UDim2.new(0.1, 0, 0.2, 0)
-button.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-button.TextColor3 = Color3.fromRGB(255, 255, 255)
-button.Font = Enum.Font.GothamBold
-button.TextSize = 16
-button.Text = "upwalk: OFF"
-button.Parent = frame
+-- Tombol Close
+local closeBtn = Instance.new("TextButton", frame)
+closeBtn.Size = UDim2.new(0, 22, 0, 22)
+closeBtn.Position = UDim2.new(1, -26, 0, 4)
+closeBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+closeBtn.Text = "X"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 13
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 5)
 
--- Rounded corners tombol
-local btnCorner = Instance.new("UICorner")
-btnCorner.CornerRadius = UDim.new(0, 10)
-btnCorner.Parent = button
+closeBtn.MouseButton1Click:Connect(function()
+	gui:Destroy()
+end)
 
--- Border tipis semi-transparan
-local btnStroke = Instance.new("UIStroke")
-btnStroke.Color = Color3.fromRGB(255, 255, 255)
-btnStroke.Thickness = 1
-btnStroke.Transparency = 0.5
-btnStroke.Parent = button
+-- Tombol Toggle
+local toggleBtn = Instance.new("TextButton", frame)
+toggleBtn.Size = UDim2.new(0.9, 0, 0, 34)
+toggleBtn.Position = UDim2.new(0.05, 0, 0, 38)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleBtn.Font = Enum.Font.GothamSemibold
+toggleBtn.TextSize = 13
+toggleBtn.Text = "▶ Start"
+Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0, 7)
 
--- Shadow tombol
-local btnShadow = Instance.new("Frame")
-btnShadow.Size = UDim2.new(1, 4, 1, 4)
-btnShadow.Position = UDim2.new(0, -2, 0, -2)
-btnShadow.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-btnShadow.BorderSizePixel = 0
-btnShadow.ZIndex = 0
-btnShadow.Parent = button
+-- Logic Speed
+local speed = 40
+local active = false
+local mover
+local heartbeatConn
 
-local btnShadowCorner = Instance.new("UICorner")
-btnShadowCorner.CornerRadius = UDim.new(0, 10)
-btnShadowCorner.Parent = btnShadow
+local function startSpeed()
+	if mover then mover:Destroy() end
+	mover = Instance.new("BodyVelocity")
+	mover.Velocity = Vector3.new(0, 0, 0)
+	mover.MaxForce = Vector3.new(9e9, 0, 9e9)
+	mover.Parent = humanoidRootPart
 
--- Animasi hover
-UserInputService.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement then
-		local mousePos = input.Position
-		local absPos = button.AbsolutePosition
-		local absSize = button.AbsoluteSize
-
-		if mousePos.X >= absPos.X and mousePos.X <= absPos.X + absSize.X and
-		   mousePos.Y >= absPos.Y and mousePos.Y <= absPos.Y + absSize.Y then
-			button.BackgroundColor3 = Color3.fromRGB(255, 100, 100) -- hover
-		else
-			if active then
-				button.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
-			else
-				button.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-			end
+	if heartbeatConn then heartbeatConn:Disconnect() end
+	heartbeatConn = RunService.Heartbeat:Connect(function()
+		if active and mover then
+			local moveDir = humanoid.MoveDirection
+			mover.Velocity = moveDir * speed
 		end
+	end)
+end
+
+local function stopSpeed()
+	if mover then mover:Destroy() mover = nil end
+	if heartbeatConn then heartbeatConn:Disconnect() heartbeatConn = nil end
+end
+
+toggleBtn.MouseButton1Click:Connect(function()
+	if active then
+		active = false
+		toggleBtn.Text = "▶ Start"
+		toggleBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+		stopSpeed()
+	else
+		active = true
+		toggleBtn.Text = "■ Stop"
+		toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 120)
+		startSpeed()
 	end
 end)
 
--- Variabel lift
-local active = false
-local platform
-local tween
-
--- Fungsi mulai lift
-local function startLift()
-	local char = lp.Character or lp.CharacterAdded:Wait()
-	local hrp = char:WaitForChild("HumanoidRootPart")
-
-	if platform then platform:Destroy() end
-
-	platform = Instance.new("Part")
-	platform.Name = "LiftPlatform"
-	platform.Size = Vector3.new(1000, 3, 1000)
-	platform.Anchored = true
-	platform.CanCollide = true
-	platform.Transparency = 0.7
-	platform.TopSurface = Enum.SurfaceType.Smooth
-	platform.BottomSurface = Enum.SurfaceType.Smooth
-	platform.Parent = workspace
-
-	local startPos = hrp.Position - Vector3.new(0, 4, 0)
-	platform.CFrame = CFrame.new(startPos)
-
-	local endPos = hrp.Position + Vector3.new(0, 20, 0)
-	tween = TweenService:Create(platform, TweenInfo.new(2, Enum.EasingStyle.Linear), {
-		CFrame = CFrame.new(endPos)
-	})
-	tween:Play()
-end
-
--- Fungsi stop lift
-local function stopLift()
-	if tween then tween:Cancel() end
-	if platform then platform:Destroy() end
-end
-
--- Klik tombol
-button.MouseButton1Click:Connect(function()
-	active = not active
+-- Respawn Handler
+Players.LocalPlayer.CharacterAdded:Connect(function(newChar)
+	character = newChar
+	humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+	humanoid = character:WaitForChild("Humanoid")
 	if active then
-		button.Text = "upwalk: ON"
-		button.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
-		startLift()
-	else
-		button.Text = "upwalk: OFF"
-		button.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-		stopLift()
+		task.wait(1)
+		startSpeed()
+	end
+end)
+
+-- Drag Function
+local dragging, dragInput, dragStart, startPos
+local function update(input)
+	local delta = input.Position - dragStart
+	frame.Position = UDim2.new(
+		startPos.X.Scale, startPos.X.Offset + delta.X,
+		startPos.Y.Scale, startPos.Y.Offset + delta.Y
+	)
+end
+
+frame.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPos = frame.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+frame.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+		dragInput = input
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		update(input)
 	end
 end)
