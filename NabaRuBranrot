@@ -130,6 +130,16 @@ _G.FaDhenAddToggle("Chilli Hub", {
 
 
 
+_G.FaDhenAddToggle("Speed Booster", {
+    Name = "Speed Booster",
+    Callback = function(on)
+        if on then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/wanjir%20berjalan%20up"))()
+        end
+    end
+})
+
+
 
 
 
