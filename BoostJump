@@ -12,7 +12,7 @@ gui.Parent = player:WaitForChild("PlayerGui")
 -- Frame container bisa digeser
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 126, 0, 54) -- 10% lebih kecil
-mainFrame.Position = UDim2.new(0.75, -63, 0.60, 0) -- lebih kanan & lebih atas
+mainFrame.Position = UDim2.new(0.80, -63, 0.60, 0) -- lebih kanan & lebih atas
 mainFrame.BackgroundTransparency = 1
 mainFrame.Active = true
 mainFrame.Draggable = true
