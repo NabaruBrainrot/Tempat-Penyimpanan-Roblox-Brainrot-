@@ -1,0 +1,113 @@
+-- GUI Infinite Boost 2 detik dengan Progress Bar & Drag
+-- LOGIC TIDAK DIUBAH
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local gui = Instance.new("ScreenGui")
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- Frame container bisa digeser
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 126, 0, 54) -- 10% lebih kecil
+mainFrame.Position = UDim2.new(0.75, -63, 0.60, 0) -- lebih kanan & lebih atas
+mainFrame.BackgroundTransparency = 1
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = gui
+
+-- Tombol Boost
+local boostButton = Instance.new("TextButton")
+boostButton.Size = UDim2.new(1, 0, 0.7, 0)
+boostButton.Position = UDim2.new(0, 0, 0, 0)
+boostButton.Text = "🚀 Boost"
+boostButton.TextScaled = true
+boostButton.Font = Enum.Font.GothamBold
+boostButton.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+boostButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+boostButton.BorderSizePixel = 0
+boostButton.Parent = mainFrame
+
+-- Sudut bulat
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 12)
+corner.Parent = boostButton
+
+-- Progress bar container
+local progressFrame = Instance.new("Frame")
+progressFrame.Size = UDim2.new(1, 0, 0.25, -2)
+progressFrame.Position = UDim2.new(0, 0, 0.75, 2)
+progressFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+progressFrame.BorderSizePixel = 0
+progressFrame.Parent = mainFrame
+
+local pCorner = Instance.new("UICorner")
+pCorner.CornerRadius = UDim.new(0, 10)
+pCorner.Parent = progressFrame
+
+-- Progress fill
+local progressBar = Instance.new("Frame")
+progressBar.Size = UDim2.new(1, 0, 1, 0)
+progressBar.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+progressBar.BorderSizePixel = 0
+progressBar.Parent = progressFrame
+
+local fCorner = Instance.new("UICorner")
+fCorner.CornerRadius = UDim.new(0, 10)
+fCorner.Parent = progressBar
+
+-- Glow effect
+local uiStroke = Instance.new("UIStroke")
+uiStroke.Color = Color3.fromRGB(0, 255, 200)
+uiStroke.Thickness = 2
+uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+uiStroke.Parent = boostButton
+
+-- Setting
+local LIFT_SPEED = 20    -- kecepatan naik
+local MAX_JUMP_TIME = 2  -- durasi maksimal tahan (detik)
+
+-- State
+local holdingBoost = false
+local boostStartTime = 0
+
+-- Saat tombol ditekan
+boostButton.MouseButton1Down:Connect(function()
+    holdingBoost = true
+    boostStartTime = tick()
+end)
+
+-- Saat tombol dilepas
+boostButton.MouseButton1Up:Connect(function()
+    holdingBoost = false
+end)
+
+-- Update progress bar + gerakan karakter
+RunService.Heartbeat:Connect(function()
+    local elapsed = tick() - boostStartTime
+
+    if holdingBoost then
+        local remaining = math.max(0, MAX_JUMP_TIME - elapsed)
+        local ratio = remaining / MAX_JUMP_TIME
+        progressBar.Size = UDim2.new(ratio, 0, 1, 0)
+
+        if remaining <= 0 then
+            holdingBoost = false
+            progressBar.Size = UDim2.new(0, 0, 1, 0)
+            return
+        end
+
+        local char = player.Character
+        if char then
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                local vel = hrp.AssemblyLinearVelocity
+                hrp.AssemblyLinearVelocity = Vector3.new(vel.X, LIFT_SPEED, vel.Z)
+            end
+        end
+    else
+        progressBar.Size = UDim2.new(1, 0, 1, 0)
+    end
+end)
