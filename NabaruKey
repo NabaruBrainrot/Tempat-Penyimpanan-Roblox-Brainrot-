@@ -129,14 +129,6 @@ _G.FaDhenAddToggle("Chilli Hub", {
 })
 
 
-_G.FaDhenAddToggle("Miranda Hub", {
-    Name = "Miranda Hub",
-    Callback = function(on)
-        if on then
-            loadstring(game:HttpGet("https://pastefy.app/9YIyWc7E/raw"))()
-        end
-    end
-})
 
 
 _G.FaDhenAddToggle("Boost Jump", {
