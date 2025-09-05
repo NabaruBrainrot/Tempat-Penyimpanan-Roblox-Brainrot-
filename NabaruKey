@@ -139,6 +139,19 @@ _G.FaDhenAddToggle("Miranda Hub", {
 })
 
 
+_G.FaDhenAddToggle("Boost Jump", {
+    Name = "Boost Jump",
+    Callback = function(on)
+        if on then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/BoostJump"))()
+        end
+    end
+})
+
+
+
+
+
 
 _G.FaDhenAddToggle("Speed Booster", {
     Name = "Speed Booster",
