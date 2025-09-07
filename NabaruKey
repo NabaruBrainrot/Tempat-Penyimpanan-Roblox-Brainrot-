@@ -123,7 +123,7 @@ _G.FaDhenAddToggle("Chilli Hub", {
     Name = "Chilli Hub",
     Callback = function(on)
         if on then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Delfi%20"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua"))()
         end
     end
 })
