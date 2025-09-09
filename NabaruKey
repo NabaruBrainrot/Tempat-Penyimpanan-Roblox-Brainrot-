@@ -1,143 +1,5 @@
--- Services
-local CoreGui = game:GetService("CoreGui")
+loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Ui%20library"))()
 
--- Hapus GUI lama
-pcall(function()
-    if CoreGui:FindFirstChild("FaDhenGui") then
-        CoreGui.FaDhenGui:Destroy()
-    end
-end)
-
--- ScreenGui utama
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "FaDhenGui"
-ScreenGui.Parent = CoreGui
-
--- Tombol Open di kiri atas
-local openButton = Instance.new("TextButton")
-openButton.Size = UDim2.new(0, 70, 0, 35)
-openButton.Position = UDim2.new(0, 35, 0, 20)
-openButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-openButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-openButton.Text = "Open"
-openButton.Font = Enum.Font.SourceSansBold
-openButton.TextSize = 16
-openButton.Parent = ScreenGui
-
-local openCorner = Instance.new("UICorner")
-openCorner.CornerRadius = UDim.new(0,8)
-openCorner.Parent = openButton
-
--- Frame GUI utama
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 200, 0, 300)
-mainFrame.Position = UDim2.new(0.5, -100, 0.5, -150)
-mainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-mainFrame.BorderSizePixel = 0
-mainFrame.Visible = false
-mainFrame.Parent = ScreenGui
-
-local frameCorner = Instance.new("UICorner")
-frameCorner.CornerRadius = UDim.new(0,12)
-frameCorner.Parent = mainFrame
-
--- Tombol Close di pojok kanan atas frame
-local closeButton = Instance.new("TextButton")
-closeButton.Size = UDim2.new(0, 35, 0, 25)
-closeButton.Position = UDim2.new(1, -40, 0, 10)
-closeButton.BackgroundColor3 = Color3.fromRGB(180,50,50)
-closeButton.TextColor3 = Color3.fromRGB(255,255,255)
-closeButton.Text = "X"
-closeButton.Font = Enum.Font.SourceSansBold
-closeButton.TextSize = 18
-closeButton.Parent = mainFrame
-
-local closeCorner = Instance.new("UICorner")
-closeCorner.CornerRadius = UDim.new(0,6)
-closeCorner.Parent = closeButton
-
--- ScrollingFrame untuk toggle buttons
-local scrollFrame = Instance.new("ScrollingFrame")
-scrollFrame.Size = UDim2.new(1, -20, 1, -50)
-scrollFrame.Position = UDim2.new(0, 10, 0, 40)
-scrollFrame.BackgroundTransparency = 1
-scrollFrame.BorderSizePixel = 0
-scrollFrame.CanvasSize = UDim2.new(0,0,0,0)
-scrollFrame.ScrollBarThickness = 6
-scrollFrame.Parent = mainFrame
-
-local layout = Instance.new("UIListLayout")
-layout.Parent = scrollFrame
-layout.SortOrder = Enum.SortOrder.LayoutOrder
-layout.Padding = UDim.new(0,6)
-
--- Auto update tinggi CanvasSize biar full scroll
-layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    scrollFrame.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
-end)
-
--- Tabel global toggle buttons
-_G.FaDhenToggles = {}
-
--- Fungsi AddToggle
-function _G.FaDhenAddToggle(name, props)
-    local callback = props.Callback
-
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1,0,0,35)
-    btn.BackgroundColor3 = Color3.fromRGB(50,50,50)
-    btn.TextColor3 = Color3.fromRGB(255,255,255)
-    btn.Text = name.." [OFF]"
-    btn.Font = Enum.Font.SourceSansBold
-    btn.TextSize = 16
-    btn.Parent = scrollFrame
-
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0,8)
-    corner.Parent = btn
-
-    local toggled = false
-    btn.MouseButton1Click:Connect(function()
-        toggled = not toggled
-        btn.Text = name.." ["..(toggled and "ON" or "OFF").."]"
-        if callback then
-            callback(toggled)
-        end
-    end)
-
-    _G.FaDhenToggles[name] = btn
-end
-
--- Tombol Open
-openButton.MouseButton1Click:Connect(function()
-    mainFrame.Visible = true
-end)
-
--- Tombol Close
-closeButton.MouseButton1Click:Connect(function()
-    mainFrame.Visible = false
-end)
-
-
-_G.FaDhenAddToggle("Chilli Hub", {
-    Name = "Chilli Hub",
-    Callback = function(on)
-        if on then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua"))()
-        end
-    end
-})
-
-
-
-_G.FaDhenAddToggle("PetsFinder", {
-    Name = "PetsFinder",
-    Callback = function(on)
-        if on then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Ninja10908/S4/refs/heads/main/Kurdhub"))()
-        end
-    end
-})
 
 
 
@@ -211,12 +73,73 @@ end)
 -- pertama kali load
 hookBackpack()
 
--- Toggle UI
-_G.FaDhenAddToggle("AimBot", {
-    Callback = function(on)
-        getgenv().FaDhenAutoAim = on
+-- Toggle UI (baru)
+_G.FaDhenAddToggle("Aimbot", {
+    Callback = function(state)
+        getgenv().FaDhenAutoAim = state
     end
 })
+
+
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local ragdollConnection = nil
+
+local function anchorCharacter(char, state)
+    for _, part in pairs(char:GetDescendants()) do
+        if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+            part.Anchored = state
+        end
+    end
+end
+
+local function handleRagdoll(char)
+    local humanoid = char:WaitForChild("Humanoid", 5)
+    if not humanoid then return end
+    
+    ragdollConnection = humanoid.StateChanged:Connect(function(_, newState)
+        if newState == Enum.HumanoidStateType.Physics 
+        or newState == Enum.HumanoidStateType.Ragdoll 
+        or newState == Enum.HumanoidStateType.FallingDown then
+            anchorCharacter(char, true)
+            task.wait(0.01)
+            anchorCharacter(char, false)
+            humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+        end
+    end)
+end
+
+local function enableAntiRagdoll()
+    if player.Character then
+        handleRagdoll(player.Character)
+    end
+    player.CharacterAdded:Connect(function(char)
+        task.wait(0.5)
+        handleRagdoll(char)
+    end)
+end
+
+local function disableAntiRagdoll()
+    if ragdollConnection then
+        ragdollConnection:Disconnect()
+        ragdollConnection = nil
+    end
+end
+
+--=== Toggle baru ===--
+_G.FaDhenAddToggle("Anti Ragdoll", {
+    Callback = function(state)
+        if state then
+            enableAntiRagdoll()
+        else
+            disableAntiRagdoll()
+        end
+    end
+})
+
+
+
 
 
 
@@ -263,7 +186,7 @@ local function applyESPToCharacter(player, character)
 	local label = Instance.new("TextLabel")
 	label.Size = UDim2.new(1, 0, 1, 0)
 	label.BackgroundTransparency = 1
-	label.Text = player.DisplayName -- pakai nama cadangan (DisplayName)
+	label.Text = player.DisplayName
 	label.TextColor3 = Color3.new(1, 1, 1)
 	label.TextStrokeTransparency = 0.5
 	label.Font = Enum.Font.SourceSansBold
@@ -331,9 +254,9 @@ function FaESP:Disable()
 end
 
 --=== Toggle baru pakai FaDhen ===--
-_G.FaDhenAddToggle("ESP Player", {
-    Callback = function(on)
-        if on then
+_G.FaDhenAddToggle("ESP", {
+    Callback = function(state)
+        if state then
             FaESP:Enable()
         else
             FaESP:Disable()
@@ -343,15 +266,9 @@ _G.FaDhenAddToggle("ESP Player", {
 
 
 
-
-
-
-
-
-_G.FaDhenAddToggle("Boost Jump", {
-    Name = "Boost Jump",
-    Callback = function(on)
-        if on then
+_G.FaDhenAddToggle("Jump Boost", {
+    Callback = function(state)
+        if state then
             loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/BoostJump"))()
         end
     end
@@ -362,207 +279,6 @@ _G.FaDhenAddToggle("Boost Jump", {
 
 
 
-_G.FaDhenAddToggle("Speed Booster", {
-    Name = "Speed Booster",
-    Callback = function(on)
-        if on then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/wanjir%20berjalan%20up"))()
-        end
-    end
-})
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-_G.FaDhenAddToggle("Lock Base", {
-    Name = "Lock Base",
-    Callback = function(on)
-        if on then
-            
-            loadstring(game:HttpGet("https://pastebin.com/raw/makzCS0N"))()
-        end
-    end
-})
-
-
-
--- Services
-local CoreGui = game:GetService("CoreGui")
-local protect = syn and syn.protect_gui or fluxus and fluxus.protect_gui or function() end
-
--- Buat GUI (default disembunyikan)
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "SentryTeleportGUI"
-ScreenGui.ResetOnSpawn = false
-protect(ScreenGui)
-ScreenGui.Parent = (gethui and gethui()) or CoreGui
-ScreenGui.Enabled = false  -- awalnya tidak tampil
-
-local Button = Instance.new("TextButton")
-Button.Size = UDim2.new(0, 100, 0, 30)  
-Button.Position = UDim2.new(0, 10, 0, 60) 
-Button.AnchorPoint = Vector2.new(0,0)
-Button.Text = "Tp Sentry"
-Button.BackgroundColor3 = Color3.fromRGB(100, 200, 255)
-Button.TextColor3 = Color3.new(0, 0, 0)
-Button.BorderSizePixel = 2
-Button.Parent = ScreenGui
-
--- Fungsi teleport
-local function teleportParts()
-    local player = game.Players.LocalPlayer
-    if not player or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
-
-    local hrp = player.Character.HumanoidRootPart
-
-    for _, obj in pairs(workspace:GetChildren()) do
-        if obj:IsA("BasePart") and obj.Name:match("^Sentry_") then
-            local targetCFrame = hrp.CFrame + hrp.CFrame.LookVector * 2
-            obj.Anchored = false
-            obj.CFrame = targetCFrame
-        end
-    end
-end
-
-Button.MouseButton1Click:Connect(teleportParts)
-
--- 🔥 Hubungkan ke toggle
-_G.FaDhenAddToggle("Tp Sentry", {
-    Callback = function(on)
-        if on then
-            ScreenGui.Enabled = true   -- munculkan GUI
-        else
-            ScreenGui.Enabled = false  -- sembunyikan GUI
-        end
-    end
-})
-
-
-
-
--- Load Anti Steal
-loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Anti%20Steal"))()
-
--- Tambahkan toggle di GUI
-_G.FaDhenAddToggle("Anti Steal", {
-    Name = "Anti Steal",
-    Callback = function(on)
-        if getgenv().AntiSteal_SetEnabled then
-            getgenv().AntiSteal_SetEnabled(on)
-        else
-            warn("Anti Steal belum siap!")
-        end
-    end
-})
-
-
-
-
-
-
-
-
-
-
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local gui = player:WaitForChild("PlayerGui")
-
-local screenGui
-local function createMainGui()
-    if screenGui then return screenGui end
-
-    screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "UtilityGui"
-    screenGui.ResetOnSpawn = false
-    screenGui.IgnoreGuiInset = true
-    screenGui.Parent = gui
-
-    -- FRAME UTAMA UNTUK BUTTON
-    local frame = Instance.new("Frame")
-    frame.Name = "MainFrame"
-    frame.Size = UDim2.new(0, 200, 0, 32)
-    frame.Position = UDim2.new(0.5, 0, 0.02, 0)
-    frame.AnchorPoint = Vector2.new(0.5, 0)
-    frame.BackgroundTransparency = 1
-    frame.Parent = screenGui
-
-    -- RESET BUTTON
-    local resetBtn = Instance.new("TextButton")
-    resetBtn.Size = UDim2.new(0, 90, 1, 0)
-    resetBtn.Position = UDim2.new(0, 0, 0, 0)
-    resetBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-    resetBtn.TextColor3 = Color3.new(1, 1, 1)
-    resetBtn.Text = "Reset"
-    resetBtn.Font = Enum.Font.GothamBold
-    resetBtn.TextSize = 14
-    resetBtn.Parent = frame
-    Instance.new("UICorner", resetBtn).CornerRadius = UDim.new(0, 6)
-
-    resetBtn.MouseButton1Click:Connect(function()
-        local character = player.Character or player.CharacterAdded:Wait()
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then humanoid.Health = 0 end
-    end)
-
-    -- LEAVE BUTTON
-    local leaveBtn = Instance.new("TextButton")
-    leaveBtn.Size = UDim2.new(0, 90, 1, 0)
-    leaveBtn.Position = UDim2.new(0, 100, 0, 0)
-    leaveBtn.BackgroundColor3 = Color3.fromRGB(44, 44, 44)
-    leaveBtn.TextColor3 = Color3.new(1, 1, 1)
-    leaveBtn.Text = "Leave"
-    leaveBtn.Font = Enum.Font.GothamBold
-    leaveBtn.TextSize = 14
-    leaveBtn.Parent = frame
-    Instance.new("UICorner", leaveBtn).CornerRadius = UDim.new(0, 6)
-
-    leaveBtn.MouseButton1Click:Connect(function()
-        game:Shutdown()
-    end)
-
-    player.CharacterAdded:Connect(function()
-        task.wait(0.1)
-        if not gui:FindFirstChild("UtilityGui") then
-            screenGui.Parent = gui
-        end
-    end)
-
-    return screenGui
-end
-
---=== Toggle baru pakai FaDhen ===--
-_G.FaDhenAddToggle("Exit Button", {
-    Callback = function(on)
-        if on then
-            createMainGui().Enabled = true
-        else
-            if screenGui then
-                screenGui.Enabled = false
-            end
-        end
-    end
-})
-
-
-
-
-
-
-
-
-
---Script lain
 
 
 local DEBUG = false
