@@ -1,261 +1,426 @@
---// ======= THEME =========
-local THEME = {
-    FrameBg        = Color3.fromRGB(38, 42, 56),   
-    FrameBg2       = Color3.fromRGB(48, 52, 68),   
-    Accent         = Color3.fromRGB(0, 180, 255),  
-    AccentHover    = Color3.fromRGB(0, 205, 255),
-    TabIdle        = Color3.fromRGB(70, 90, 130),
-    TabActive      = Color3.fromRGB(0, 180, 255),
-    ToggleBg       = Color3.fromRGB(60, 64, 80),
-    ToggleHover    = Color3.fromRGB(70, 74, 95),
-    ToggleOffTrack = Color3.fromRGB(120, 120, 120),
-    ToggleOnTrack  = Color3.fromRGB(0, 200, 150),
-    TextLight      = Color3.fromRGB(240, 240, 240),
-    TitleText      = Color3.fromRGB(255, 255, 255),
+-- FaDhenGaming GUI Script - Clean & Compact Design (20% Larger)
+-- Services
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+-- Hapus GUI lama
+pcall(function()
+    if CoreGui:FindFirstChild("FaDhenGui") then
+        CoreGui.FaDhenGui:Destroy()
+    end
+end)
+
+-- Settings untuk menyimpan toggle states
+local Settings = {
+    toggles = {}
 }
 
---// ======= SERVICES =======
-local CoreGui      = game:GetService("CoreGui")
-local TweenService = game:GetService("TweenService")
-local UIS          = game:GetService("UserInputService")
+-- Fungsi untuk save settings
+local function SaveSettings()
+    pcall(function()
+        writefile("FaDhenGaming_Settings.json", game:GetService("HttpService"):JSONEncode(Settings))
+    end)
+end
 
--- Bersihkan UI lama
-local OLD = CoreGui:FindFirstChild("UilibraryCool")
-if OLD then OLD:Destroy() end
+-- Fungsi untuk load settings
+local function LoadSettings()
+    pcall(function()
+        if isfile("FaDhenGaming_Settings.json") then
+            local success, result = pcall(function()
+                return game:GetService("HttpService"):JSONDecode(readfile("FaDhenGaming_Settings.json"))
+            end)
+            if success then
+                Settings = result
+            end
+        end
+    end)
+end
 
--- ScreenGui
-local gui = Instance.new("ScreenGui")
-gui.Name = "UilibraryCool"
-gui.ResetOnSpawn = false
-gui.Parent = CoreGui
+-- Load settings saat startup
+LoadSettings()
 
--- MAIN FRAME
+-- ScreenGui utama
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "FaDhenGui"
+ScreenGui.Parent = CoreGui
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+-- Main Frame dengan ukuran yang diminta (20% lebih besar)
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 240, 0, 250)
-mainFrame.Position = UDim2.new(0.5, -120, 0.5, -125)
-mainFrame.BackgroundColor3 = THEME.FrameBg
-mainFrame.Active = true
-mainFrame.Draggable = true
-mainFrame.Visible = false
-mainFrame.Parent = gui
-Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0, 198, 0, 41) -- Ukuran diperbesar 20% (165*1.2=198, 34*1.2=41)
+mainFrame.Position = UDim2.new(0.5, -99, 0, 50) -- Center horizontal (198/2=99)
+mainFrame.BackgroundColor3 = Color3.new(27/255, 42/255, 53/255) -- Warna yang diminta
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = ScreenGui
+mainFrame.ClipsDescendants = false -- PENTING: Biar toggle tidak terpotong
 
+-- Corner untuk main frame
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 4) -- 20% lebih besar (3*1.2≈4)
+mainCorner.Parent = mainFrame
+
+-- Subtle border
 local mainStroke = Instance.new("UIStroke")
-mainStroke.Thickness = 2
-mainStroke.Color = THEME.Accent
-mainStroke.Transparency = 0.15
+mainStroke.Color = Color3.new(35/255, 50/255, 65/255)
+mainStroke.Thickness = 1
 mainStroke.Parent = mainFrame
 
--- Soft Shadow
-local shadow = Instance.new("ImageLabel")
-shadow.AnchorPoint = Vector2.new(0.5, 0.5)
-shadow.Position = UDim2.new(0.5, 0, 0.5, 0)
-shadow.Size = UDim2.new(1, 36, 1, 36)
-shadow.ZIndex = 0
-shadow.BackgroundTransparency = 1
-shadow.Image = "rbxassetid://5028857084"
-shadow.ImageColor3 = Color3.new(0,0,0)
-shadow.ImageTransparency = 0.55
-shadow.ScaleType = Enum.ScaleType.Slice
-shadow.SliceCenter = Rect.new(24, 24, 276, 276)
-shadow.Parent = mainFrame
+-- Header Frame (fill main frame)
+local headerFrame = Instance.new("Frame")
+headerFrame.Name = "HeaderFrame"
+headerFrame.Size = UDim2.new(1, 0, 1, 0)
+headerFrame.Position = UDim2.new(0, 0, 0, 0)
+headerFrame.BackgroundTransparency = 1 -- Transparent, color comes from mainFrame
+headerFrame.BorderSizePixel = 0
+headerFrame.Parent = mainFrame
 
--- TITLE BAR
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 32)
-title.BackgroundColor3 = THEME.Accent
-title.Text = "  YT FaDhenGaming"
-title.Font = Enum.Font.GothamBold
-title.TextSize = 14
-title.TextXAlignment = Enum.TextXAlignment.Left
-title.TextColor3 = THEME.TitleText
-title.Parent = mainFrame
-Instance.new("UICorner", title).CornerRadius = UDim.new(0, 12)
+-- Title Label
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Name = "TitleLabel"
+titleLabel.Size = UDim2.new(1, -36, 1, 0) -- Diperbesar 20% (30*1.2=36)
+titleLabel.Position = UDim2.new(0, 10, 0, 0) -- Diperbesar 20% (8*1.2≈10)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "FaDhenGaming"
+titleLabel.TextColor3 = Color3.new(1, 1, 1) -- Pure white
+titleLabel.Font = Enum.Font.GothamSemibold
+titleLabel.TextSize = 14 -- Diperbesar 20% (12*1.2≈14)
+titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+titleLabel.TextYAlignment = Enum.TextYAlignment.Center
+titleLabel.Parent = headerFrame
 
-local titleGradient = Instance.new("UIGradient")
-titleGradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, THEME.Accent),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(140, 60, 255))
-}
-titleGradient.Rotation = 80
-titleGradient.Parent = title
+-- Toggle Button (V / -)
+local toggleButton = Instance.new("TextButton")
+toggleButton.Name = "ToggleButton"
+toggleButton.Size = UDim2.new(0, 24, 0, 24) -- Diperbesar 20% (20*1.2=24)
+toggleButton.Position = UDim2.new(1, -30, 0.5, -12) -- Adjusted for new size (25*1.2=30, 10*1.2=12)
+toggleButton.BackgroundColor3 = Color3.new(35/255, 50/255, 65/255)
+toggleButton.TextColor3 = Color3.new(0.9, 0.9, 0.9)
+toggleButton.Text = "v"
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.TextSize = 12 -- Diperbesar 20% (10*1.2=12)
+toggleButton.Parent = headerFrame
 
--- TAB CONTAINER
-local tabContainer = Instance.new("Frame")
-tabContainer.Size = UDim2.new(1, -20, 0, 28)
-tabContainer.Position = UDim2.new(0, 10, 0, 42)
-tabContainer.BackgroundTransparency = 1
-tabContainer.Parent = mainFrame
+local toggleCorner = Instance.new("UICorner")
+toggleCorner.CornerRadius = UDim.new(0, 5) -- Diperbesar 20% (4*1.2≈5)
+toggleCorner.Parent = toggleButton
 
-local tabLayout = Instance.new("UIListLayout")
-tabLayout.FillDirection = Enum.FillDirection.Horizontal
-tabLayout.Padding = UDim.new(0, 6)
-tabLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
-tabLayout.Parent = tabContainer
-
--- CONTENT FRAME
+-- Content Frame - PENTING: Di luar mainFrame agar tidak terpotong
 local contentFrame = Instance.new("Frame")
-contentFrame.Position = UDim2.new(0, 10, 0, 80)
-contentFrame.Size = UDim2.new(1, -20, 1, -90)
-contentFrame.BackgroundTransparency = 1
-contentFrame.Parent = mainFrame
+contentFrame.Name = "ContentFrame"
+contentFrame.Size = UDim2.new(0, 198, 0, 0) -- Start with 0 height, width 20% lebih besar
+contentFrame.Position = UDim2.new(0, 0, 0.9, 2)  -- Just below mainFrame
+contentFrame.BackgroundColor3 = Color3.new(27/255, 42/255, 53/255) -- Same color
+contentFrame.BorderSizePixel = 0
+contentFrame.Visible = false
+contentFrame.Parent = mainFrame -- Parent to mainFrame but positioned outside
+contentFrame.ClipsDescendants = true
 
--- Tabs
-local tabs, tabButtons = {}, {}
-local function createTab(name)
-    local tab = Instance.new("Frame")
-    tab.Name = name .. "Tab"
-    tab.Size = UDim2.new(1, 0, 1, 0)
-    tab.BackgroundTransparency = 1
-    tab.Visible = false
-    tab.Parent = contentFrame
+-- Content corner
+local contentCorner = Instance.new("UICorner")
+contentCorner.CornerRadius = UDim.new(0, 4) -- Diperbesar 20% (3*1.2≈4)
+contentCorner.Parent = contentFrame
 
-    local layout = Instance.new("UIListLayout")
-    layout.Padding = UDim.new(0, 8)
-    layout.VerticalAlignment = Enum.VerticalAlignment.Top
-    layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.Parent = tab
+-- Content border
+local contentStroke = Instance.new("UIStroke")
+contentStroke.Color = Color3.new(35/255, 50/255, 65/255)
+contentStroke.Thickness = 1
+contentStroke.Parent = contentFrame
 
-    tabs[name] = tab
-    return tab
+-- Scrolling Frame untuk toggle items
+local scrollFrame = Instance.new("ScrollingFrame")
+scrollFrame.Name = "ScrollFrame"
+scrollFrame.Size = UDim2.new(1, -7, 1, -7) -- Diperbesar 20% (6*1.2≈7)
+scrollFrame.Position = UDim2.new(0, 4, 0, 4) -- Diperbesar 20% (3*1.2≈4)
+scrollFrame.BackgroundTransparency = 1
+scrollFrame.BorderSizePixel = 0
+scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+scrollFrame.ScrollBarThickness = 4 -- Diperbesar 20% (3*1.2≈4)
+scrollFrame.ScrollBarImageColor3 = Color3.new(0.4, 0.4, 0.5)
+scrollFrame.ScrollingDirection = Enum.ScrollingDirection.Y
+scrollFrame.Parent = contentFrame
+
+-- Layout untuk toggle items
+local layout = Instance.new("UIListLayout")
+layout.Name = "Layout"
+layout.Parent = scrollFrame
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+layout.Padding = UDim.new(0, 4) -- Diperbesar 20% (3*1.2≈4)
+layout.FillDirection = Enum.FillDirection.Vertical
+layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+-- Update canvas size
+local function updateCanvasSize()
+    local contentSize = layout.AbsoluteContentSize.Y
+    scrollFrame.CanvasSize = UDim2.new(0, 0, 0, contentSize + 7) -- Diperbesar 20% (6*1.2≈7)
 end
 
-local mainTab  = createTab("Main")
-local visualTab = createTab("Visual")
-local miscTab   = createTab("Misc")
+layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateCanvasSize)
 
-local function setActiveTab(name)
-    for tabName, tab in pairs(tabs) do
-        tab.Visible = (tabName == name)
+-- Variables
+local isExpanded = false
+local toggleItems = {}
+
+-- Fungsi untuk membuat toggle item yang compact
+local function CreateToggleItem(name, initialState)
+    local itemFrame = Instance.new("Frame")
+    itemFrame.Name = name .. "Item"
+    itemFrame.Size = UDim2.new(1, -7, 0, 34) -- Compact height diperbesar 20% (6*1.2≈7, 28*1.2≈34)
+    itemFrame.BackgroundColor3 = Color3.new(32/255, 47/255, 58/255) -- Slightly lighter
+    itemFrame.BorderSizePixel = 0
+    itemFrame.LayoutOrder = #toggleItems + 1
+    itemFrame.Parent = scrollFrame
+
+    local itemCorner = Instance.new("UICorner")
+    itemCorner.CornerRadius = UDim.new(0, 7) -- Diperbesar 20% (6*1.2≈7)
+    itemCorner.Parent = itemFrame
+
+    -- Subtle item border
+    local itemStroke = Instance.new("UIStroke")
+    itemStroke.Color = Color3.new(40/255, 55/255, 68/255)
+    itemStroke.Thickness = 1
+    itemStroke.Parent = itemFrame
+
+    -- Label untuk nama toggle
+    local label = Instance.new("TextLabel")
+    label.Name = "Label"
+    label.Size = UDim2.new(1, -60, 1, 0) -- Diperbesar 20% (50*1.2=60)
+    label.Position = UDim2.new(0, 10, 0, 0) -- Diperbesar 20% (8*1.2≈10)
+    label.BackgroundTransparency = 1
+    label.Text = name
+    label.TextColor3 = Color3.new(0.95, 0.95, 0.95)
+    label.Font = Enum.Font.Gotham
+    label.TextSize = 13 -- Diperbesar 20% (11*1.2≈13)
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.TextYAlignment = Enum.TextYAlignment.Center
+    label.Parent = itemFrame
+
+    -- Slider background - compact size diperbesar 20%
+    local sliderBg = Instance.new("Frame")
+    sliderBg.Name = "SliderBg"
+    sliderBg.Size = UDim2.new(0, 43, 0, 22) -- Diperbesar 20% (36*1.2≈43, 18*1.2≈22)
+    sliderBg.Position = UDim2.new(1, -50, 0.5, -11) -- Diperbesar 20% (42*1.2≈50, 9*1.2≈11)
+    sliderBg.BackgroundColor3 = Color3.new(0.2, 0.2, 0.25)
+    sliderBg.BorderSizePixel = 0
+    sliderBg.Parent = itemFrame
+
+    local sliderBgCorner = Instance.new("UICorner")
+    sliderBgCorner.CornerRadius = UDim.new(0.5, 0)
+    sliderBgCorner.Parent = sliderBg
+
+    -- Slider circle - compact size diperbesar 20%
+    local sliderCircle = Instance.new("Frame")
+    sliderCircle.Name = "SliderCircle"
+    sliderCircle.Size = UDim2.new(0, 17, 0, 17) -- Diperbesar 20% (14*1.2≈17)
+    sliderCircle.Position = UDim2.new(0, 2, 0.5, -8) -- Diperbesar 20% (7*1.2≈8)
+    sliderCircle.BackgroundColor3 = Color3.new(0.8, 0.8, 0.85)
+    sliderCircle.BorderSizePixel = 0
+    sliderCircle.Parent = sliderBg
+
+    local circleCorner = Instance.new("UICorner")
+    circleCorner.CornerRadius = UDim.new(0.5, 0)
+    circleCorner.Parent = sliderCircle
+
+    -- Click button
+    local clickButton = Instance.new("TextButton")
+    clickButton.Name = "ClickButton"
+    clickButton.Size = UDim2.new(1, 0, 1, 0)
+    clickButton.Position = UDim2.new(0, 0, 0, 0)
+    clickButton.BackgroundTransparency = 1
+    clickButton.Text = ""
+    clickButton.Parent = itemFrame
+
+    -- State
+    local currentState = initialState or false
+
+    -- Update visual function
+    local function UpdateVisual(state)
+        local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        
+        if state then
+            -- ON state
+            TweenService:Create(sliderCircle, tweenInfo, {
+                Position = UDim2.new(0, 24, 0.5, -8), -- Diperbesar 20% (20*1.2=24, 7*1.2≈8)
+                BackgroundColor3 = Color3.new(1, 1, 1)
+            }):Play()
+            TweenService:Create(sliderBg, tweenInfo, {
+                BackgroundColor3 = Color3.new(0.2, 0.7, 0.4)
+            }):Play()
+        else
+            -- OFF state
+            TweenService:Create(sliderCircle, tweenInfo, {
+                Position = UDim2.new(0, 2, 0.5, -8), -- Diperbesar 20% (7*1.2≈8)
+                BackgroundColor3 = Color3.new(0.8, 0.8, 0.85)
+            }):Play()
+            TweenService:Create(sliderBg, tweenInfo, {
+                BackgroundColor3 = Color3.new(0.2, 0.2, 0.25)
+            }):Play()
+        end
     end
-    for tabName, btn in pairs(tabButtons) do
-        TweenService:Create(btn, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            BackgroundColor3 = (tabName == name) and THEME.TabActive or THEME.TabIdle
+
+    -- Set initial state
+    UpdateVisual(currentState)
+
+    return itemFrame, clickButton, UpdateVisual, currentState
+end
+
+-- Fungsi expand/collapse
+local function ToggleExpansion()
+    isExpanded = not isExpanded
+    
+    local tweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    
+    if isExpanded then
+        -- Expand
+        toggleButton.Text = "-"
+        contentFrame.Visible = true
+        
+        -- Calculate height based on items
+        local itemCount = #toggleItems
+        local maxHeight = 180 -- Max height untuk scroll diperbesar 20% (150*1.2=180)
+        local calculatedHeight = math.min(itemCount * 37 + 7, maxHeight) -- Diperbesar 20% (31*1.2≈37, 6*1.2≈7)
+        
+        contentFrame.Size = UDim2.new(0, 198, 0, 0)
+        TweenService:Create(contentFrame, tweenInfo, {
+            Size = UDim2.new(0, 198, 0, calculatedHeight)
         }):Play()
+    else
+        -- Collapse
+        toggleButton.Text = "v"
+        
+        TweenService:Create(contentFrame, tweenInfo, {
+            Size = UDim2.new(0, 198, 0, 0)
+        }):Play()
+        
+        -- REMOVED THE WAIT STATEMENT HERE
+        contentFrame.Visible = false
+    end
+    
+    updateCanvasSize()
+end
+
+-- Connect toggle button
+toggleButton.MouseButton1Click:Connect(ToggleExpansion)
+
+-- Global variables
+_G.FaDhenToggles = {}
+
+-- AddToggle function
+function _G.FaDhenAddToggle(name, props)
+    props = props or {}
+    local callback = props.Callback or function() end
+    
+    -- Check saved state
+    local savedState = Settings.toggles[name] or false
+    
+    -- Create toggle item
+    local itemFrame, clickButton, updateVisual, currentState = CreateToggleItem(name, savedState)
+    currentState = savedState
+    
+    -- Add to toggleItems
+    table.insert(toggleItems, {
+        name = name,
+        frame = itemFrame,
+        state = currentState
+    })
+    
+    -- Click functionality
+    clickButton.MouseButton1Click:Connect(function()
+        currentState = not currentState
+        updateVisual(currentState)
+        
+        -- Save state
+        Settings.toggles[name] = currentState
+        SaveSettings()
+        
+        -- Update table
+        for i, item in pairs(toggleItems) do
+            if item.name == name then
+                item.state = currentState
+                break
+            end
+        end
+        
+        -- Callback
+        pcall(function()
+            callback(currentState)
+        end)
+    end)
+    
+    -- Store reference
+    _G.FaDhenToggles[name] = {
+        frame = itemFrame,
+        button = clickButton,
+        update = updateVisual,
+        getValue = function() return currentState end,
+        setValue = function(value) 
+            currentState = value
+            updateVisual(currentState)
+            Settings.toggles[name] = currentState
+            SaveSettings()
+            
+            for i, item in pairs(toggleItems) do
+                if item.name == name then
+                    item.state = currentState
+                    break
+                end
+            end
+        end
+    }
+    
+    updateCanvasSize()
+    
+    -- Initial callback
+    if savedState then
+        pcall(function()
+            callback(savedState)
+        end)
     end
 end
 
-local function createTabButton(text, tabName)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 70, 0, 26)
-    btn.Text = text
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 13
-    btn.TextColor3 = THEME.TextLight
-    btn.BackgroundColor3 = THEME.TabIdle
-    btn.AutoButtonColor = false
-    btn.Parent = tabContainer
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
-    btn.MouseButton1Click:Connect(function() setActiveTab(tabName) end)
-    btn.MouseEnter:Connect(function() if not tabs[tabName].Visible then TweenService:Create(btn, TweenInfo.new(0.12), {BackgroundColor3 = THEME.AccentHover}):Play() end end)
-    btn.MouseLeave:Connect(function() if not tabs[tabName].Visible then TweenService:Create(btn, TweenInfo.new(0.12), {BackgroundColor3 = THEME.TabIdle}):Play() end end)
-    tabButtons[tabName] = btn
-end
+-- Hover effects
+toggleButton.MouseEnter:Connect(function()
+    TweenService:Create(toggleButton, TweenInfo.new(0.15), {
+        BackgroundColor3 = Color3.new(40/255, 55/255, 70/255)
+    }):Play()
+end)
 
-createTabButton("Main",   "Main")
-createTabButton("Visual", "Visual")
-createTabButton("Misc",   "Misc")
-setActiveTab("Main")
+toggleButton.MouseLeave:Connect(function()
+    TweenService:Create(toggleButton, TweenInfo.new(0.15), {
+        BackgroundColor3 = Color3.new(35/255, 50/255, 65/255)
+    }):Play()
+end)
 
--- TOGGLE CREATOR (dibuat global agar bisa dipanggil dari luar)
-_G.FaDhenAddToggle = function(tabName, data)
-    local tab = tabs[tabName]
-    if not tab then return warn("[FaDhenUI] Tab '"..tabName.."' tidak ditemukan!") end
+-- Drag functionality
+local dragging = false
+local dragStart = nil
+local startPos = nil
 
-    local name     = data.Name or "Toggle"
-    local callback = data.Callback
-    local colorOn  = data.ColorOn or THEME.ToggleOnTrack
-
-    local btn = Instance.new("TextButton")
-    btn.Name = name .. "_Toggle"
-    btn.Parent = tab
-    btn.Size = UDim2.new(1, -10, 0, 32)
-    btn.BackgroundColor3 = THEME.ToggleBg
-    btn.TextColor3 = THEME.TextLight
-    btn.Font = Enum.Font.Gotham
-    btn.TextSize = 15
-    btn.TextXAlignment = Enum.TextXAlignment.Left
-    btn.AutoButtonColor = false
-    btn.Text = "  " .. name
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
-
-    local track = Instance.new("Frame")
-    track.Parent = btn
-    track.Size = UDim2.new(0, 32, 0, 14)
-    track.Position = UDim2.new(1, -48, 0.5, -7)
-    track.BackgroundColor3 = THEME.ToggleOffTrack
-    Instance.new("UICorner", track).CornerRadius = UDim.new(1, 0)
-
-    local dot = Instance.new("Frame")
-    dot.Parent = track
-    dot.Size = UDim2.new(0, 14, 0, 14)
-    dot.Position = UDim2.new(0, 1, 0.5, -7)
-    dot.BackgroundColor3 = Color3.new(1,1,1)
-    Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
-
-    local state = false
-    local function animate(on)
-        TweenService:Create(dot, TweenInfo.new(0.20, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-            {Position = on and UDim2.new(1, -15, 0.5, -7) or UDim2.new(0, 1, 0.5, -7)}):Play()
-        TweenService:Create(track, TweenInfo.new(0.20, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-            {BackgroundColor3 = on and colorOn or THEME.ToggleOffTrack}):Play()
-    end
-
-    btn.MouseButton1Click:Connect(function()
-        state = not state
-        animate(state)
-        if callback then pcall(callback, state) end
-    end)
-
-    btn.MouseEnter:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.12), {BackgroundColor3 = THEME.ToggleHover}):Play()
-    end)
-    btn.MouseLeave:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.12), {BackgroundColor3 = THEME.ToggleBg}):Play()
-    end)
-
-    return {Set = function(v) if type(v)=="boolean" and v~=state then state=v animate(state) end end, Get = function() return state end}
-end
-
--- HOTKEY SHOW/HIDE (RightShift)
-UIS.InputBegan:Connect(function(input, gp)
-    if gp then return end
-    if input.KeyCode == Enum.KeyCode.RightShift then
-        mainFrame.Visible = not mainFrame.Visible
+headerFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = mainFrame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
     end
 end)
 
--- Open Button
-local toggleBtn = Instance.new("ImageButton", gui)
-toggleBtn.Size = UDim2.new(0, 55, 0, 55)
-toggleBtn.Position = UDim2.new(0, 10, 0.2, 0)
-toggleBtn.Image = "rbxassetid://121962590520433"
-toggleBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-toggleBtn.BackgroundTransparency = 0.7
-toggleBtn.Active = true
-toggleBtn.Draggable = true
-Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0, 9)
-
-local stroke = Instance.new("UIStroke")
-stroke.Parent = toggleBtn
-stroke.Thickness = 2
-stroke.Color = Color3.fromRGB(255, 255, 255)
-stroke.Transparency = 0.3
-
-toggleBtn.MouseEnter:Connect(function()
-    TweenService:Create(toggleBtn, TweenInfo.new(0.15), {Size = UDim2.new(0, 60, 0, 60)}):Play()
-end)
-toggleBtn.MouseLeave:Connect(function()
-    TweenService:Create(toggleBtn, TweenInfo.new(0.15), {Size = UDim2.new(0, 55, 0, 55)}):Play()
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
 end)
 
-local isOpen = false
-toggleBtn.MouseButton1Click:Connect(function()
-    isOpen = not isOpen
-    mainFrame.Visible = isOpen
-end)
-
--- Tab default tetap Main
-setActiveTab("Main")
+-- Welcome message
+wait(0.2)
+print("✅ FaDhenGaming GUI - Clean & Compact (20% Larger)")
+print("📐 Size: 198x41 | Color: RGB(27,42,53)")
+print("🔧 Usage: _G.FaDhenAddToggle('Name', {Callback = function(state) end})")
