@@ -50,9 +50,9 @@ ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 -- Main Frame dengan ukuran yang diminta (20% lebih besar)
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 198, 0, 41) -- Ukuran diperbesar 20% (165*1.2=198, 34*1.2=41)
-mainFrame.Position = UDim2.new(0.5, -99, 0, 50) -- Center horizontal (198/2=99)
-mainFrame.BackgroundColor3 = Color3.new(27/255, 42/255, 53/255) -- Warna yang diminta
+mainFrame.Size = UDim2.new(0, 198, 0, 41) -- Ukuran diperbesar 20%
+mainFrame.Position = UDim2.new(0, 10, 0, 10) -- Kiri atas, geser 10px dari tepi
+mainFrame.BackgroundColor3 = Color3.new(27/255, 42/255, 53/255)
 mainFrame.BorderSizePixel = 0
 mainFrame.Parent = ScreenGui
 mainFrame.ClipsDescendants = false -- PENTING: Biar toggle tidak terpotong
