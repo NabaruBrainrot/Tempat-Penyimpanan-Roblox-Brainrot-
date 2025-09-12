@@ -52,7 +52,7 @@ local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
 mainFrame.Size = UDim2.new(0, 198, 0, 41) -- Ukuran diperbesar 20%
 mainFrame.Position = UDim2.new(0, 10, 0, 10) -- Kiri atas, geser 10px dari tepi
-mainFrame.BackgroundColor3 = Color3.new(27/255, 42/255, 53/255)
+mainFrame.BackgroundColor3 = Color3.new(25/255, 25/255, 35/255)
 mainFrame.BorderSizePixel = 0
 mainFrame.Parent = ScreenGui
 mainFrame.ClipsDescendants = false -- PENTING: Biar toggle tidak terpotong
@@ -64,7 +64,7 @@ mainCorner.Parent = mainFrame
 
 -- Subtle border
 local mainStroke = Instance.new("UIStroke")
-mainStroke.Color = Color3.new(35/255, 50/255, 65/255)
+mainStroke.Color = Color3.new(35/255, 35/255, 45/255)
 mainStroke.Thickness = 1
 mainStroke.Parent = mainFrame
 
@@ -96,7 +96,7 @@ local toggleButton = Instance.new("TextButton")
 toggleButton.Name = "ToggleButton"
 toggleButton.Size = UDim2.new(0, 24, 0, 24) -- Diperbesar 20% (20*1.2=24)
 toggleButton.Position = UDim2.new(1, -30, 0.5, -12) -- Adjusted for new size (25*1.2=30, 10*1.2=12)
-toggleButton.BackgroundColor3 = Color3.new(35/255, 50/255, 65/255)
+toggleButton.BackgroundColor3 = Color3.new(35/255, 35/255, 45/255)
 toggleButton.TextColor3 = Color3.new(0.9, 0.9, 0.9)
 toggleButton.Text = "v"
 toggleButton.Font = Enum.Font.GothamBold
@@ -112,7 +112,7 @@ local contentFrame = Instance.new("Frame")
 contentFrame.Name = "ContentFrame"
 contentFrame.Size = UDim2.new(0, 198, 0, 0) -- Start with 0 height, width 20% lebih besar
 contentFrame.Position = UDim2.new(0, 0, 0.9, 2)  -- Just below mainFrame
-contentFrame.BackgroundColor3 = Color3.new(27/255, 42/255, 53/255) -- Same color
+contentFrame.BackgroundColor3 = Color3.new(25/255, 25/255, 35/255) -- Same color
 contentFrame.BorderSizePixel = 0
 contentFrame.Visible = false
 contentFrame.Parent = mainFrame -- Parent to mainFrame but positioned outside
@@ -125,7 +125,7 @@ contentCorner.Parent = contentFrame
 
 -- Content border
 local contentStroke = Instance.new("UIStroke")
-contentStroke.Color = Color3.new(35/255, 50/255, 65/255)
+contentStroke.Color = Color3.new(35/255, 35/255, 45/255)
 contentStroke.Thickness = 1
 contentStroke.Parent = contentFrame
 
@@ -168,7 +168,7 @@ local function CreateToggleItem(name, initialState)
     local itemFrame = Instance.new("Frame")
     itemFrame.Name = name .. "Item"
     itemFrame.Size = UDim2.new(1, -7, 0, 34) -- Compact height diperbesar 20% (6*1.2≈7, 28*1.2≈34)
-    itemFrame.BackgroundColor3 = Color3.new(32/255, 47/255, 58/255) -- Slightly lighter
+    itemFrame.BackgroundColor3 = Color3.new(30/255, 30/255, 40/255) -- Slightly lighter
     itemFrame.BorderSizePixel = 0
     itemFrame.LayoutOrder = #toggleItems + 1
     itemFrame.Parent = scrollFrame
@@ -179,7 +179,7 @@ local function CreateToggleItem(name, initialState)
 
     -- Subtle item border
     local itemStroke = Instance.new("UIStroke")
-    itemStroke.Color = Color3.new(40/255, 55/255, 68/255)
+    itemStroke.Color = Color3.new(40/255, 40/255, 50/255)
     itemStroke.Thickness = 1
     itemStroke.Parent = itemFrame
 
@@ -383,13 +383,13 @@ end
 -- Hover effects
 toggleButton.MouseEnter:Connect(function()
     TweenService:Create(toggleButton, TweenInfo.new(0.15), {
-        BackgroundColor3 = Color3.new(40/255, 55/255, 70/255)
+        BackgroundColor3 = Color3.new(40/255, 40/255, 50/255)
     }):Play()
 end)
 
 toggleButton.MouseLeave:Connect(function()
     TweenService:Create(toggleButton, TweenInfo.new(0.15), {
-        BackgroundColor3 = Color3.new(35/255, 50/255, 65/255)
+        BackgroundColor3 = Color3.new(35/255, 35/255, 45/255)
     }):Play()
 end)
 
@@ -422,5 +422,5 @@ end)
 -- Welcome message
 wait(0.2)
 print("✅ FaDhenGaming GUI - Clean & Compact (20% Larger)")
-print("📐 Size: 198x41 | Color: RGB(27,42,53)")
+print("📐 Size: 198x41 | Color: RGB(25,25,35)")
 print("🔧 Usage: _G.FaDhenAddToggle('Name', {Callback = function(state) end})")
