@@ -4,6 +4,20 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat
 
 
 
+_G.FaDhenAddToggle("Auto laser", {
+    Callback = function(state)
+        if state then
+            loadstring(game:HttpGet("https://pastefy.app/9fgffG4l/raw"))()
+        end
+    end
+})
+
+
+
+
+
+
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
