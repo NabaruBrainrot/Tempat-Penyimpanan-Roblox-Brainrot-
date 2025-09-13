@@ -17,9 +17,9 @@ local Settings = {
 }
 
 -- Fungsi untuk save settings
-local function SaveSettingss()
+local function SaveSettings()
     pcall(function()
-        writefile("FaDhenGaming_Settings.json", game:GetService("HttpService"):JSONEncode(Settingss))
+        writefile("FaDhenGaming_Settings.json", game:GetService("HttpService"):JSONEncode(Settings))
     end)
 end
 
@@ -28,7 +28,7 @@ local function LoadSettings()
     pcall(function()
         if isfile("FaDhenGaming_Settings.json") then
             local success, result = pcall(function()
-                return game:GetService("HttpService"):JSONDecode(readfile("FaDhenGaming_Settingss.json"))
+                return game:GetService("HttpService"):JSONDecode(readfile("FaDhenGaming_Settings.json"))
             end)
             if success then
                 Settings = result
