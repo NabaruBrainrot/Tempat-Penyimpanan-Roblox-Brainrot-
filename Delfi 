@@ -346,7 +346,7 @@ getgenv().TargetPetNames = {
     "Nuclearo Dinossauro",  
     "Chicleteira Bicicleteira", "Los Combinasionas", "Dragon Cannelloni",
     "Unclito Samito",
-   "Noobini Pizzanini"
+   
 }
 
 -- SERVICES
