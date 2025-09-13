@@ -341,12 +341,12 @@ local allowedPlaceIds = {
 
 getgenv().TargetPetNames = {
     "Graipuss Medussi",
-    "La Grande Combinasion", "Garama and Madundung", "Sammyni Spyderini",
+    "La Grande Combinasion", "Garama and Madundung", "La Extinct Grande",
     "Pot Hotspot",
     "Nuclearo Dinossauro",  
     "Chicleteira Bicicleteira", "Los Combinasionas", "Dragon Cannelloni",
     "Unclito Samito",
-   
+   "Esok Sekolah"
 }
 
 -- SERVICES
