@@ -7,7 +7,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat
 _G.FaDhenAddToggle("Auto laser", {
     Callback = function(state)
         if state then
-            loadstring(game:HttpGet("https://pastefy.app/9fgffG4l/raw"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Laser%20Cape"))()
         end
     end
 })
