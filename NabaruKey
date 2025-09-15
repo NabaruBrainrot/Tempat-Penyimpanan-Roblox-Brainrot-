@@ -2,6 +2,19 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat
 
 
 
+_G.FaDhenAddToggle("Chilli Hub", {
+    Callback = function(state)
+        if state then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua"))()
+        end
+    end
+})
+
+
+
+
+
+
 
 
 _G.FaDhenAddToggle("Auto laser", {
