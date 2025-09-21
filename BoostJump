@@ -67,7 +67,7 @@ uiStroke.Parent = boostButton
 
 -- Setting
 local LIFT_SPEED = 20    -- kecepatan naik
-local MAX_JUMP_TIME = 2  -- durasi maksimal tahan (detik)
+local MAX_JUMP_TIME = 5  -- durasi maksimal tahan (detik)
 
 -- State
 local holdingBoost = false
