@@ -1,74 +1,31 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Ui%20Baru"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Ui%20library"))()
 
 
 
-
-
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local ragdollConnection = nil
-
-local function anchorCharacter(char, state)
-    for _, part in pairs(char:GetDescendants()) do
-        if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-            part.Anchored = state
-        end
-    end
-end
-
-local function handleRagdoll(char)
-    local humanoid = char:WaitForChild("Humanoid", 5)
-    if not humanoid then return end
-    
-    ragdollConnection = humanoid.StateChanged:Connect(function(_, newState)
-        if newState == Enum.HumanoidStateType.Physics 
-        or newState == Enum.HumanoidStateType.Ragdoll 
-        or newState == Enum.HumanoidStateType.FallingDown then
-            anchorCharacter(char, true)
-            task.wait(0.01)
-            anchorCharacter(char, false)
-            humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
-        end
-    end)
-end
-
-local function enableAntiRagdoll()
-    if player.Character then
-        handleRagdoll(player.Character)
-    end
-    player.CharacterAdded:Connect(function(char)
-        task.wait(0.5)
-        handleRagdoll(char)
-    end)
-end
-
-local function disableAntiRagdoll()
-    if ragdollConnection then
-        ragdollConnection:Disconnect()
-        ragdollConnection = nil
-    end
-end
-
-
-
-
-
-
-
-
-
-
-
---=== Toggle baru ===--
-_G.FaDhenAddToggle("Anti Ragdol", {
+_G.FaDhenAddToggle("Chilli Hub", {
     Callback = function(state)
         if state then
-            enableAntiRagdoll()
-        else
-            disableAntiRagdoll()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua"))()
         end
     end
 })
+
+
+
+
+
+
+
+
+_G.FaDhenAddToggle("Auto laser", {
+    Callback = function(state)
+        if state then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Laser%20Cape"))()
+        end
+    end
+})
+
+
 
 
 
@@ -144,11 +101,70 @@ end)
 hookBackpack()
 
 -- Toggle UI (baru)
-_G.FaDhenAddToggle("Auto AimBot", {
+_G.FaDhenAddToggle("Aimbot", {
     Callback = function(state)
         getgenv().FaDhenAutoAim = state
     end
 })
+
+
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local ragdollConnection = nil
+
+local function anchorCharacter(char, state)
+    for _, part in pairs(char:GetDescendants()) do
+        if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+            part.Anchored = state
+        end
+    end
+end
+
+local function handleRagdoll(char)
+    local humanoid = char:WaitForChild("Humanoid", 5)
+    if not humanoid then return end
+    
+    ragdollConnection = humanoid.StateChanged:Connect(function(_, newState)
+        if newState == Enum.HumanoidStateType.Physics 
+        or newState == Enum.HumanoidStateType.Ragdoll 
+        or newState == Enum.HumanoidStateType.FallingDown then
+            anchorCharacter(char, true)
+            task.wait(0.01)
+            anchorCharacter(char, false)
+            humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+        end
+    end)
+end
+
+local function enableAntiRagdoll()
+    if player.Character then
+        handleRagdoll(player.Character)
+    end
+    player.CharacterAdded:Connect(function(char)
+        task.wait(0.5)
+        handleRagdoll(char)
+    end)
+end
+
+local function disableAntiRagdoll()
+    if ragdollConnection then
+        ragdollConnection:Disconnect()
+        ragdollConnection = nil
+    end
+end
+
+--=== Toggle baru ===--
+_G.FaDhenAddToggle("Anti Ragdoll", {
+    Callback = function(state)
+        if state then
+            enableAntiRagdoll()
+        else
+            disableAntiRagdoll()
+        end
+    end
+})
+
 
 
 
@@ -265,7 +281,7 @@ function FaESP:Disable()
 end
 
 --=== Toggle baru pakai FaDhen ===--
-_G.FaDhenAddToggle("ESP_Highlight", {
+_G.FaDhenAddToggle("ESP", {
     Callback = function(state)
         if state then
             FaESP:Enable()
@@ -277,84 +293,7 @@ _G.FaDhenAddToggle("ESP_Highlight", {
 
 
 
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-
-local currentHighlight
-local toggleActive = false
-
-local function highlightBase()
-    local plots = workspace:FindFirstChild("Plots")
-    if not plots then return end
-
-    for _, plot in pairs(plots:GetChildren()) do
-        local sign
-        local success = pcall(function()
-            sign = plot:FindFirstChild("PlotSign")
-                and plot.PlotSign:FindFirstChild("SurfaceGui")
-                and plot.PlotSign.SurfaceGui:FindFirstChild("Frame")
-                and plot.PlotSign.SurfaceGui.Frame:FindFirstChild("TextLabel")
-        end)
-
-        if sign and typeof(sign.Text) == "string" then
-            local signText = (sign.Text or ""):lower():gsub("^%s+", ""):gsub("%s+$", "")
-            local expected1 = (player.DisplayName .. "'s base"):lower()
-            local expected2 = (player.Name .. "'s base"):lower()
-
-            if signText == expected1 or signText == expected2 then
-                -- hapus highlight lama kalau ada
-                if currentHighlight then
-                    currentHighlight:Destroy()
-                    currentHighlight = nil
-                end
-
-                -- buat highlight baru
-                local highlight = Instance.new("Highlight")
-highlight.Parent = plot
-highlight.DepthMode = Enum.HighlightDepthMode.Occluded -- ganti dari AlwaysOnTop
-highlight.FillColor = Color3.fromRGB(255, 255, 255)
-
-highlight.OutlineColor = Color3.new(1, 1, 1)
-highlight.FillTransparency = 0.5
-highlight.OutlineTransparency = 0
-                currentHighlight = highlight
-                return
-            end
-        end
-    end
-end
-
--- Loop 5 detik cek ulang
-task.spawn(function()
-    while true do
-        if toggleActive then
-            highlightBase()
-        end
-        task.wait(5)
-    end
-end)
-
---=== TOGGLE ===--
-_G.FaDhenAddToggle("Highlight Base", {
-    Callback = function(state)
-        toggleActive = state
-        if state then
-            -- langsung aktif saat toggle ON
-            highlightBase()
-        else
-            if currentHighlight then
-                currentHighlight:Destroy()
-                currentHighlight = nil
-            end
-        end
-    end
-})
-
-
-
-
-
-_G.FaDhenAddToggle("BoosterJump", {
+_G.FaDhenAddToggle("Jump Boost", {
     Callback = function(state)
         if state then
             loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/BoostJump"))()
@@ -362,321 +301,46 @@ _G.FaDhenAddToggle("BoosterJump", {
     end
 })
 
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local gui = player:WaitForChild("PlayerGui")
-
-local screenGui
-local function createMainGui()
-    if screenGui then return screenGui end
-
-    screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "UtilityGui"
-    screenGui.ResetOnSpawn = false
-    screenGui.IgnoreGuiInset = true
-    screenGui.Parent = gui
-
-    -- FRAME UTAMA UNTUK BUTTON
-    local frame = Instance.new("Frame")
-    frame.Name = "MainFrame"
-    frame.Size = UDim2.new(0, 200, 0, 32)
-    frame.Position = UDim2.new(0.5, 0, 0.02, 0)
-    frame.AnchorPoint = Vector2.new(0.5, 0)
-    frame.BackgroundTransparency = 1
-    frame.Parent = screenGui
-
-    -- RESET BUTTON
-    local resetBtn = Instance.new("TextButton")
-    resetBtn.Size = UDim2.new(0, 90, 1, 0)
-    resetBtn.Position = UDim2.new(0, 0, 0, 0)
-    resetBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-    resetBtn.TextColor3 = Color3.new(1, 1, 1)
-    resetBtn.Text = "Reset"
-    resetBtn.Font = Enum.Font.GothamBold
-    resetBtn.TextSize = 14
-    resetBtn.Parent = frame
-    Instance.new("UICorner", resetBtn).CornerRadius = UDim.new(0, 6)
-
-    resetBtn.MouseButton1Click:Connect(function()
-        local character = player.Character or player.CharacterAdded:Wait()
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then humanoid.Health = 0 end
-    end)
-
-    -- LEAVE BUTTON
-    local leaveBtn = Instance.new("TextButton")
-    leaveBtn.Size = UDim2.new(0, 90, 1, 0)
-    leaveBtn.Position = UDim2.new(0, 100, 0, 0)
-    leaveBtn.BackgroundColor3 = Color3.fromRGB(44, 44, 44)
-    leaveBtn.TextColor3 = Color3.new(1, 1, 1)
-    leaveBtn.Text = "Leave"
-    leaveBtn.Font = Enum.Font.GothamBold
-    leaveBtn.TextSize = 14
-    leaveBtn.Parent = frame
-    Instance.new("UICorner", leaveBtn).CornerRadius = UDim.new(0, 6)
-
-    leaveBtn.MouseButton1Click:Connect(function()
-        game:Shutdown()
-    end)
-
-    player.CharacterAdded:Connect(function()
-        task.wait(0.1)
-        if not gui:FindFirstChild("UtilityGui") then
-            screenGui.Parent = gui
-        end
-    end)
-
-    return screenGui
-end
-
--- 🔹 Ganti ke toggle baru
-_G.FaDhenAddToggle("Show Button", {
-    Callback = function(state)
-        if state then
-            createMainGui().Enabled = true
-        else
-            if screenGui then
-                screenGui.Enabled = false
-            end
-        end
-    end
-})
 
 
 
 
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local player = Players.LocalPlayer
-local gui = player:WaitForChild("PlayerGui")
 
-local screenGui
-local title
 
--- fungsi buat GUI
-local function createBaseTimeGui()
-    if screenGui then return screenGui end
 
-    screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "BaseTimeGui"
-    screenGui.ResetOnSpawn = false
-    screenGui.IgnoreGuiInset = true
-    screenGui.Parent = gui
+local DEBUG = false
+local BATCH_SIZE = 250
+local SEARCH_TRAPS_IN_GAME = false
 
--- Frame kecil
-local mainFrame = Instance.new("Frame")
-mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 120, 0, 40)
-mainFrame.Position = UDim2.new(0.5, 0, 0.1, 0)
-mainFrame.AnchorPoint = Vector2.new(0.5, 0)
-mainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-mainFrame.BackgroundTransparency = 0.5 -- setengah transparan
-mainFrame.BorderSizePixel = 0
-mainFrame.Active = true
-mainFrame.Draggable = true
-mainFrame.Parent = screenGui
+local function dprint(...) if DEBUG then print(...) end end
 
-local uiCorner = Instance.new("UICorner")
-uiCorner.CornerRadius = UDim.new(0, 10)
-uiCorner.Parent = mainFrame
-
-local uiStroke = Instance.new("UIStroke")
-uiStroke.Color = Color3.fromRGB(255, 255, 255)
-uiStroke.Thickness = 0.5
-uiStroke.Parent = mainFrame
-
-    -- Label
-    title = Instance.new("TextLabel")
-    title.Size = UDim2.new(1, 0, 1, 0)
-    title.BackgroundTransparency = 1
-    title.Text = "Base Time: 0s"
-    title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    title.Font = Enum.Font.GothamBold
-    title.TextSize = 14
-    title.Parent = mainFrame
-
-    return screenGui
-end
-
--- cari base player
-local plots = workspace:WaitForChild("Plots")
-local base = nil
-do
-	local userLower = string.lower(player.Name)
-	local displayLower = string.lower(player.DisplayName)
-	for _, model in ipairs(plots:GetChildren()) do
-		if model:IsA("Model") then
-			for _, obj in ipairs(model:GetDescendants()) do
-				if obj:IsA("TextLabel") then
-					local txt = string.lower(obj.Text)
-					if string.find(txt, userLower, 1, true) or string.find(txt, displayLower, 1, true) then
-						base = model
-						break
-					end
-				end
-			end
-		end
-		if base then break end
+local function processBillboardIfNeeded(obj)
+	if not (obj:IsA("BasePart") and obj.Name == "Main") then return end
+	if obj:GetAttribute("BillboardProcessed") then return end
+	local parent = obj.Parent
+	local ok = false
+	while parent do
+		if parent:IsA("Folder") and parent.Name == "Purchases" then ok = true break end
+		parent = parent.Parent
 	end
-end
-
-local purchasesFolder = base and base:FindFirstChild("Purchases")
-
--- ambil countdown label
-local function findCountdown()
-	if not purchasesFolder then return nil end
-	for _, obj in ipairs(purchasesFolder:GetDescendants()) do
-		if obj:IsA("TextLabel") and obj.Name == "RemainingTime" then
-			return obj
+	if not ok then return end
+	for _, child in ipairs(obj:GetChildren()) do
+		if child:IsA("BillboardGui") then
+			child.Size = UDim2.new(0, 180, 0, 150)
+			child.MaxDistance = 90
+			child.StudsOffset = Vector3.new(0, 5, 0)
+			dprint("✅ BillboardGui diubah:", obj:GetFullName())
 		end
 	end
-	return nil
+	obj:SetAttribute("BillboardProcessed", true)
 end
 
--- update GUI
-RunService.RenderStepped:Connect(function()
-	if screenGui and screenGui.Enabled and title then
-		local countdownLabel = findCountdown()
-		if countdownLabel then
-			title.Text = "Base Time: " .. countdownLabel.Text
-		else
-			title.Text = "Base Time: 0s"
-		end
+task.defer(function()
+	local all = workspace:GetDescendants()
+	for i = 1, #all do
+		processBillboardIfNeeded(all[i])
+		if i % BATCH_SIZE == 0 then task.wait() end
 	end
 end)
 
---=== TOGGLE ===--
-_G.FaDhenAddToggle("Show Time", {
-    Callback = function(state)
-        if state then
-            createBaseTimeGui().Enabled = true
-        else
-            if screenGui then
-                screenGui:Destroy()  -- hapus biar ga makan memori
-                screenGui = nil
-                title = nil
-            end
-        end
-    end
-})
-
---Tp Sentry
-_G.FaDhenAddToggle("Tp Sentry", {
-    Callback = function(state)
-        if state then
-            -- Hapus GUI lama
-            pcall(function()
-                game.CoreGui:FindFirstChild("SentryTeleportGUI"):Destroy()
-            end)
-
-            -- Buat GUI
-            local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-            ScreenGui.Name = "SentryTeleportGUI"
-            ScreenGui.ResetOnSpawn = false
-
-            local Button = Instance.new("TextButton", ScreenGui)
-            Button.Size = UDim2.new(0, 100, 0, 30)
-            Button.Position = UDim2.new(0, 10, 0, 10)
-            Button.Text = "Tp Sentry"
-            Button.BackgroundColor3 = Color3.fromRGB(100, 200, 255)
-            Button.TextColor3 = Color3.new(0, 0, 0)
-            Button.BorderSizePixel = 2
-
-            local looping = false -- status loop
-
-            -- Fungsi teleport Sentry 3 studs di depan
-            local function teleportSentryLoop()
-                local player = game.Players.LocalPlayer
-                if not player or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
-                local hrp = player.Character.HumanoidRootPart
-
-                local sentryParts = {}
-                for _, obj in pairs(workspace:GetChildren()) do
-                    if obj:IsA("BasePart") and obj.Name:match("^Sentry_") then
-                        table.insert(sentryParts, obj)
-                    end
-                end
-
-                -- Looping aktif
-                looping = true
-                Button.Text = "Tp Active"
-
-                task.spawn(function()
-                    while looping do
-                        for _, part in pairs(sentryParts) do
-                            local forward = hrp.CFrame.LookVector
-                            local targetPos = hrp.Position + forward * 3
-                            part.CFrame = CFrame.new(targetPos, hrp.Position + forward)
-                            part.Anchored = true
-                        end
-                        task.wait(1)
-                    end
-                    Button.Text = "Tp Sentry"
-                end)
-            end
-
-            -- Klik Button → toggle loop on/off
-            Button.MouseButton1Click:Connect(function()
-                if not looping then
-                    teleportSentryLoop() -- aktifkan loop
-                else
-                    looping = false -- hentikan loop sepenuhnya
-                end
-            end)
-
-        else
-            -- Toggle GUI off → hapus GUI dan hentikan loop
-            pcall(function()
-                game.CoreGui:FindFirstChild("SentryTeleportGUI"):Destroy()
-            end)
-        end
-    end
-})
-
-
-
-
-_G.FaDhenAddToggle("Tp Sentry", {
-    Callback = function(state)
-        if state then
-            -- Hapus GUI lama
-            pcall(function()
-                game.CoreGui:FindFirstChild("SentryTeleportGUI"):Destroy()
-            end)
-
-            -- Buat GUI
-            local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-            ScreenGui.Name = "SentryTeleportGUI"
-            ScreenGui.ResetOnSpawn = false
-
-            local Button = Instance.new("TextButton", ScreenGui)
-            Button.Size = UDim2.new(0, 100, 0, 30)
-            Button.Position = UDim2.new(0, 10, 0, 10)
-            Button.Text = "Tp Sentry"
-            Button.BackgroundColor3 = Color3.fromRGB(100, 200, 255)
-            Button.TextColor3 = Color3.new(0, 0, 0)
-            Button.BorderSizePixel = 2
-
-            local looping = false
-
-            -- Fungsi teleport 3 studs di depan player
-            local function teleportSentryLoop()
-                local player = game.Players.LocalPlayer
-                if not player or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
-                local hrp = player.Character.HumanoidRootPart
-
-                local sentryParts = {}
-                for _, obj in pairs(workspace:GetChildren()) do
-                    if obj:IsA("BasePart") and obj.Name:match("^Sentry_") then
-                        table.insert(sentryParts, obj)
-                    end
-                end
-
-                looping = true
-                Button.Text = "Tp Active" -- ubah teks supaya terlihat aktif
-
-                task.spawn(function()
-                    while looping do
-                        for _, part in pairs(sentryParts) do
-                            local forward = hrp.CFrame.LookVector
-  
+workspace.DescendantAdded:Connect(processBillboardIfNeeded)
