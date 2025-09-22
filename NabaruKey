@@ -1,111 +1,6 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Ui%20library"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Ui%20Baru"))()
 
 
-
-_G.FaDhenAddToggle("Chilli Hub", {
-    Callback = function(state)
-        if state then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua"))()
-        end
-    end
-})
-
-
-
-
-
-
-
-
-_G.FaDhenAddToggle("Auto laser", {
-    Callback = function(state)
-        if state then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Laser%20Cape"))()
-        end
-    end
-})
-
-
-
-
-
-
-
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local Net = require(ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"))
-
--- flag toggle
-getgenv().FaDhenAutoAim = getgenv().FaDhenAutoAim or false
-
--- cari player terdekat
-local function getNearestPlayer()
-    local nearestPlayer = nil
-    local shortestDistance = math.huge
-    local myChar = LocalPlayer.Character
-    if not myChar or not myChar:FindFirstChild("HumanoidRootPart") then return nil end
-
-    local myPos = myChar.HumanoidRootPart.Position
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local dist = (player.Character.HumanoidRootPart.Position - myPos).Magnitude
-            if dist < shortestDistance then
-                shortestDistance = dist
-                nearestPlayer = player
-            end
-        end
-    end
-    return nearestPlayer
-end
-
--- fungsi pasang auto aim ke tool
-local function hookTool(tool)
-    if tool:IsA("Tool") and not tool:FindFirstChild("FaDhenHooked") then
-        local marker = Instance.new("BoolValue")
-        marker.Name = "FaDhenHooked"
-        marker.Parent = tool
-
-        tool.Activated:Connect(function()
-            if getgenv().FaDhenAutoAim then
-                local nearest = getNearestPlayer()
-                if nearest and nearest.Character and nearest.Character:FindFirstChild("HumanoidRootPart") then
-                    local hrp = nearest.Character.HumanoidRootPart
-                    Net:RemoteEvent("UseItem"):FireServer(hrp.Position, hrp)
-                    return
-                end
-            end
-
-            -- fallback: pakai mouse
-            local PlayerMouse = require(ReplicatedStorage.Packages.PlayerMouse)
-            Net:RemoteEvent("UseItem"):FireServer(PlayerMouse.Hit.Position, PlayerMouse.Target)
-        end)
-    end
-end
-
--- pasang hook ke semua tool di backpack
-local function hookBackpack()
-    for _, tool in pairs(LocalPlayer.Backpack:GetChildren()) do
-        hookTool(tool)
-    end
-    LocalPlayer.Backpack.ChildAdded:Connect(hookTool)
-end
-
--- saat karakter respawn, pasang ulang
-LocalPlayer.CharacterAdded:Connect(function()
-    task.wait(1) -- beri delay kecil supaya Backpack terisi
-    hookBackpack()
-end)
-
--- pertama kali load
-hookBackpack()
-
--- Toggle UI (baru)
-_G.FaDhenAddToggle("Aimbot", {
-    Callback = function(state)
-        getgenv().FaDhenAutoAim = state
-    end
-})
 
 
 
@@ -154,8 +49,18 @@ local function disableAntiRagdoll()
     end
 end
 
+
+
+
+
+
+
+
+
+
+
 --=== Toggle baru ===--
-_G.FaDhenAddToggle("Anti Ragdoll", {
+_G.FaDhenAddToggle("Anti Ragdol", {
     Callback = function(state)
         if state then
             enableAntiRagdoll()
@@ -169,14 +74,93 @@ _G.FaDhenAddToggle("Anti Ragdoll", {
 
 
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Net = require(ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"))
+
+-- flag toggle
+getgenv().FaDhenAutoAim = getgenv().FaDhenAutoAim or false
+
+
+local function getNearestPlayer()
+    local nearestPlayer = nil
+    local shortestDistance = math.huge
+    local myChar = LocalPlayer.Character
+    if not myChar or not myChar:FindFirstChild("HumanoidRootPart") then return nil end
+
+    local myPos = myChar.HumanoidRootPart.Position
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local dist = (player.Character.HumanoidRootPart.Position - myPos).Magnitude
+            if dist < shortestDistance then
+                shortestDistance = dist
+                nearestPlayer = player
+            end
+        end
+    end
+    return nearestPlayer
+end
+
+
+local function hookTool(tool)
+    if tool:IsA("Tool") and not tool:FindFirstChild("FaDhenHooked") then
+        local marker = Instance.new("BoolValue")
+        marker.Name = "FaDhenHooked"
+        marker.Parent = tool
+
+        tool.Activated:Connect(function()
+            if getgenv().FaDhenAutoAim then
+                local nearest = getNearestPlayer()
+                if nearest and nearest.Character and nearest.Character:FindFirstChild("HumanoidRootPart") then
+                    local hrp = nearest.Character.HumanoidRootPart
+                    Net:RemoteEvent("UseItem"):FireServer(hrp.Position, hrp)
+                    return
+                end
+            end
+
+            
+            local PlayerMouse = require(ReplicatedStorage.Packages.PlayerMouse)
+            Net:RemoteEvent("UseItem"):FireServer(PlayerMouse.Hit.Position, PlayerMouse.Target)
+        end)
+    end
+end
+
+
+local function hookBackpack()
+    for _, tool in pairs(LocalPlayer.Backpack:GetChildren()) do
+        hookTool(tool)
+    end
+    LocalPlayer.Backpack.ChildAdded:Connect(hookTool)
+end
+
+
+LocalPlayer.CharacterAdded:Connect(function()
+    task.wait(1) 
+    hookBackpack()
+end)
+
+
+hookBackpack()
+
+
+_G.FaDhenAddToggle("Auto AimBot", {
+    Callback = function(state)
+        getgenv().FaDhenAutoAim = state
+    end
+})
 
 
 
---=== ESP PLAYER (FaDhen Toggle) ===--
+
+
+
+
+
 local Players = game:GetService("Players")
 local localPlayer = Players.LocalPlayer
 
--- reuse global table supaya aman kalau script di-execute ulang
+
 local FaESP = getgenv().FaDhenESP or {}
 getgenv().FaDhenESP = FaESP
 
@@ -280,8 +264,8 @@ function FaESP:Disable()
 	end
 end
 
---=== Toggle baru pakai FaDhen ===--
-_G.FaDhenAddToggle("ESP", {
+
+_G.FaDhenAddToggle("ESP_Highlight", {
     Callback = function(state)
         if state then
             FaESP:Enable()
@@ -293,7 +277,84 @@ _G.FaDhenAddToggle("ESP", {
 
 
 
-_G.FaDhenAddToggle("Jump Boost", {
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local currentHighlight
+local toggleActive = false
+
+local function highlightBase()
+    local plots = workspace:FindFirstChild("Plots")
+    if not plots then return end
+
+    for _, plot in pairs(plots:GetChildren()) do
+        local sign
+        local success = pcall(function()
+            sign = plot:FindFirstChild("PlotSign")
+                and plot.PlotSign:FindFirstChild("SurfaceGui")
+                and plot.PlotSign.SurfaceGui:FindFirstChild("Frame")
+                and plot.PlotSign.SurfaceGui.Frame:FindFirstChild("TextLabel")
+        end)
+
+        if sign and typeof(sign.Text) == "string" then
+            local signText = (sign.Text or ""):lower():gsub("^%s+", ""):gsub("%s+$", "")
+            local expected1 = (player.DisplayName .. "'s base"):lower()
+            local expected2 = (player.Name .. "'s base"):lower()
+
+            if signText == expected1 or signText == expected2 then
+                
+                if currentHighlight then
+                    currentHighlight:Destroy()
+                    currentHighlight = nil
+                end
+
+                
+                local highlight = Instance.new("Highlight")
+highlight.Parent = plot
+highlight.DepthMode = Enum.HighlightDepthMode.Occluded 
+highlight.FillColor = Color3.fromRGB(255, 255, 255)
+
+highlight.OutlineColor = Color3.new(1, 1, 1)
+highlight.FillTransparency = 0.5
+highlight.OutlineTransparency = 0
+                currentHighlight = highlight
+                return
+            end
+        end
+    end
+end
+
+
+task.spawn(function()
+    while true do
+        if toggleActive then
+            highlightBase()
+        end
+        task.wait(5)
+    end
+end)
+
+
+_G.FaDhenAddToggle("Highlight Base", {
+    Callback = function(state)
+        toggleActive = state
+        if state then
+            
+            highlightBase()
+        else
+            if currentHighlight then
+                currentHighlight:Destroy()
+                currentHighlight = nil
+            end
+        end
+    end
+})
+
+
+
+
+
+_G.FaDhenAddToggle("BoosterJump", {
     Callback = function(state)
         if state then
             loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/BoostJump"))()
@@ -301,7 +362,284 @@ _G.FaDhenAddToggle("Jump Boost", {
     end
 })
 
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local gui = player:WaitForChild("PlayerGui")
 
+local screenGui
+local function createMainGui()
+    if screenGui then return screenGui end
+
+    screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "UtilityGui"
+    screenGui.ResetOnSpawn = false
+    screenGui.IgnoreGuiInset = true
+    screenGui.Parent = gui
+
+    
+    local frame = Instance.new("Frame")
+    frame.Name = "MainFrame"
+    frame.Size = UDim2.new(0, 200, 0, 32)
+    frame.Position = UDim2.new(0.5, 0, 0.02, 0)
+    frame.AnchorPoint = Vector2.new(0.5, 0)
+    frame.BackgroundTransparency = 1
+    frame.Parent = screenGui
+
+    
+    local resetBtn = Instance.new("TextButton")
+    resetBtn.Size = UDim2.new(0, 90, 1, 0)
+    resetBtn.Position = UDim2.new(0, 0, 0, 0)
+    resetBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+    resetBtn.TextColor3 = Color3.new(1, 1, 1)
+    resetBtn.Text = "Reset"
+    resetBtn.Font = Enum.Font.GothamBold
+    resetBtn.TextSize = 14
+    resetBtn.Parent = frame
+    Instance.new("UICorner", resetBtn).CornerRadius = UDim.new(0, 6)
+
+    resetBtn.MouseButton1Click:Connect(function()
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then humanoid.Health = 0 end
+    end)
+
+    
+    local leaveBtn = Instance.new("TextButton")
+    leaveBtn.Size = UDim2.new(0, 90, 1, 0)
+    leaveBtn.Position = UDim2.new(0, 100, 0, 0)
+    leaveBtn.BackgroundColor3 = Color3.fromRGB(44, 44, 44)
+    leaveBtn.TextColor3 = Color3.new(1, 1, 1)
+    leaveBtn.Text = "Leave"
+    leaveBtn.Font = Enum.Font.GothamBold
+    leaveBtn.TextSize = 14
+    leaveBtn.Parent = frame
+    Instance.new("UICorner", leaveBtn).CornerRadius = UDim.new(0, 6)
+
+    leaveBtn.MouseButton1Click:Connect(function()
+        game:Shutdown()
+    end)
+
+    player.CharacterAdded:Connect(function()
+        task.wait(0.1)
+        if not gui:FindFirstChild("UtilityGui") then
+            screenGui.Parent = gui
+        end
+    end)
+
+    return screenGui
+end
+
+
+_G.FaDhenAddToggle("Show Button", {
+    Callback = function(state)
+        if state then
+            createMainGui().Enabled = true
+        else
+            if screenGui then
+                screenGui.Enabled = false
+            end
+        end
+    end
+})
+
+
+
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+local gui = player:WaitForChild("PlayerGui")
+
+local screenGui
+local title
+
+
+local function createBaseTimeGui()
+    if screenGui then return screenGui end
+
+    screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "BaseTimeGui"
+    screenGui.ResetOnSpawn = false
+    screenGui.IgnoreGuiInset = true
+    screenGui.Parent = gui
+
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0, 120, 0, 40)
+mainFrame.Position = UDim2.new(0.5, 0, 0.1, 0)
+mainFrame.AnchorPoint = Vector2.new(0.5, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+mainFrame.BackgroundTransparency = 0.5 
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = screenGui
+
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 10)
+uiCorner.Parent = mainFrame
+
+local uiStroke = Instance.new("UIStroke")
+uiStroke.Color = Color3.fromRGB(255, 255, 255)
+uiStroke.Thickness = 0.5
+uiStroke.Parent = mainFrame
+
+    -- Label
+    title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 1, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "Base Time: 0s"
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 14
+    title.Parent = mainFrame
+
+    return screenGui
+end
+
+
+local plots = workspace:WaitForChild("Plots")
+local base = nil
+do
+	local userLower = string.lower(player.Name)
+	local displayLower = string.lower(player.DisplayName)
+	for _, model in ipairs(plots:GetChildren()) do
+		if model:IsA("Model") then
+			for _, obj in ipairs(model:GetDescendants()) do
+				if obj:IsA("TextLabel") then
+					local txt = string.lower(obj.Text)
+					if string.find(txt, userLower, 1, true) or string.find(txt, displayLower, 1, true) then
+						base = model
+						break
+					end
+				end
+			end
+		end
+		if base then break end
+	end
+end
+
+local purchasesFolder = base and base:FindFirstChild("Purchases")
+
+
+local function findCountdown()
+	if not purchasesFolder then return nil end
+	for _, obj in ipairs(purchasesFolder:GetDescendants()) do
+		if obj:IsA("TextLabel") and obj.Name == "RemainingTime" then
+			return obj
+		end
+	end
+	return nil
+end
+
+
+RunService.RenderStepped:Connect(function()
+	if screenGui and screenGui.Enabled and title then
+		local countdownLabel = findCountdown()
+		if countdownLabel then
+			title.Text = "Base Time: " .. countdownLabel.Text
+		else
+			title.Text = "Base Time: 0s"
+		end
+	end
+end)
+
+
+_G.FaDhenAddToggle("Show Time", {
+    Callback = function(state)
+        if state then
+            createBaseTimeGui().Enabled = true
+        else
+            if screenGui then
+                screenGui:Destroy() 
+                screenGui = nil
+                title = nil
+            end
+        end
+    end
+})
+
+
+_G.FaDhenAddToggle("Tp Sentry", {
+    Callback = function(state)
+        if state then
+            pcall(function()
+                game.CoreGui:FindFirstChild("SentryTeleportGUI"):Destroy()
+            end)
+
+            local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+            ScreenGui.Name = "SentryTeleportGUI"
+            ScreenGui.ResetOnSpawn = false
+
+            local Button = Instance.new("TextButton", ScreenGui)
+            Button.Size = UDim2.new(0, 100, 0, 30)
+            Button.Position = UDim2.new(0, 10, 0, 10)
+            Button.Text = "Tp Sentry"
+            Button.BackgroundColor3 = Color3.fromRGB(100, 200, 255)
+            Button.TextColor3 = Color3.new(0, 0, 0)
+            Button.BorderSizePixel = 2
+
+            local looping = false 
+            
+            local function teleportSentryLoop()
+                local player = game.Players.LocalPlayer
+                if not player or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+                local hrp = player.Character.HumanoidRootPart
+
+                local sentryParts = {}
+                for _, obj in pairs(workspace:GetChildren()) do
+                    if obj:IsA("BasePart") and obj.Name:match("^Sentry_") then
+                        table.insert(sentryParts, obj)
+                    end
+                end
+
+                -- Looping aktif
+                looping = true
+                Button.Text = "Tp Active"
+
+                task.spawn(function()
+                    while looping do
+                        for _, part in pairs(sentryParts) do
+                            local forward = hrp.CFrame.LookVector
+                            local targetPos = hrp.Position + forward * 3
+                            part.CFrame = CFrame.new(targetPos, hrp.Position + forward)
+                            part.Anchored = true
+                        end
+                        task.wait(0.1)
+                    end
+                    Button.Text = "Tp Sentry"
+                end)
+            end
+
+            
+            Button.MouseButton1Click:Connect(function()
+                if not looping then
+                    teleportSentryLoop()
+                else
+                    looping = false 
+                end
+            end)
+
+        else
+            
+            pcall(function()
+                game.CoreGui:FindFirstChild("SentryTeleportGUI"):Destroy()
+            end)
+        end
+    end
+})
+
+
+
+
+_G.FaDhenAddToggle("Show Other Script", {
+    Callback = function(state)
+        if state then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua"))()
+        end
+    end
+})
 
 
 
