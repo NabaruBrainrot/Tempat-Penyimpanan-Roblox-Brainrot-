@@ -82,7 +82,7 @@ local Net = require(ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net
 -- flag toggle
 getgenv().FaDhenAutoAim = getgenv().FaDhenAutoAim or false
 
--- cari player terdekat
+
 local function getNearestPlayer()
     local nearestPlayer = nil
     local shortestDistance = math.huge
@@ -102,7 +102,7 @@ local function getNearestPlayer()
     return nearestPlayer
 end
 
--- fungsi pasang auto aim ke tool
+
 local function hookTool(tool)
     if tool:IsA("Tool") and not tool:FindFirstChild("FaDhenHooked") then
         local marker = Instance.new("BoolValue")
@@ -119,14 +119,14 @@ local function hookTool(tool)
                 end
             end
 
-            -- fallback: pakai mouse
+            
             local PlayerMouse = require(ReplicatedStorage.Packages.PlayerMouse)
             Net:RemoteEvent("UseItem"):FireServer(PlayerMouse.Hit.Position, PlayerMouse.Target)
         end)
     end
 end
 
--- pasang hook ke semua tool di backpack
+
 local function hookBackpack()
     for _, tool in pairs(LocalPlayer.Backpack:GetChildren()) do
         hookTool(tool)
@@ -134,16 +134,16 @@ local function hookBackpack()
     LocalPlayer.Backpack.ChildAdded:Connect(hookTool)
 end
 
--- saat karakter respawn, pasang ulang
+
 LocalPlayer.CharacterAdded:Connect(function()
-    task.wait(1) -- beri delay kecil supaya Backpack terisi
+    task.wait(1) 
     hookBackpack()
 end)
 
--- pertama kali load
+
 hookBackpack()
 
--- Toggle UI (baru)
+
 _G.FaDhenAddToggle("Auto AimBot", {
     Callback = function(state)
         getgenv().FaDhenAutoAim = state
@@ -156,11 +156,11 @@ _G.FaDhenAddToggle("Auto AimBot", {
 
 
 
---=== ESP PLAYER (FaDhen Toggle) ===--
+
 local Players = game:GetService("Players")
 local localPlayer = Players.LocalPlayer
 
--- reuse global table supaya aman kalau script di-execute ulang
+
 local FaESP = getgenv().FaDhenESP or {}
 getgenv().FaDhenESP = FaESP
 
@@ -264,7 +264,7 @@ function FaESP:Disable()
 	end
 end
 
---=== Toggle baru pakai FaDhen ===--
+
 _G.FaDhenAddToggle("ESP_Highlight", {
     Callback = function(state)
         if state then
@@ -302,16 +302,16 @@ local function highlightBase()
             local expected2 = (player.Name .. "'s base"):lower()
 
             if signText == expected1 or signText == expected2 then
-                -- hapus highlight lama kalau ada
+                
                 if currentHighlight then
                     currentHighlight:Destroy()
                     currentHighlight = nil
                 end
 
-                -- buat highlight baru
+                
                 local highlight = Instance.new("Highlight")
 highlight.Parent = plot
-highlight.DepthMode = Enum.HighlightDepthMode.Occluded -- ganti dari AlwaysOnTop
+highlight.DepthMode = Enum.HighlightDepthMode.Occluded 
 highlight.FillColor = Color3.fromRGB(255, 255, 255)
 
 highlight.OutlineColor = Color3.new(1, 1, 1)
@@ -324,7 +324,7 @@ highlight.OutlineTransparency = 0
     end
 end
 
--- Loop 5 detik cek ulang
+
 task.spawn(function()
     while true do
         if toggleActive then
@@ -334,12 +334,12 @@ task.spawn(function()
     end
 end)
 
---=== TOGGLE ===--
+
 _G.FaDhenAddToggle("Highlight Base", {
     Callback = function(state)
         toggleActive = state
         if state then
-            -- langsung aktif saat toggle ON
+            
             highlightBase()
         else
             if currentHighlight then
@@ -376,7 +376,7 @@ local function createMainGui()
     screenGui.IgnoreGuiInset = true
     screenGui.Parent = gui
 
-    -- FRAME UTAMA UNTUK BUTTON
+    
     local frame = Instance.new("Frame")
     frame.Name = "MainFrame"
     frame.Size = UDim2.new(0, 200, 0, 32)
@@ -385,7 +385,7 @@ local function createMainGui()
     frame.BackgroundTransparency = 1
     frame.Parent = screenGui
 
-    -- RESET BUTTON
+    
     local resetBtn = Instance.new("TextButton")
     resetBtn.Size = UDim2.new(0, 90, 1, 0)
     resetBtn.Position = UDim2.new(0, 0, 0, 0)
@@ -403,7 +403,7 @@ local function createMainGui()
         if humanoid then humanoid.Health = 0 end
     end)
 
-    -- LEAVE BUTTON
+    
     local leaveBtn = Instance.new("TextButton")
     leaveBtn.Size = UDim2.new(0, 90, 1, 0)
     leaveBtn.Position = UDim2.new(0, 100, 0, 0)
@@ -429,7 +429,7 @@ local function createMainGui()
     return screenGui
 end
 
--- 🔹 Ganti ke toggle baru
+
 _G.FaDhenAddToggle("Show Button", {
     Callback = function(state)
         if state then
@@ -453,7 +453,7 @@ local gui = player:WaitForChild("PlayerGui")
 local screenGui
 local title
 
--- fungsi buat GUI
+
 local function createBaseTimeGui()
     if screenGui then return screenGui end
 
@@ -463,14 +463,14 @@ local function createBaseTimeGui()
     screenGui.IgnoreGuiInset = true
     screenGui.Parent = gui
 
--- Frame kecil
+
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
 mainFrame.Size = UDim2.new(0, 120, 0, 40)
 mainFrame.Position = UDim2.new(0.5, 0, 0.1, 0)
 mainFrame.AnchorPoint = Vector2.new(0.5, 0)
 mainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-mainFrame.BackgroundTransparency = 0.5 -- setengah transparan
+mainFrame.BackgroundTransparency = 0.5 
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
 mainFrame.Draggable = true
@@ -498,7 +498,7 @@ uiStroke.Parent = mainFrame
     return screenGui
 end
 
--- cari base player
+
 local plots = workspace:WaitForChild("Plots")
 local base = nil
 do
@@ -522,7 +522,7 @@ end
 
 local purchasesFolder = base and base:FindFirstChild("Purchases")
 
--- ambil countdown label
+
 local function findCountdown()
 	if not purchasesFolder then return nil end
 	for _, obj in ipairs(purchasesFolder:GetDescendants()) do
@@ -533,7 +533,7 @@ local function findCountdown()
 	return nil
 end
 
--- update GUI
+
 RunService.RenderStepped:Connect(function()
 	if screenGui and screenGui.Enabled and title then
 		local countdownLabel = findCountdown()
@@ -545,14 +545,14 @@ RunService.RenderStepped:Connect(function()
 	end
 end)
 
---=== TOGGLE ===--
+
 _G.FaDhenAddToggle("Show Time", {
     Callback = function(state)
         if state then
             createBaseTimeGui().Enabled = true
         else
             if screenGui then
-                screenGui:Destroy()  -- hapus biar ga makan memori
+                screenGui:Destroy() 
                 screenGui = nil
                 title = nil
             end
@@ -560,16 +560,16 @@ _G.FaDhenAddToggle("Show Time", {
     end
 })
 
---Tp Sentry
+
 _G.FaDhenAddToggle("Tp Sentry", {
     Callback = function(state)
         if state then
-            -- Hapus GUI lama
+            
             pcall(function()
                 game.CoreGui:FindFirstChild("SentryTeleportGUI"):Destroy()
             end)
 
-            -- Buat GUI
+            
             local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
             ScreenGui.Name = "SentryTeleportGUI"
             ScreenGui.ResetOnSpawn = false
@@ -582,9 +582,9 @@ _G.FaDhenAddToggle("Tp Sentry", {
             Button.TextColor3 = Color3.new(0, 0, 0)
             Button.BorderSizePixel = 2
 
-            local looping = false -- status loop
+            local looping = false 
 
-            -- Fungsi teleport Sentry 3 studs di depan
+            
             local function teleportSentryLoop()
                 local player = game.Players.LocalPlayer
                 if not player or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
@@ -597,7 +597,7 @@ _G.FaDhenAddToggle("Tp Sentry", {
                     end
                 end
 
-                -- Looping aktif
+                
                 looping = true
                 Button.Text = "Tp Active"
 
@@ -615,17 +615,17 @@ _G.FaDhenAddToggle("Tp Sentry", {
                 end)
             end
 
-            -- Klik Button → toggle loop on/off
+            
             Button.MouseButton1Click:Connect(function()
                 if not looping then
-                    teleportSentryLoop() -- aktifkan loop
+                    teleportSentryLoop() -- 
                 else
-                    looping = false -- hentikan loop sepenuhnya
+                    looping = false 
                 end
             end)
 
         else
-            -- Toggle GUI off → hapus GUI dan hentikan loop
+            
             pcall(function()
                 game.CoreGui:FindFirstChild("SentryTeleportGUI"):Destroy()
             end)
@@ -639,12 +639,12 @@ _G.FaDhenAddToggle("Tp Sentry", {
 _G.FaDhenAddToggle("Tp Sentry", {
     Callback = function(state)
         if state then
-            -- Hapus GUI lama
+            
             pcall(function()
                 game.CoreGui:FindFirstChild("SentryTeleportGUI"):Destroy()
             end)
 
-            -- Buat GUI
+            
             local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
             ScreenGui.Name = "SentryTeleportGUI"
             ScreenGui.ResetOnSpawn = false
@@ -659,7 +659,7 @@ _G.FaDhenAddToggle("Tp Sentry", {
 
             local looping = false
 
-            -- Fungsi teleport 3 studs di depan player
+            
             local function teleportSentryLoop()
                 local player = game.Players.LocalPlayer
                 if not player or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
@@ -673,10 +673,57 @@ _G.FaDhenAddToggle("Tp Sentry", {
                 end
 
                 looping = true
-                Button.Text = "Tp Active" -- ubah teks supaya terlihat aktif
+                Button.Text = "Tp Active" 
 
                 task.spawn(function()
                     while looping do
                         for _, part in pairs(sentryParts) do
                             local forward = hrp.CFrame.LookVector
-  
+                            local targetPos = hrp.Position + forward * 3
+                            part.CFrame = CFrame.new(targetPos, hrp.Position + forward)
+                            part.Anchored = true
+                        end
+                        task.wait(0.1)
+                    end
+                    Button.Text = "Tp Sentry" 
+                end)
+            end
+
+            
+            Button.MouseButton1Click:Connect(function()
+                if not looping then
+                    teleportSentryLoop()
+                else
+                    looping = false
+                end
+            end)
+
+        else
+            
+            pcall(function()
+                game.CoreGui:FindFirstChild("SentryTeleportGUI"):Destroy()
+            end)
+        end
+    end
+})
+
+
+
+
+
+_G.FaDhenAddToggle("Show Other Script", {
+    Callback = function(state)
+        if state then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua"))()
+        end
+    end
+})
+
+
+
+
+
+
+local DEBUG = false
+local BATCH_SIZE = 250
+local SEARCH_TRAPS_IN_GAME = fals
