@@ -1,101 +1,164 @@
--- GUI Infinite Boost 2 detik dengan Progress Bar & Drag
--- LOGIC TIDAK DIUBAH
+-- Professional Corporate GUI Design - Enhanced (10% Bigger Total)
+-- LOGIC TIDAK DIUBAH - Desain enterprise grade
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 local gui = Instance.new("ScreenGui")
 gui.ResetOnSpawn = false
+gui.Name = "ProfessionalBoostGUI"
 gui.Parent = player:WaitForChild("PlayerGui")
 
--- Frame container bisa digeser
+-- Main container dengan design corporate
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 126, 0, 54) -- 10% lebih kecil
-mainFrame.Position = UDim2.new(0.80, -63, 0.60, 0) -- lebih kanan & lebih atas
-mainFrame.BackgroundTransparency = 1
+mainFrame.Size = UDim2.new(0, 138, 0, 60) -- Dibuat 5% lebih besar lagi
+mainFrame.Position = UDim2.new(0.80, -69, 0.60, 0) -- Posisi menyesuaikan
+mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Hitam
+mainFrame.BackgroundTransparency = 0.5 -- Transparan 50%
+mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
 mainFrame.Draggable = true
+mainFrame.ZIndex = 2
 mainFrame.Parent = gui
 
--- Tombol Boost
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 6)
+mainCorner.Parent = mainFrame
+
+
+-- Corporate button dengan clean design
 local boostButton = Instance.new("TextButton")
-boostButton.Size = UDim2.new(1, 0, 0.7, 0)
-boostButton.Position = UDim2.new(0, 0, 0, 0)
-boostButton.Text = "🚀 Boost"
+boostButton.Size = UDim2.new(1, -8, 0.65, 0)
+boostButton.Position = UDim2.new(0, 4, 0, 4)
+boostButton.Text = "BOOST"
 boostButton.TextScaled = true
 boostButton.Font = Enum.Font.GothamBold
-boostButton.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+boostButton.BackgroundColor3 = Color3.fromRGB(59, 130, 246)
 boostButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 boostButton.BorderSizePixel = 0
+boostButton.ZIndex = 3
 boostButton.Parent = mainFrame
 
--- Sudut bulat
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 12)
-corner.Parent = boostButton
+local buttonCorner = Instance.new("UICorner")
+buttonCorner.CornerRadius = UDim.new(0, 5)
+buttonCorner.Parent = boostButton
 
--- Progress bar container
-local progressFrame = Instance.new("Frame")
-progressFrame.Size = UDim2.new(1, 0, 0.25, -2)
-progressFrame.Position = UDim2.new(0, 0, 0.75, 2)
-progressFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-progressFrame.BorderSizePixel = 0
-progressFrame.Parent = mainFrame
 
-local pCorner = Instance.new("UICorner")
-pCorner.CornerRadius = UDim.new(0, 10)
-pCorner.Parent = progressFrame
+-- Professional progress container
+local progressContainer = Instance.new("Frame")
+progressContainer.Size = UDim2.new(1, -8, 0.2, 0)
+progressContainer.Position = UDim2.new(0, 4, 0.75, 0)
+progressContainer.BackgroundColor3 = Color3.fromRGB(229, 231, 235)
+progressContainer.BorderSizePixel = 0
+progressContainer.ZIndex = 3
+progressContainer.Parent = mainFrame
 
--- Progress fill
+local progressContainerCorner = Instance.new("UICorner")
+progressContainerCorner.CornerRadius = UDim.new(0, 6)
+progressContainerCorner.Parent = progressContainer
+
+-- Progress bar dengan corporate colors
 local progressBar = Instance.new("Frame")
 progressBar.Size = UDim2.new(1, 0, 1, 0)
-progressBar.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+progressBar.Position = UDim2.new(0, 0, 0, 0)
+progressBar.BackgroundColor3 = Color3.fromRGB(34, 157, 94)
 progressBar.BorderSizePixel = 0
-progressBar.Parent = progressFrame
+progressBar.ZIndex = 4
+progressBar.Parent = progressContainer
 
-local fCorner = Instance.new("UICorner")
-fCorner.CornerRadius = UDim.new(0, 10)
-fCorner.Parent = progressBar
+local progressCorner = Instance.new("UICorner")
+progressCorner.CornerRadius = UDim.new(0, 6)
+progressCorner.Parent = progressBar
 
--- Glow effect
-local uiStroke = Instance.new("UIStroke")
-uiStroke.Color = Color3.fromRGB(0, 255, 200)
-uiStroke.Thickness = 2
-uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-uiStroke.Parent = boostButton
+-- Professional hover effects
+local originalButtonColor = boostButton.BackgroundColor3
+local hoverColor = Color3.fromRGB(37, 99, 235)
+local activeColor = Color3.fromRGB(29, 78, 216)
 
--- Setting
-local LIFT_SPEED = 20    -- kecepatan naik
-local MAX_JUMP_TIME = 5  -- durasi maksimal tahan (detik)
+local hoverTweenIn = TweenService:Create(
+    boostButton,
+    TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+    {BackgroundColor3 = hoverColor}
+)
 
--- State
+local hoverTweenOut = TweenService:Create(
+    boostButton,
+    TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+    {BackgroundColor3 = originalButtonColor}
+)
+
+boostButton.MouseEnter:Connect(function()
+    if not holdingBoost then
+        hoverTweenIn:Play()
+    end
+end)
+
+boostButton.MouseLeave:Connect(function()
+    if not holdingBoost then
+        hoverTweenOut:Play()
+    end
+end)
+
+-- LOGIC ASLI TIDAK DIUBAH
+local LIFT_SPEED = 20
+local MAX_JUMP_TIME = 5
+
 local holdingBoost = false
 local boostStartTime = 0
+local progressTween = nil
 
--- Saat tombol ditekan
+-- Smooth professional animations
+local function animateProgress(targetSize)
+    if progressTween then
+        progressTween:Cancel()
+    end
+    
+    progressTween = TweenService:Create(
+        progressBar,
+        TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+        {Size = targetSize}
+    )
+    progressTween:Play()
+end
+
+-- Professional press effects
+local pressEffect = TweenService:Create(
+    boostButton,
+    TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+    {BackgroundColor3 = activeColor}
+)
+
+local releaseEffect = TweenService:Create(
+    boostButton,
+    TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+    {BackgroundColor3 = originalButtonColor}
+)
+
 boostButton.MouseButton1Down:Connect(function()
     holdingBoost = true
     boostStartTime = tick()
+    pressEffect:Play()
 end)
 
--- Saat tombol dilepas
 boostButton.MouseButton1Up:Connect(function()
     holdingBoost = false
+    releaseEffect:Play()
 end)
 
--- Update progress bar + gerakan karakter
+-- Main loop - LOGIC TIDAK BERUBAH
 RunService.Heartbeat:Connect(function()
     local elapsed = tick() - boostStartTime
 
     if holdingBoost then
         local remaining = math.max(0, MAX_JUMP_TIME - elapsed)
         local ratio = remaining / MAX_JUMP_TIME
-        progressBar.Size = UDim2.new(ratio, 0, 1, 0)
+        animateProgress(UDim2.new(ratio, 0, 1, 0))
 
         if remaining <= 0 then
             holdingBoost = false
-            progressBar.Size = UDim2.new(0, 0, 1, 0)
+            animateProgress(UDim2.new(0, 0, 1, 0))
             return
         end
 
@@ -108,6 +171,6 @@ RunService.Heartbeat:Connect(function()
             end
         end
     else
-        progressBar.Size = UDim2.new(1, 0, 1, 0)
+        animateProgress(UDim2.new(1, 0, 1, 0))
     end
 end)
