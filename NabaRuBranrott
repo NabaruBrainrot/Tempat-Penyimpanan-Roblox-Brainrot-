@@ -564,12 +564,10 @@ _G.FaDhenAddToggle("Show Time", {
 _G.FaDhenAddToggle("Tp Sentry", {
     Callback = function(state)
         if state then
-            
             pcall(function()
                 game.CoreGui:FindFirstChild("SentryTeleportGUI"):Destroy()
             end)
 
-            
             local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
             ScreenGui.Name = "SentryTeleportGUI"
             ScreenGui.ResetOnSpawn = false
@@ -583,7 +581,6 @@ _G.FaDhenAddToggle("Tp Sentry", {
             Button.BorderSizePixel = 2
 
             local looping = false 
-
             
             local function teleportSentryLoop()
                 local player = game.Players.LocalPlayer
@@ -597,7 +594,7 @@ _G.FaDhenAddToggle("Tp Sentry", {
                     end
                 end
 
-                
+                -- Looping aktif
                 looping = true
                 Button.Text = "Tp Active"
 
@@ -609,7 +606,7 @@ _G.FaDhenAddToggle("Tp Sentry", {
                             part.CFrame = CFrame.new(targetPos, hrp.Position + forward)
                             part.Anchored = true
                         end
-                        task.wait(1)
+                        task.wait(0.1)
                     end
                     Button.Text = "Tp Sentry"
                 end)
@@ -618,7 +615,7 @@ _G.FaDhenAddToggle("Tp Sentry", {
             
             Button.MouseButton1Click:Connect(function()
                 if not looping then
-                    teleportSentryLoop() -- 
+                    teleportSentryLoop()
                 else
                     looping = false 
                 end
@@ -632,81 +629,6 @@ _G.FaDhenAddToggle("Tp Sentry", {
         end
     end
 })
-
-
-
-
-_G.FaDhenAddToggle("Tp Sentry", {
-    Callback = function(state)
-        if state then
-            
-            pcall(function()
-                game.CoreGui:FindFirstChild("SentryTeleportGUI"):Destroy()
-            end)
-
-            
-            local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-            ScreenGui.Name = "SentryTeleportGUI"
-            ScreenGui.ResetOnSpawn = false
-
-            local Button = Instance.new("TextButton", ScreenGui)
-            Button.Size = UDim2.new(0, 100, 0, 30)
-            Button.Position = UDim2.new(0, 10, 0, 10)
-            Button.Text = "Tp Sentry"
-            Button.BackgroundColor3 = Color3.fromRGB(100, 200, 255)
-            Button.TextColor3 = Color3.new(0, 0, 0)
-            Button.BorderSizePixel = 2
-
-            local looping = false
-
-            
-            local function teleportSentryLoop()
-                local player = game.Players.LocalPlayer
-                if not player or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
-                local hrp = player.Character.HumanoidRootPart
-
-                local sentryParts = {}
-                for _, obj in pairs(workspace:GetChildren()) do
-                    if obj:IsA("BasePart") and obj.Name:match("^Sentry_") then
-                        table.insert(sentryParts, obj)
-                    end
-                end
-
-                looping = true
-                Button.Text = "Tp Active" 
-
-                task.spawn(function()
-                    while looping do
-                        for _, part in pairs(sentryParts) do
-                            local forward = hrp.CFrame.LookVector
-                            local targetPos = hrp.Position + forward * 3
-                            part.CFrame = CFrame.new(targetPos, hrp.Position + forward)
-                            part.Anchored = true
-                        end
-                        task.wait(0.1)
-                    end
-                    Button.Text = "Tp Sentry" 
-                end)
-            end
-
-            
-            Button.MouseButton1Click:Connect(function()
-                if not looping then
-                    teleportSentryLoop()
-                else
-                    looping = false
-                end
-            end)
-
-        else
-            
-            pcall(function()
-                game.CoreGui:FindFirstChild("SentryTeleportGUI"):Destroy()
-            end)
-        end
-    end
-})
-
 
 
 
@@ -726,4 +648,37 @@ _G.FaDhenAddToggle("Show Other Script", {
 
 local DEBUG = false
 local BATCH_SIZE = 250
-local SEARCH_TRAPS_IN_GAME = fals
+local SEARCH_TRAPS_IN_GAME = false
+
+local function dprint(...) if DEBUG then print(...) end end
+
+local function processBillboardIfNeeded(obj)
+	if not (obj:IsA("BasePart") and obj.Name == "Main") then return end
+	if obj:GetAttribute("BillboardProcessed") then return end
+	local parent = obj.Parent
+	local ok = false
+	while parent do
+		if parent:IsA("Folder") and parent.Name == "Purchases" then ok = true break end
+		parent = parent.Parent
+	end
+	if not ok then return end
+	for _, child in ipairs(obj:GetChildren()) do
+		if child:IsA("BillboardGui") then
+			child.Size = UDim2.new(0, 180, 0, 150)
+			child.MaxDistance = 90
+			child.StudsOffset = Vector3.new(0, 5, 0)
+			dprint("✅ BillboardGui diubah:", obj:GetFullName())
+		end
+	end
+	obj:SetAttribute("BillboardProcessed", true)
+end
+
+task.defer(function()
+	local all = workspace:GetDescendants()
+	for i = 1, #all do
+		processBillboardIfNeeded(all[i])
+		if i % BATCH_SIZE == 0 then task.wait() end
+	end
+end)
+
+workspace.DescendantAdded:Connect(processBillboardIfNeeded)
