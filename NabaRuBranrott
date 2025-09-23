@@ -74,6 +74,9 @@ _G.FaDhenAddToggle("Anti Ragdol", {
 
 
 
+
+
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -152,9 +155,22 @@ _G.FaDhenAddToggle("Auto AimBot", {
 
 
 
+_G.FaDhenAddToggle("BoosterJump", {
+    Callback = function(state)
+        if state then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/BoostJump"))()
+        end
+    end
+})
 
 
-
+_G.FaDhenAddToggle("Auto Laser", {
+    Callback = function(state)
+        if state then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Laser%20Cape"))()
+        end
+    end
+})
 
 
 local Players = game:GetService("Players")
@@ -352,15 +368,6 @@ _G.FaDhenAddToggle("Highlight Base", {
 
 
 
-
-
-_G.FaDhenAddToggle("BoosterJump", {
-    Callback = function(state)
-        if state then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/BoostJump"))()
-        end
-    end
-})
 
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
