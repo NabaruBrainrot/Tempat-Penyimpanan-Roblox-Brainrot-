@@ -107,7 +107,7 @@ local function fireCollectZone()
 	isProcessing = true
 	Label.Text = "Processing..."
 
-	task.wait(1) -- Delay 1 detik
+	task.wait(0.1) -- Delay 1 detik
 
 	if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
 		player.CharacterAdded:Wait()
