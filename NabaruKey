@@ -60,7 +60,7 @@ end
 
 
 --=== Toggle baru ===--
-_G.FaDhenAddToggle("Anti Ragdol", {
+_G.FaDhenAddToggle("ANTI RAGDOL", {
     Callback = function(state)
         if state then
             enableAntiRagdoll()
@@ -147,7 +147,7 @@ end)
 hookBackpack()
 
 
-_G.FaDhenAddToggle("Auto AimBot", {
+_G.FaDhenAddToggle("AUTO AIMBOT", {
     Callback = function(state)
         getgenv().FaDhenAutoAim = state
     end
@@ -155,7 +155,7 @@ _G.FaDhenAddToggle("Auto AimBot", {
 
 
 
-_G.FaDhenAddToggle("BoosterJump", {
+_G.FaDhenAddToggle("BOOST JUMP", {
     Callback = function(state)
         if state then
             loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/BoostJump"))()
@@ -281,7 +281,7 @@ function FaESP:Disable()
 end
 
 
-_G.FaDhenAddToggle("ESP_Highlight", {
+_G.FaDhenAddToggle("ESP PLAYER", {
     Callback = function(state)
         if state then
             FaESP:Enable()
@@ -292,79 +292,6 @@ _G.FaDhenAddToggle("ESP_Highlight", {
 })
 
 
-
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-
-local currentHighlight
-local toggleActive = false
-
-local function highlightBase()
-    local plots = workspace:FindFirstChild("Plots")
-    if not plots then return end
-
-    for _, plot in pairs(plots:GetChildren()) do
-        local sign
-        local success = pcall(function()
-            sign = plot:FindFirstChild("PlotSign")
-                and plot.PlotSign:FindFirstChild("SurfaceGui")
-                and plot.PlotSign.SurfaceGui:FindFirstChild("Frame")
-                and plot.PlotSign.SurfaceGui.Frame:FindFirstChild("TextLabel")
-        end)
-
-        if sign and typeof(sign.Text) == "string" then
-            local signText = (sign.Text or ""):lower():gsub("^%s+", ""):gsub("%s+$", "")
-            local expected1 = (player.DisplayName .. "'s base"):lower()
-            local expected2 = (player.Name .. "'s base"):lower()
-
-            if signText == expected1 or signText == expected2 then
-                
-                if currentHighlight then
-                    currentHighlight:Destroy()
-                    currentHighlight = nil
-                end
-
-                
-                local highlight = Instance.new("Highlight")
-highlight.Parent = plot
-highlight.DepthMode = Enum.HighlightDepthMode.Occluded 
-highlight.FillColor = Color3.fromRGB(255, 255, 255)
-
-highlight.OutlineColor = Color3.new(1, 1, 1)
-highlight.FillTransparency = 0.5
-highlight.OutlineTransparency = 0
-                currentHighlight = highlight
-                return
-            end
-        end
-    end
-end
-
-
-task.spawn(function()
-    while true do
-        if toggleActive then
-            highlightBase()
-        end
-        task.wait(5)
-    end
-end)
-
-
-_G.FaDhenAddToggle("Highlight Base", {
-    Callback = function(state)
-        toggleActive = state
-        if state then
-            
-            highlightBase()
-        else
-            if currentHighlight then
-                currentHighlight:Destroy()
-                currentHighlight = nil
-            end
-        end
-    end
-})
 
 
 
@@ -452,120 +379,7 @@ _G.FaDhenAddToggle("Show Button", {
 
 
 
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local player = Players.LocalPlayer
-local gui = player:WaitForChild("PlayerGui")
 
-local screenGui
-local title
-
-
-local function createBaseTimeGui()
-    if screenGui then return screenGui end
-
-    screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "BaseTimeGui"
-    screenGui.ResetOnSpawn = false
-    screenGui.IgnoreGuiInset = true
-    screenGui.Parent = gui
-
-
-local mainFrame = Instance.new("Frame")
-mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 120, 0, 40)
-mainFrame.Position = UDim2.new(0.5, 0, 0.1, 0)
-mainFrame.AnchorPoint = Vector2.new(0.5, 0)
-mainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-mainFrame.BackgroundTransparency = 0.5 
-mainFrame.BorderSizePixel = 0
-mainFrame.Active = true
-mainFrame.Draggable = true
-mainFrame.Parent = screenGui
-
-local uiCorner = Instance.new("UICorner")
-uiCorner.CornerRadius = UDim.new(0, 10)
-uiCorner.Parent = mainFrame
-
-local uiStroke = Instance.new("UIStroke")
-uiStroke.Color = Color3.fromRGB(255, 255, 255)
-uiStroke.Thickness = 0.5
-uiStroke.Parent = mainFrame
-
-    -- Label
-    title = Instance.new("TextLabel")
-    title.Size = UDim2.new(1, 0, 1, 0)
-    title.BackgroundTransparency = 1
-    title.Text = "Base Time: 0s"
-    title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    title.Font = Enum.Font.GothamBold
-    title.TextSize = 14
-    title.Parent = mainFrame
-
-    return screenGui
-end
-
-
-local plots = workspace:WaitForChild("Plots")
-local base = nil
-do
-	local userLower = string.lower(player.Name)
-	local displayLower = string.lower(player.DisplayName)
-	for _, model in ipairs(plots:GetChildren()) do
-		if model:IsA("Model") then
-			for _, obj in ipairs(model:GetDescendants()) do
-				if obj:IsA("TextLabel") then
-					local txt = string.lower(obj.Text)
-					if string.find(txt, userLower, 1, true) or string.find(txt, displayLower, 1, true) then
-						base = model
-						break
-					end
-				end
-			end
-		end
-		if base then break end
-	end
-end
-
-local purchasesFolder = base and base:FindFirstChild("Purchases")
-
-
-local function findCountdown()
-	if not purchasesFolder then return nil end
-	for _, obj in ipairs(purchasesFolder:GetDescendants()) do
-		if obj:IsA("TextLabel") and obj.Name == "RemainingTime" then
-			return obj
-		end
-	end
-	return nil
-end
-
-
-RunService.RenderStepped:Connect(function()
-	if screenGui and screenGui.Enabled and title then
-		local countdownLabel = findCountdown()
-		if countdownLabel then
-			title.Text = "Base Time: " .. countdownLabel.Text
-		else
-			title.Text = "Base Time: 0s"
-		end
-	end
-end)
-
-
-_G.FaDhenAddToggle("Show Time", {
-    Callback = function(state)
-        if state then
-            createBaseTimeGui().Enabled = true
-        else
-            if screenGui then
-                screenGui:Destroy() 
-                screenGui = nil
-                title = nil
-            end
-        end
-    end
-})
 
 
 _G.FaDhenAddToggle("Tp Sentry", {
@@ -640,6 +454,9 @@ _G.FaDhenAddToggle("Tp Sentry", {
 
 
 
+
+
+
 _G.FaDhenAddToggle("Show Other Script", {
     Callback = function(state)
         if state then
@@ -651,6 +468,13 @@ _G.FaDhenAddToggle("Show Other Script", {
 
 
 
+
+
+
+
+
+
+--SCRIPT LAIN
 
 
 local DEBUG = false
