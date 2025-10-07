@@ -2,6 +2,126 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat
 
 
 
+-- Float Part Toggle Script (Fluxus)
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+
+-- Variabel utama
+local screenGui = nil
+local button = nil
+local isOn = false
+local floatingPart = nil
+local connection = nil
+
+-- Fungsi buat part neon
+local function createPart()
+	local part = Instance.new("Part")
+	part.Size = Vector3.new(6, 1, 6)
+	part.Anchored = true
+	part.CanCollide = true
+	part.Material = Enum.Material.Neon
+	part.Color = Color3.fromRGB(0, 255, 255)
+	part.Transparency = 0.25
+	part.Parent = workspace
+	return part
+end
+
+-- Fungsi aktif/nonaktif float
+local function toggleFloat(state)
+	isOn = state
+	if isOn then
+		button.Text = "Float: ON"
+		button.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+		floatingPart = createPart()
+
+		connection = RunService.RenderStepped:Connect(function()
+			local char = player.Character
+			if char and char:FindFirstChild("HumanoidRootPart") and floatingPart then
+				local root = char.HumanoidRootPart
+				floatingPart.Position = root.Position - Vector3.new(0, 2.7, 0)
+			end
+		end)
+	else
+		button.Text = "Float: OFF"
+		button.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+		if connection then
+			connection:Disconnect()
+			connection = nil
+		end
+		if floatingPart then
+			floatingPart:Destroy()
+			floatingPart = nil
+		end
+	end
+end
+
+-- Fungsi buat GUI saat toggle utama aktif
+local function createGUI()
+	screenGui = Instance.new("ScreenGui")
+	screenGui.Name = "FloatToggleGUI"
+	screenGui.ResetOnSpawn = false
+	screenGui.Parent = game:GetService("CoreGui")
+
+	button = Instance.new("TextButton")
+	button.Parent = screenGui
+	button.Size = UDim2.new(0, 140, 0, 45)
+	button.AnchorPoint = Vector2.new(1, 0.5)
+	button.Position = UDim2.new(1, -20, 0.5, 0)
+	button.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+	button.TextColor3 = Color3.fromRGB(255, 255, 255)
+	button.Text = "Float: OFF"
+	button.Font = Enum.Font.SourceSansBold
+	button.TextSize = 20
+	button.BorderSizePixel = 0
+	button.Active = true
+
+	-- Hover efek
+	button.MouseEnter:Connect(function()
+		button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+	end)
+	button.MouseLeave:Connect(function()
+		if button.Text == "Float: OFF" then
+			button.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+		else
+			button.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+		end
+	end)
+
+	-- Toggle float saat tombol diklik
+	button.MouseButton1Click:Connect(function()
+		toggleFloat(not isOn)
+	end)
+end
+
+-- Fungsi hapus GUI saat toggle utama dimatikan
+local function destroyGUI()
+	if connection then
+		connection:Disconnect()
+		connection = nil
+	end
+	if floatingPart then
+		floatingPart:Destroy()
+		floatingPart = nil
+	end
+	if screenGui then
+		screenGui:Destroy()
+		screenGui = nil
+	end
+end
+
+-- === Tambahkan toggle utama kamu ===
+_G.FaDhenAddToggle("AUTO FLOAT", {
+	Callback = function(state)
+		if state then
+			createGUI() -- Saat toggle ON, munculkan GUI
+		else
+			destroyGUI() -- Saat toggle OFF, hapus GUI
+		end
+	end
+})
+
+
 
 
 local Players = game:GetService("Players")
