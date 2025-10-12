@@ -1,4 +1,77 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Ui%20Baru"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/bananaGanteng/Legend/refs/heads/main/Brainrot"))()
+
+
+
+
+
+_G.FaDhenAddToggle("SPEED BOOSTER", {
+    Callback = function(state)
+        if state then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/wanjir%20berjalan%20up"))()
+        end
+    end
+})
+
+
+
+
+
+
+
+
+_G.FaDhenAddToggle("AUTO INVSIBLE", {
+    Callback = function(state)
+        local player = game.Players.LocalPlayer
+        if not player then return end
+        local char = player.Character or player.CharacterAdded:Wait()
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+
+        -- buat penyimpanan properti pertama kali
+        if not _G._InvisibleCache then
+            _G._InvisibleCache = {}
+        end
+
+        if state then
+            -- Aktifkan invisibility (visual only)
+            for _, v in ipairs(char:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    _G._InvisibleCache[v] = v.LocalTransparencyModifier
+                    v.LocalTransparencyModifier = 1
+                elseif v:IsA("Decal") or v:IsA("Texture") then
+                    _G._InvisibleCache[v] = v.Transparency
+                    v.Transparency = 1
+                end
+            end
+
+            -- Hilangkan nama di atas kepala
+            if humanoid then
+                _G._InvisibleCache["DisplayType"] = humanoid.DisplayDistanceType
+                humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+            end
+
+        else
+            -- Kembalikan ke kondisi semula
+            for obj, originalValue in pairs(_G._InvisibleCache) do
+                if typeof(obj) == "Instance" and obj.Parent then
+                    if obj:IsA("BasePart") then
+                        obj.LocalTransparencyModifier = originalValue or 0
+                    elseif obj:IsA("Decal") or obj:IsA("Texture") then
+                        obj.Transparency = originalValue or 0
+                    end
+                end
+            end
+
+            if humanoid and _G._InvisibleCache["DisplayType"] then
+                humanoid.DisplayDistanceType = _G._InvisibleCache["DisplayType"]
+            end
+
+            _G._InvisibleCache = {} -- kosongkan agar bersih
+        end
+    end
+})
+
+
+
 
 
 
@@ -284,13 +357,7 @@ _G.FaDhenAddToggle("BOOST JUMP", {
 })
 
 
-_G.FaDhenAddToggle("Auto Laser", {
-    Callback = function(state)
-        if state then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Laser%20Cape"))()
-        end
-    end
-})
+
 
 
 local Players = game:GetService("Players")
