@@ -62,7 +62,7 @@ circle.BorderSizePixel = 0
 Instance.new("UICorner", circle).CornerRadius = UDim.new(1, 0)
 
 -- Logic Speed (Optimized)
-local speed = 40
+local speed = 28
 local active = false
 local heartbeatConn
 local lastUpdate = 0
