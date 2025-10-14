@@ -599,21 +599,6 @@ _G.FaDhenAddToggle("Tp Sentry", {
 
 
 
-_G.FaDhenAddToggle("Show Other Script", {
-    Callback = function(state)
-        if state then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua"))()
-        end
-    end
-})
-
-
-
-
-
-
-
-
 
 
 --SCRIPT LAIN
