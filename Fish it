@@ -1,6 +1,6 @@
 ---Ghost Gui UI Library
 loadstring(game:HttpGet('https://raw.githubusercontent.com/GhostPlayer352/UI-Library/refs/heads/main/Ghost%20Gui'))()
-game.CoreGui.GhostGui.MainFrame.Title.Text = "Fish it"
+game.CoreGui.GhostGui.MainFrame.Title.Text = "🎣Fish it"
 ---
 
 
@@ -278,5 +278,25 @@ CreateButton("Area 7", CFrame.new(
 if game.CoreGui:FindFirstChild("TeleportGUI") then
     game.CoreGui.TeleportGUI:Destroy()
     print("❌ Teleport GUI ditutup.")
+end
+]])
+
+
+
+AddContent("Switch", "speed", [[
+-- ==== BLOCK: OFF (toggle OFF → Speed CEPAT) ====
+local player = game.Players.LocalPlayer
+if player and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
+    player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = 50
+    print("⚡ Speed diaktifkan jadi 50 (toggle OFF).")
+else
+    warn("⚠️ Tidak dapat menemukan karakter atau humanoid.")
+end
+]], [[
+-- ==== BLOCK: ON (toggle ON → Speed NORMAL) ====
+local player = game.Players.LocalPlayer
+if player and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
+    player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = 23
+    print("❌ Speed dikembalikan ke normal (toggle ON).")
 end
 ]])
