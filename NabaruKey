@@ -1,18 +1,6 @@
 loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Ui%20Baru"))()
 
 
-_G.FaDhenAddToggle("SPEED BOOSTER", {
-    Callback = function(state)
-        if state then
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/wanjir%20berjalan%20up"))()
-        end
-    end
-})
-
-
-
-
-
 
 
 
@@ -26,6 +14,36 @@ _G.FaDhenAddToggle("AUTO INVISIBLE", {
 
 
 
+
+
+
+
+_G.FaDhenAddToggle("SPEED BOOSTER", {
+    Callback = function(state)
+        if state then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/wanjir%20berjalan%20up"))()
+        end
+    end
+})
+
+
+
+
+
+-- Load Anti Steal
+loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Anti%20Steal"))()
+
+-- Tambahkan toggle di tab Main
+_G.FaDhenAddToggle("ANTI STEAL", {
+    Name = "Anti Steal",
+    Callback = function(on)
+        if getgenv().AntiSteal_SetEnabled then
+            getgenv().AntiSteal_SetEnabled(on)
+        else
+            warn("Anti Steal belum siap!")
+        end
+    end
+})
 
 
 
