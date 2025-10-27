@@ -8,7 +8,6 @@ game.CoreGui.GhostGui.MainFrame.Title.Text = "Fish it"
 
 
 
-
 AddContent("Switch", "Auto Fish", [[
 -- ==== BLOCK: OFF (Toggle MATI → Script AKTIF) ====
 _G.AutoFishingEnabled = true
@@ -19,8 +18,40 @@ if _G.AutoFishingLoop and coroutine.status(_G.AutoFishingLoop) ~= "dead" then
     task.cancel(_G.AutoFishingLoop)
 end
 
+-- Simpan posisi awal saat pertama kali aktif
+if not _G.OriginalCFrame and game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+    _G.OriginalCFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+end
+
 _G.AutoFishingLoop = task.spawn(function()
+    local lastResetTime = os.clock()
+
     while _G.AutoFishingEnabled do
+        local now = os.clock()
+
+
+        if now - lastResetTime >= 60 then
+            local player = game.Players.LocalPlayer
+            if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local lastPos = player.Character.HumanoidRootPart.CFrame
+                print("♻️ Reset karakter di lokasi saat ini...")
+
+                -- Reset cepat (bunuh karakter)
+                player.Character:FindFirstChildOfClass("Humanoid"):TakeDamage(9999)
+
+                -- Tunggu karakter baru muncul
+                player.CharacterAdded:Wait()
+                repeat task.wait() until player.Character:FindFirstChild("HumanoidRootPart")
+
+                -- Teleport kembali ke posisi sebelum reset
+                task.wait(0)
+                player.Character:WaitForChild("HumanoidRootPart").CFrame = lastPos
+                print("📍 Respawn di lokasi sebelum reset")
+            end
+            lastResetTime = os.clock()
+        end
+
+        -- === Logic Auto Fishing Asli ===
         -- Langkah 1
         local args1 = { 1 }
         game:GetService("ReplicatedStorage"):WaitForChild("Packages")
@@ -49,7 +80,7 @@ _G.AutoFishingLoop = task.spawn(function()
             :InvokeServer(unpack(args3))
         print("▶️ Langkah 3 dijalankan")
 
-        task.wait(3)
+        task.wait(2.3)
 
         -- Langkah 4
         game:GetService("ReplicatedStorage"):WaitForChild("Packages")
@@ -64,7 +95,7 @@ _G.AutoFishingLoop = task.spawn(function()
             break
         end
 
-        task.wait(0)
+        task.wait(0.01)
     end
 end)
 ]], [[
@@ -72,6 +103,12 @@ end)
 _G.AutoFishingEnabled = false
 print("🛑 Auto Fishing Diminta Berhenti (akan berhenti setelah siklus selesai)")
 ]])
+
+
+
+
+
+
 
 
 AddContent("Switch", "Auto Sell", [[
