@@ -30,7 +30,7 @@ _G.AutoFishingLoop = task.spawn(function()
         local now = os.clock()
 
 
-        if now - lastResetTime >= 60 then
+        if now - lastResetTime >= 120 then
             local player = game.Players.LocalPlayer
             if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                 local lastPos = player.Character.HumanoidRootPart.CFrame
