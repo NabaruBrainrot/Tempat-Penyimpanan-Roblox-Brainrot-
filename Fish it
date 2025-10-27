@@ -80,7 +80,7 @@ _G.AutoFishingLoop = task.spawn(function()
             :InvokeServer(unpack(args3))
         print("▶️ Langkah 3 dijalankan")
 
-        task.wait(2.3)
+        task.wait(2.5)
 
         -- Langkah 4
         game:GetService("ReplicatedStorage"):WaitForChild("Packages")
