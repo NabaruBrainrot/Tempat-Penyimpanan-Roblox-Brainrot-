@@ -8,7 +8,7 @@ game.CoreGui.GhostGui.MainFrame.Title.Text = "Fish it"
 
 
 
-AddContent("Switch", "Auto Fish", [[
+AddContent("Switch", "Instan Fishing", [[
 -- ==== BLOCK: OFF (Toggle MATI → Script AKTIF) ====
 _G.AutoFishingEnabled = true
 print("🎣 Auto Fishing Dinyalakan (Toggle OFF)")
