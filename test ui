@@ -108,7 +108,7 @@ _G.titleLabel = titleLabel -- simpan global juga
 -- ScrollFrame
 local scrollFrame = Instance.new("ScrollingFrame")
 scrollFrame.Size = UDim2.new(1, -20, 1, -75)
-scrollFrame.Position = UDim2.new(0, 10, 0, 60)
+scrollFrame.Position = UDim2.new(0, 13, 0, 60)
 scrollFrame.BackgroundTransparency = 1
 scrollFrame.BorderSizePixel = 0
 scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -156,7 +156,7 @@ function _G.FaDhenAddToggle(name, props)
     local toggled = false
 
     local toggleFrame = Instance.new("Frame")
-    toggleFrame.Size = UDim2.new(1, 0, 0, 40)
+    toggleFrame.Size = UDim2.new(0.97, 0, 0, 40)
     toggleFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     toggleFrame.BorderSizePixel = 0
     toggleFrame.Parent = scrollFrame
