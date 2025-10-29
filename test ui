@@ -4,14 +4,14 @@ local UserInputService = game:GetService("UserInputService")
 
 -- Hapus GUI lama
 pcall(function()
-    if CoreGui:FindFirstChild("FaDhenGui") then
+    if CoreGui:FindFirstChild("Azenby") then
         CoreGui.FaDhenGui:Destroy()
     end
 end)
 
 -- ScreenGui utama
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "FaDhenGui"
+ScreenGui.Name = "Azenby"
 ScreenGui.Parent = CoreGui
 
 -- Tombol Open
