@@ -115,6 +115,12 @@ scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 scrollFrame.ScrollBarThickness = 6
 scrollFrame.Parent = mainFrame
 
+scrollFrame.ScrollingDirection = Enum.ScrollingDirection.Y
+scrollFrame.ElasticBehavior = Enum.ElasticBehavior.Never
+scrollFrame.HorizontalScrollBarInset = Enum.ScrollBarInset.None
+
+
+
 local layout = Instance.new("UIListLayout")
 layout.Parent = scrollFrame
 layout.SortOrder = Enum.SortOrder.LayoutOrder
