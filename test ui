@@ -5,7 +5,7 @@ local UserInputService = game:GetService("UserInputService")
 -- Hapus GUI lama
 pcall(function()
     if CoreGui:FindFirstChild("Azenby") then
-        CoreGui.FaDhenGui:Destroy()
+        CoreGui.Azenby:Destroy()
     end
 end)
 
