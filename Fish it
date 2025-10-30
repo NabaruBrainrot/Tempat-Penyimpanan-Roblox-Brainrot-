@@ -253,3 +253,20 @@ _G.FaDhenAddToggle("Anti AFK", {
 })
 
 
+
+
+_G.FaDhenAddToggle("Auto Fly", {
+    Callback = function(state)
+        print("Auto Fly:", state)
+
+        if state then
+            -- Saat Toggle ON → Jalankan Script Fly
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
+        else
+            -- Saat Toggle OFF → (kosong, bisa tambahkan stop fly di sini jika mau)
+            print("Auto Fly dimatikan")
+        end
+    end
+})
+
+
