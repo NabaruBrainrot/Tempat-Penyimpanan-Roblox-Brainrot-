@@ -213,12 +213,12 @@ function _G.FaDhenAddToggle(name, props)
         local targetPos, bgColor, btnColor
         if toggled then
             targetPos = UDim2.new(0, 28, 0, 2)
-            bgColor = Color3.fromRGB(76, 175, 80)
+            bgColor = Color3.fromRGB(0, 200, 200)
             btnColor = Color3.fromRGB(255, 255, 255)
         else
             targetPos = UDim2.new(0, 2, 0, 2)
-            bgColor = Color3.fromRGB(80, 80, 80)
-            btnColor = Color3.fromRGB(200, 200, 200)
+            bgColor = Color3.fromRGB(75, 75, 75)
+            btnColor = Color3.fromRGB(255, 255, 255)
         end
         TweenService:Create(sliderBtn, tweenInfo, {Position = targetPos}):Play()
         TweenService:Create(sliderBg, tweenInfo, {BackgroundColor3 = bgColor}):Play()
