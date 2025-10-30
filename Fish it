@@ -47,7 +47,7 @@ _G.FaDhenAddToggle("Auto Fish", {
             Title.Position = UDim2.new(0, 10, 0, 5)
             Title.Size = UDim2.new(0, 120, 0, 20)
             Title.Font = Enum.Font.GothamBold
-            Title.Text = "set speed 0-3"
+            Title.Text = "set speed 0-5"
             Title.TextColor3 = Color3.fromRGB(255, 255, 255)
             Title.TextSize = 12
             Title.TextXAlignment = Enum.TextXAlignment.Left
@@ -57,7 +57,7 @@ _G.FaDhenAddToggle("Auto Fish", {
             TextBox.Position = UDim2.new(0, 10, 0, 25)
             TextBox.Size = UDim2.new(0, 120, 0, 25)
             TextBox.Font = Enum.Font.GothamBold
-            TextBox.Text = "2.5"
+            TextBox.Text = "3"
             TextBox.TextColor3 = Color3.fromRGB(0, 0, 0)
             TextBox.TextSize = 12
             TextBox.ClearTextOnFocus = false
