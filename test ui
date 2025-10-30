@@ -112,7 +112,7 @@ scrollFrame.Position = UDim2.new(0, 13, 0, 60)
 scrollFrame.BackgroundTransparency = 1
 scrollFrame.BorderSizePixel = 0
 scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-scrollFrame.ScrollBarThickness = 6
+scrollFrame.ScrollBarThickness = 0
 scrollFrame.Parent = mainFrame
 
 
@@ -208,17 +208,17 @@ function _G.FaDhenAddToggle(name, props)
     sliderBtnCorner.CornerRadius = UDim.new(0, 10)
     sliderBtnCorner.Parent = sliderBtn
 
-    local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local tweenInfo = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
     local function updateSlider()
         local targetPos, bgColor, btnColor
         if toggled then
             targetPos = UDim2.new(0, 28, 0, 2)
-            bgColor = Color3.fromRGB(0, 200, 200)
+            bgColor = Color3.fromRGB(33, 150, 243)
             btnColor = Color3.fromRGB(255, 255, 255)
         else
             targetPos = UDim2.new(0, 2, 0, 2)
             bgColor = Color3.fromRGB(75, 75, 75)
-            btnColor = Color3.fromRGB(255, 255, 255)
+            btnColor = Color3.fromRGB(230, 230, 230)
         end
         TweenService:Create(sliderBtn, tweenInfo, {Position = targetPos}):Play()
         TweenService:Create(sliderBg, tweenInfo, {BackgroundColor3 = bgColor}):Play()
