@@ -112,8 +112,14 @@ scrollFrame.Position = UDim2.new(0, 13, 0, 60)
 scrollFrame.BackgroundTransparency = 1
 scrollFrame.BorderSizePixel = 0
 scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+
+
+
 scrollFrame.ScrollBarThickness = 6
+scrollFrame.ScrollBarImageColor3 = Color3.fromRGB(80, 80, 80)
 scrollFrame.Parent = mainFrame
+
+
 
 
 scrollFrame.ScrollingDirection = Enum.ScrollingDirection.Y
