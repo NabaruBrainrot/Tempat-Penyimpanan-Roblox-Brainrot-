@@ -167,7 +167,7 @@ function _G.FaDhenAddToggle(name, props)
 
     local toggleFrame = Instance.new("Frame")
     toggleFrame.Size = UDim2.new(0.97, 0, 0, 40)
-    toggleFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    toggleFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     toggleFrame.BorderSizePixel = 0
     toggleFrame.Parent = scrollFrame
 
