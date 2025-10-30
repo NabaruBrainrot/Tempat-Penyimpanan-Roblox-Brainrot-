@@ -1,339 +1,267 @@
----Ghost Gui UI Library
-loadstring(game:HttpGet('https://raw.githubusercontent.com/GhostPlayer352/UI-Library/refs/heads/main/Ghost%20Gui'))()
-game.CoreGui.GhostGui.MainFrame.Title.Text = "Fish it"
----
+loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/test%20ui"))()
+_G.FaDhenAddTitle("fadhen / Fish it")
+
+
+
+
+_G.FaDhenAddToggle("Auto Farm", {
+    Callback = function(state)
+        print("Auto Click:", state)
+    end
+})
 
 
 
 
 
 
-AddContent("Switch", "Instan Fishing", [[
--- ==== BLOCK: OFF (Toggle MATI → Script AKTIF) ====
-_G.AutoFishingEnabled = true
-print("🎣 Auto Fishing Dinyalakan (Toggle OFF)")
 
--- Hentikan loop lama kalau masih jalan
-if _G.AutoFishingLoop and coroutine.status(_G.AutoFishingLoop) ~= "dead" then
-    task.cancel(_G.AutoFishingLoop)
-end
+_G.FaDhenAddToggle("Auto Fish", {
+    Callback = function(state)
+        print("Auto Fish:", state)
 
--- Simpan posisi awal saat pertama kali aktif
-if not _G.OriginalCFrame and game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-    _G.OriginalCFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
-end
-
-_G.AutoFishingLoop = task.spawn(function()
-    local lastResetTime = os.clock()
-
-    while _G.AutoFishingEnabled do
-        local now = os.clock()
-
-
-        if now - lastResetTime >= 120 then
-            local player = game.Players.LocalPlayer
-            if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                local lastPos = player.Character.HumanoidRootPart.CFrame
-                print("♻️ Reset karakter di lokasi saat ini...")
-
-                -- Reset cepat (bunuh karakter)
-                player.Character:FindFirstChildOfClass("Humanoid"):TakeDamage(9999)
-
-                -- Tunggu karakter baru muncul
-                player.CharacterAdded:Wait()
-                repeat task.wait() until player.Character:FindFirstChild("HumanoidRootPart")
-
-                -- Teleport kembali ke posisi sebelum reset
-                task.wait(0)
-                player.Character:WaitForChild("HumanoidRootPart").CFrame = lastPos
-                print("📍 Respawn di lokasi sebelum reset")
+        if state then
+            -- Kalau GUI sudah ada, munculkan lagi
+            if game.CoreGui:FindFirstChild("DeliveryTouchGUI") then
+                game.CoreGui.DeliveryTouchGUI.Enabled = true
+                return
             end
-            lastResetTime = os.clock()
+
+            -- ==== BUAT GUI ====
+            local TweenService = game:GetService("TweenService")
+            local Players = game:GetService("Players")
+            local LocalPlayer = Players.LocalPlayer
+
+            local ScreenGui = Instance.new("ScreenGui")    
+            local Frame = Instance.new("Frame")    
+            local Title = Instance.new("TextLabel")    
+            local Button = Instance.new("TextButton")    
+            local TextBox = Instance.new("TextBox")    
+            local UICorner_Frame = Instance.new("UICorner")    
+            local UICorner_Button = Instance.new("UICorner")    
+            local UICorner_TextBox = Instance.new("UICorner")    
+
+            ScreenGui.Name = "DeliveryTouchGUI"    
+            ScreenGui.Parent = game.CoreGui    
+            ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling    
+
+            Frame.Parent = ScreenGui    
+            Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)    
+            Frame.Position = UDim2.new(0,535, 0, 11)    
+            Frame.Size = UDim2.new(0, 140, 0, 110)    
+            Frame.Active = true    
+            Frame.Draggable = true    
+            UICorner_Frame.CornerRadius = UDim.new(0, 10)    
+            UICorner_Frame.Parent = Frame    
+
+            Title.Parent = Frame
+            Title.BackgroundTransparency = 1
+            Title.Position = UDim2.new(0, 10, 0, 5)
+            Title.Size = UDim2.new(0, 120, 0, 20)
+            Title.Font = Enum.Font.GothamBold
+            Title.Text = "set speed 0-3"
+            Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+            Title.TextSize = 12
+            Title.TextXAlignment = Enum.TextXAlignment.Left
+
+            TextBox.Parent = Frame
+            TextBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            TextBox.Position = UDim2.new(0, 10, 0, 25)
+            TextBox.Size = UDim2.new(0, 120, 0, 25)
+            TextBox.Font = Enum.Font.GothamBold
+            TextBox.Text = "2.5"
+            TextBox.TextColor3 = Color3.fromRGB(0, 0, 0)
+            TextBox.TextSize = 12
+            TextBox.ClearTextOnFocus = false
+            UICorner_TextBox.CornerRadius = UDim.new(0, 8)
+            UICorner_TextBox.Parent = TextBox
+
+            Button.Parent = Frame    
+            Button.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+            Button.Position = UDim2.new(0, 10, 0, 60)
+            Button.Size = UDim2.new(0, 120, 0, 30)
+            Button.Font = Enum.Font.GothamBold
+            Button.Text = "Mulai"
+            Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+            Button.TextSize = 12
+            UICorner_Button.CornerRadius = UDim.new(0, 8)
+            UICorner_Button.Parent = Button
+
+            -- ====== TOGGLE & AUTO FISHING ======
+            local isOn = false
+            _G.AutoFishingEnabled = false
+            _G.AutoFishingLoop = nil
+
+            local function startFishingLoop()
+                _G.AutoFishingEnabled = true
+                print("🎣 Auto Fishing Dinyalakan")
+
+                if _G.AutoFishingLoop and coroutine.status(_G.AutoFishingLoop) ~= "dead" then
+                    task.cancel(_G.AutoFishingLoop)
+                end
+
+                if not _G.OriginalCFrame and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    _G.OriginalCFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
+                end
+
+                _G.AutoFishingLoop = task.spawn(function()
+                    local lastResetTime = os.clock()
+                    while _G.AutoFishingEnabled do
+                        local now = os.clock()
+                        local waitTime = tonumber(TextBox.Text) or 2.5
+
+                        if now - lastResetTime >= 120 then
+                            local player = LocalPlayer
+                            if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                                local lastPos = player.Character.HumanoidRootPart.CFrame
+                                print("♻️ Reset karakter di lokasi saat ini...")
+                                player.Character:FindFirstChildOfClass("Humanoid"):TakeDamage(9999)
+                                player.CharacterAdded:Wait()
+                                repeat task.wait() until player.Character:FindFirstChild("HumanoidRootPart")
+                                player.Character:WaitForChild("HumanoidRootPart").CFrame = lastPos
+                            end
+                            lastResetTime = os.clock()
+                        end
+
+                        local args1 = { 1 }
+                        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
+                            :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
+                            :WaitForChild("net"):WaitForChild("RE/EquipToolFromHotbar")
+                            :FireServer(unpack(args1))
+                        task.wait(0.1)
+
+                        local args2 = { 1760498391.426017 }
+                        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
+                            :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
+                            :WaitForChild("net"):WaitForChild("RF/ChargeFishingRod")
+                            :InvokeServer(unpack(args2))
+                        task.wait(0.1)
+
+                        local args3 = { -0.5718746185302734, 0.9997670786545603 }
+                        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
+                            :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
+                            :WaitForChild("net"):WaitForChild("RF/RequestFishingMinigameStarted")
+                            :InvokeServer(unpack(args3))
+
+                        task.wait(waitTime)
+
+                        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
+                            :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
+                            :WaitForChild("net"):WaitForChild("RE/FishingCompleted")
+                            :FireServer()
+
+                        if not _G.AutoFishingEnabled then
+                            break
+                        end
+                    end
+                end)
+            end
+
+            local function stopFishingLoop()
+                _G.AutoFishingEnabled = false
+                print("🛑 Auto Fishing Diminta Berhenti")
+            end
+
+            Button.MouseButton1Click:Connect(function()
+                isOn = not isOn
+                if isOn then
+                    Button.Text = "Berhenti"
+                    TweenService:Create(Button, TweenInfo.new(0.25), {BackgroundColor3 = Color3.fromRGB(0, 200, 120)}):Play()
+                    startFishingLoop()
+                else
+                    Button.Text = "Mulai"
+                    TweenService:Create(Button, TweenInfo.new(0.25), {BackgroundColor3 = Color3.fromRGB(0, 170, 255)}):Play()
+                    stopFishingLoop()
+                end
+            end)
+
+        else
+            -- Toggle OFF → Sembunyikan GUI saja, jangan matikan _G.AutoFishingEnabled
+            if game.CoreGui:FindFirstChild("DeliveryTouchGUI") then
+                game.CoreGui.DeliveryTouchGUI.Enabled = false
+            end
+            print("🛑 GUI Auto Fishing disembunyikan, loop tetap sesuai tombol GUI.")
         end
+    end
+})
 
-        -- === Logic Auto Fishing Asli ===
-        -- Langkah 1
-        local args1 = { 1 }
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-            :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-            :WaitForChild("net"):WaitForChild("RE/EquipToolFromHotbar")
-            :FireServer(unpack(args1))
-        print("▶️ Langkah 1 dijalankan")
 
-        task.wait(0.1)
 
-        -- Langkah 2
-        local args2 = { 1760498391.426017 }
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-            :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-            :WaitForChild("net"):WaitForChild("RF/ChargeFishingRod")
-            :InvokeServer(unpack(args2))
-        print("▶️ Langkah 2 dijalankan")
 
-        task.wait(0.1)
 
-        -- Langkah 3
-        local args3 = { -0.5718746185302734, 0.9997670786545603 }
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-            :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-            :WaitForChild("net"):WaitForChild("RF/RequestFishingMinigameStarted")
-            :InvokeServer(unpack(args3))
-        print("▶️ Langkah 3 dijalankan")
+_G.FaDhenAddToggle("Auto Sell", {
+    Callback = function(state)
 
-        task.wait(2.5)
+        if state then
 
-        -- Langkah 4
-        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-            :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-            :WaitForChild("net"):WaitForChild("RE/FishingCompleted")
-            :FireServer()
-        print("✅ Langkah 4 dijalankan (FishingCompleted)")
+            _G.AutoSellEnabled = true
+            print("💰 Auto Sell diaktifkan (toggle ON)")
 
-        -- Jika toggle sudah diubah ke ON (dimatikan), hentikan setelah siklus ini
-        if not _G.AutoFishingEnabled then
-            print("⚠️ Auto Fishing Berhenti Setelah Selesai Satu Siklus")
-            break
+            
+            if _G.AutoSellLoop and coroutine.status(_G.AutoSellLoop) ~= "dead" then
+                task.cancel(_G.AutoSellLoop)
+            end
+
+
+            _G.AutoSellLoop = task.spawn(function()
+                while _G.AutoSellEnabled do
+                    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+                    ReplicatedStorage:WaitForChild("Packages")
+                        :WaitForChild("_Index")
+                        :WaitForChild("sleitnick_net@0.2.0")
+                        :WaitForChild("net")
+                        :WaitForChild("RF/SellAllItems")
+                        :InvokeServer()
+
+                    print("✅ Semua item dijual otomatis")
+                    task.wait(1) 
+                end
+            end)
+        else
+            -- ==== Toggle OFF → Matikan Auto Sell ====
+            _G.AutoSellEnabled = false
+            print("🛑 Auto Sell dimatikan (toggle OFF)")
         end
-
-        task.wait(0.01)
     end
-end)
-]], [[
--- ==== BLOCK: ON (Toggle HIDUP → Script NONAKTIF) ====
-_G.AutoFishingEnabled = false
-print("🛑 Auto Fishing Diminta Berhenti (akan berhenti setelah siklus selesai)")
-]])
+})
 
 
 
 
+_G.FaDhenAddToggle("Anti AFK", {
+    Callback = function(state)
 
+        if state then
+            -- ==== Toggle ON → Aktifkan Anti AFK ====
+            _G.AntiAFKEnabled = true
+            print("🟢 Anti AFK Aktif")
 
+            -- Hentikan loop lama kalau ada
+            if _G.AntiAFKLoop and coroutine.status(_G.AntiAFKLoop) ~= "dead" then
+                task.cancel(_G.AntiAFKLoop)
+            end
 
+            local VirtualUser = game:GetService("VirtualUser")
 
-AddContent("Switch", "Auto Sell", [[
--- ==== BLOCK: OFF (ketika toggle OFF → Script AKTIF) ====
-_G.AutoSellEnabled = true
-print("💰 Auto Sell diaktifkan (toggle OFF)")
+            _G.AntiAFKLoop = task.spawn(function()
+                while _G.AntiAFKEnabled do
+                    game:GetService("Players").LocalPlayer.Idled:Wait()
+                    if not _G.AntiAFKEnabled then break end
 
--- Hentikan loop lama jika masih berjalan
-if _G.AutoSellLoop and coroutine.status(_G.AutoSellLoop) ~= "dead" then
-    task.cancel(_G.AutoSellLoop)
-end
+                    VirtualUser:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+                    task.wait(1)
+                    VirtualUser:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
 
-_G.AutoSellLoop = task.spawn(function()
-    while _G.AutoSellEnabled do
-        game:GetService("ReplicatedStorage")
-            :WaitForChild("Packages"):WaitForChild("_Index")
-            :WaitForChild("sleitnick_net@0.2.0"):WaitForChild("net")
-            :WaitForChild("RF/SellAllItems"):InvokeServer()
-        print("✅ Semua item dijual otomatis")
+                    print("💤 Anti AFK aktif, kamu aman dari kick.")
+                end
+            end)
 
-        task.wait(3) -- jeda 3 detik, ubah sesuai kebutuhan
+        else
+            -- ==== Toggle OFF → Matikan Anti AFK ====
+            _G.AntiAFKEnabled = false
+            print("🔴 Anti AFK Dimatikan")
+        end
     end
-end)
-]], [[
--- ==== BLOCK: ON (ketika toggle ON → Script MATI) ====
-_G.AutoSellEnabled = false
-print("🛑 Auto Sell dimatikan (toggle ON)")
-]])
+})
 
 
-
-
-AddContent("Switch", "Auto AFK", [[
--- ==== BLOCK: OFF (toggle OFF → Anti AFK AKTIF) ====
-_G.AntiAFKEnabled = true
-print("🟢 AFK Active")
-
--- Hentikan loop lama kalau ada
-if _G.AntiAFKLoop and coroutine.status(_G.AntiAFKLoop) ~= "dead" then
-    task.cancel(_G.AntiAFKLoop)
-end
-
-local VirtualUser = game:GetService("VirtualUser")
-
-_G.AntiAFKLoop = task.spawn(function()
-    while _G.AntiAFKEnabled do
-        game:GetService("Players").LocalPlayer.Idled:Wait()
-        if not _G.AntiAFKEnabled then break end
-        VirtualUser:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
-        task.wait(1)
-        VirtualUser:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
-        print("💤 Anti AFK aktif, kamu aman dari kick.")
-    end
-end)
-]], [[
--- ==== BLOCK: ON (toggle ON → Anti AFK NONAKTIF) ====
-_G.AntiAFKEnabled = false
-print("🔴 AFK Nonaktif")
-]])
-
-
-
-
-AddContent("Switch", "Teleport", [[
--- ==== BLOCK: OFF (toggle OFF → GUI DIBUKA) ====
-print("🗺️ Teleport GUI dibuka.")
-
-pcall(function() game.CoreGui:FindFirstChild("TeleportGUI"):Destroy() end)
-
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-
--- GUI utama
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "TeleportGUI"
-ScreenGui.Parent = game.CoreGui
-
--- Frame utama
-local Frame = Instance.new("Frame")
-Frame.Parent = ScreenGui
-Frame.AnchorPoint = Vector2.new(1, 0)
-Frame.Position = UDim2.new(1, -25, 0, 60)
-Frame.Size = UDim2.new(0, 190, 0, 235)
-Frame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-Frame.BackgroundTransparency = 0.1
-Frame.BorderSizePixel = 0
-Frame.Active = true
-Frame.Draggable = true
-
--- Judul
-local Title = Instance.new("TextLabel")
-Title.Parent = Frame
-Title.Size = UDim2.new(1, 0, 0, 30)
-Title.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-Title.BorderSizePixel = 0
-Title.Text = "🗺️ SELECT AREA"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.SourceSansBold
-Title.TextScaled = true
-
--- ScrollFrame
-local Scroll = Instance.new("ScrollingFrame")
-Scroll.Parent = Frame
-Scroll.Position = UDim2.new(0, 0, 0, 32)
-Scroll.Size = UDim2.new(1, 0, 1, -34)
-Scroll.BackgroundTransparency = 1
-Scroll.BorderSizePixel = 0
-Scroll.ScrollBarThickness = 5
-Scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-
--- Layout tombol
-local ListLayout = Instance.new("UIListLayout")
-ListLayout.Parent = Scroll
-ListLayout.Padding = UDim.new(0, 6)
-ListLayout.FillDirection = Enum.FillDirection.Vertical
-ListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-
--- Fungsi buat tombol teleport
-local function CreateButton(name, cframe)
-	local Btn = Instance.new("TextButton")
-	Btn.Parent = Scroll
-	Btn.AnchorPoint = Vector2.new(0.5, 0)
-	Btn.Position = UDim2.new(0.5, 0, 0, 0)
-	Btn.Size = UDim2.new(0, 155, 0, 26)
-	Btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-	Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	Btn.Font = Enum.Font.SourceSansBold
-	Btn.TextScaled = true
-	Btn.BorderSizePixel = 0
-	Btn.Text = name
-	Btn.AutoButtonColor = true
-
-	-- Hover efek
-	Btn.MouseEnter:Connect(function()
-		Btn.BackgroundColor3 = Color3.fromRGB(65, 65, 65)
-	end)
-	Btn.MouseLeave:Connect(function()
-		Btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-	end)
-
-	-- Teleport aksi
-	Btn.MouseButton1Click:Connect(function()
-		local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if hrp then
-			hrp.CFrame = cframe
-			print("📍 Teleported to " .. name)
-		end
-	end)
-end
-
--- AREA LIST
-CreateButton("Area 1", CFrame.new(
-	86.0962067, 16.9992847, 2837.32764,
-	0.980320334, -1.19128948e-07, -0.19741337,
-	1.26658563e-07, 1, 2.55150763e-08,
-	0.19741337, -5.0017043e-08, 0.980320334
-))
-
-CreateButton("Area 2", CFrame.new(
-	-2054.41821, 53.4972076, 3764.98877,
-	0.96103394, 1.61129676e-09, 0.276430428,
-	-6.6792966e-14, 1, -5.82870952e-09,
-	-0.276430428, 5.60156899e-09, 0.96103394
-))
-
-CreateButton("Area 3", CFrame.new(
-	-654.845825, 16.0354481, 612.479309,
-	-0.998329341, 2.63004285e-08, -0.0577796213,
-	2.7475819e-08, 1, -1.95482297e-08,
-	0.0577796213, -2.11031139e-08, -0.998329341
-))
-
-CreateButton("Area 4", CFrame.new(
-	1263.17273, 8.34195328, -223.200806,
-	-0.985696256, -0.0539325736, 0.159668982,
-	2.44141318e-10, 0.94741261, 0.320014566,
-	-0.168531612, 0.315437168, -0.933861077
-))
-
-CreateButton("Area 5", CFrame.new(
-	-2854.36987, 47.025177, 1989.48828,
-	-0.835863829, 0.042007897, -0.547327161,
-	-1.18932419e-09, 0.997067571, 0.0765259191,
-	0.548936844, 0.0639652461, -0.833412707
-))
-
-CreateButton("Area 6", CFrame.new(
-	1164.1947, 6.4959774, 2327.27637,
-	-0.568023086, -4.5011685e-08, 0.82301259,
-	-1.88915834e-08, 1, 4.16528607e-08,
-	-0.82301259, 8.11177525e-09, -0.568023086
-))
-
-CreateButton("Area 7", CFrame.new(
-	-1522.53369, 9.40349483, 1897.19531,
-	-0.886752725, 0.202809498, -0.415376842,
-	6.66340672e-09, 0.898609281, 0.43874976,
-	0.462244093, 0.389062554, -0.796844244
-))
-]], [[
--- ==== BLOCK: ON (toggle ON → GUI DITUTUP) ====
-if game.CoreGui:FindFirstChild("TeleportGUI") then
-    game.CoreGui.TeleportGUI:Destroy()
-    print("❌ Teleport GUI ditutup.")
-end
-]])
-
-
-
-AddContent("Switch", "speed", [[
--- ==== BLOCK: OFF (toggle OFF → Speed CEPAT) ====
-local player = game.Players.LocalPlayer
-if player and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
-    player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = 50
-    print("⚡ Speed diaktifkan jadi 50 (toggle OFF).")
-else
-    warn("⚠️ Tidak dapat menemukan karakter atau humanoid.")
-end
-]], [[
--- ==== BLOCK: ON (toggle ON → Speed NORMAL) ====
-local player = game.Players.LocalPlayer
-if player and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
-    player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = 23
-    print("❌ Speed dikembalikan ke normal (toggle ON).")
-end
-]])
