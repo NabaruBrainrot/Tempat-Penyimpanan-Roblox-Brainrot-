@@ -19,26 +19,34 @@ _G.FaDhenAddToggle("Auto Fish", {
             local TweenService = game:GetService("TweenService")
             local Players = game:GetService("Players")
             local LocalPlayer = Players.LocalPlayer
+            local UserInputService = game:GetService("UserInputService")
 
             local ScreenGui = Instance.new("ScreenGui")    
             local Frame = Instance.new("Frame")    
             local Title = Instance.new("TextLabel")    
             local Button = Instance.new("TextButton")    
-            local TextBox = Instance.new("TextBox")    
+            local SliderFrame = Instance.new("Frame")
+            local SliderBar = Instance.new("Frame")
+            local SliderButton = Instance.new("TextButton")
+            local ValueLabel = Instance.new("TextLabel")
             local UICorner_Frame = Instance.new("UICorner")    
             local UICorner_Button = Instance.new("UICorner")    
-            local UICorner_TextBox = Instance.new("UICorner")    
+            local UICorner_Slider = Instance.new("UICorner")
+            local UICorner_SliderBar = Instance.new("UICorner")
+            local UICorner_SliderButton = Instance.new("UICorner")
 
             ScreenGui.Name = "DeliveryTouchGUI"    
             ScreenGui.Parent = game.CoreGui    
-            ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling    
+            ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+            ScreenGui.ResetOnSpawn = false
 
             Frame.Parent = ScreenGui    
-            Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)    
-            Frame.Position = UDim2.new(0,535, 0, 11)    
+            Frame.BackgroundColor3 = Color3.fromRGB(34, 34, 34)    
+            Frame.Position = UDim2.new(0, 535, 0, 11)    
             Frame.Size = UDim2.new(0, 140, 0, 110)    
             Frame.Active = true    
-            Frame.Draggable = true    
+            Frame.Draggable = true
+            Frame.BorderSizePixel = 0
             UICorner_Frame.CornerRadius = UDim.new(0, 10)    
             UICorner_Frame.Parent = Frame    
 
@@ -52,28 +60,179 @@ _G.FaDhenAddToggle("Auto Fish", {
             Title.TextSize = 12
             Title.TextXAlignment = Enum.TextXAlignment.Left
 
-            TextBox.Parent = Frame
-            TextBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            TextBox.Position = UDim2.new(0, 10, 0, 25)
-            TextBox.Size = UDim2.new(0, 120, 0, 25)
-            TextBox.Font = Enum.Font.GothamBold
-            TextBox.Text = "3"
-            TextBox.TextColor3 = Color3.fromRGB(0, 0, 0)
-            TextBox.TextSize = 12
-            TextBox.ClearTextOnFocus = false
-            UICorner_TextBox.CornerRadius = UDim.new(0, 8)
-            UICorner_TextBox.Parent = TextBox
+            -- Slider Background
+            SliderFrame.Parent = Frame
+            SliderFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            SliderFrame.Position = UDim2.new(0, 10, 0, 30)
+            SliderFrame.Size = UDim2.new(0, 120, 0, 8)
+            SliderFrame.BorderSizePixel = 0
+            SliderFrame.ClipsDescendants = false
+            UICorner_Slider.CornerRadius = UDim.new(1, 0)
+            UICorner_Slider.Parent = SliderFrame
+
+            -- Slider Bar (filled part)
+            SliderBar.Parent = SliderFrame
+            SliderBar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+            SliderBar.Position = UDim2.new(0, 0, 0, 0)
+            SliderBar.Size = UDim2.new(0.6, 0, 1, 0) -- Default 60% (value 3)
+            SliderBar.BorderSizePixel = 0
+            UICorner_SliderBar.CornerRadius = UDim.new(1, 0)
+            UICorner_SliderBar.Parent = SliderBar
+
+            -- Slider Button (draggable circle)
+            SliderButton.Parent = SliderFrame
+            SliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            SliderButton.Position = UDim2.new(0.6, -8, 0.5, -8) -- Center on 60%
+            SliderButton.Size = UDim2.new(0, 16, 0, 16)
+            SliderButton.Text = ""
+            SliderButton.AutoButtonColor = false
+            SliderButton.BorderSizePixel = 0
+            SliderButton.ZIndex = 2
+            UICorner_SliderButton.CornerRadius = UDim.new(1, 0)
+            UICorner_SliderButton.Parent = SliderButton
+
+            -- Value Label
+            ValueLabel.Parent = Frame
+            ValueLabel.BackgroundTransparency = 1
+            ValueLabel.Position = UDim2.new(0, 10, 0, 42)
+            ValueLabel.Size = UDim2.new(0, 120, 0, 15)
+            ValueLabel.Font = Enum.Font.GothamBold
+            ValueLabel.Text = "Speed: 3.0"
+            ValueLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            ValueLabel.TextSize = 11
+            ValueLabel.TextXAlignment = Enum.TextXAlignment.Center
 
             Button.Parent = Frame    
             Button.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-            Button.Position = UDim2.new(0, 10, 0, 60)
+            Button.Position = UDim2.new(0, 10, 0, 65)
             Button.Size = UDim2.new(0, 120, 0, 30)
             Button.Font = Enum.Font.GothamBold
             Button.Text = "Mulai"
             Button.TextColor3 = Color3.fromRGB(255, 255, 255)
             Button.TextSize = 12
+            Button.BorderSizePixel = 0
             UICorner_Button.CornerRadius = UDim.new(0, 8)
             UICorner_Button.Parent = Button
+
+            -- ==== SLIDER LOGIC WITH SAVE DATA ====
+            local minValue = 0
+            local maxValue = 5
+            local currentValue = 3
+            local dragging = false
+
+            -- Load saved slider value
+            local function loadSliderValue()
+                local success, result = pcall(function()
+                    return game:GetService("HttpService"):JSONDecode(readfile("AutoFishSliderValue.json"))
+                end)
+                
+                if success and result and result.speed then
+                    currentValue = math.clamp(result.speed, minValue, maxValue)
+                    print("✅ Loaded slider value:", currentValue)
+                else
+                    currentValue = 3 -- Default value
+                    print("ℹ️ Using default slider value:", currentValue)
+                end
+            end
+
+            -- Save slider value
+            local function saveSliderValue()
+                local success, err = pcall(function()
+                    local data = {speed = currentValue}
+                    writefile("AutoFishSliderValue.json", game:GetService("HttpService"):JSONEncode(data))
+                end)
+                
+                if success then
+                    print("💾 Slider value saved:", currentValue)
+                else
+                    warn("❌ Failed to save slider value:", err)
+                end
+            end
+
+            -- Load value saat GUI dibuat
+            loadSliderValue()
+
+            -- Fungsi untuk update slider
+            local function updateSlider(input)
+                local sliderPos = SliderFrame.AbsolutePosition.X
+                local sliderSize = SliderFrame.AbsoluteSize.X
+                local mousePos = input.Position.X
+                
+                -- Hitung posisi relatif
+                local relativePos = math.clamp(mousePos - sliderPos, 0, sliderSize)
+                local percentage = relativePos / sliderSize
+                
+                -- Update value
+                currentValue = minValue + (maxValue - minValue) * percentage
+                currentValue = math.floor(currentValue * 10) / 10 -- Round to 1 decimal
+                
+                -- Update posisi button dan bar
+                SliderButton.Position = UDim2.new(percentage, -8, 0.5, -8)
+                SliderBar.Size = UDim2.new(percentage, 0, 1, 0)
+                ValueLabel.Text = string.format("Speed: %.1f", currentValue)
+            end
+
+            -- Event untuk mulai drag
+            SliderButton.MouseButton1Down:Connect(function()
+                dragging = true
+                SliderButton.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+            end)
+
+            -- Event untuk stop drag
+            UserInputService.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or 
+                   input.UserInputType == Enum.UserInputType.Touch then
+                    if dragging then
+                        dragging = false
+                        SliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                        -- Save value saat selesai drag
+                        saveSliderValue()
+                    end
+                end
+            end)
+
+            -- Event untuk update saat drag
+            UserInputService.InputChanged:Connect(function(input)
+                if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or
+                   input.UserInputType == Enum.UserInputType.Touch) then
+                    updateSlider(input)
+                end
+            end)
+
+            -- Klik langsung pada slider frame
+            SliderFrame.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or
+                   input.UserInputType == Enum.UserInputType.Touch then
+                    dragging = true
+                    SliderButton.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+                    updateSlider(input)
+                end
+            end)
+
+            -- Animasi hover
+            SliderButton.MouseEnter:Connect(function()
+                if not dragging then
+                    TweenService:Create(SliderButton, TweenInfo.new(0.2), {
+                        BackgroundColor3 = Color3.fromRGB(220, 220, 220),
+                        Size = UDim2.new(0, 18, 0, 18)
+                    }):Play()
+                end
+            end)
+
+            SliderButton.MouseLeave:Connect(function()
+                if not dragging then
+                    TweenService:Create(SliderButton, TweenInfo.new(0.2), {
+                        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                        Size = UDim2.new(0, 16, 0, 16)
+                    }):Play()
+                end
+            end)
+
+            -- Initialize slider position dengan saved value
+            local initPercentage = (currentValue - minValue) / (maxValue - minValue)
+            SliderButton.Position = UDim2.new(initPercentage, -8, 0.5, -8)
+            SliderBar.Size = UDim2.new(initPercentage, 0, 1, 0)
+            ValueLabel.Text = string.format("Speed: %.1f", currentValue)
 
             -- ====== TOGGLE & AUTO FISHING ======
             local isOn = false
@@ -96,7 +255,7 @@ _G.FaDhenAddToggle("Auto Fish", {
                     local lastResetTime = os.clock()
                     while _G.AutoFishingEnabled do
                         local now = os.clock()
-                        local waitTime = tonumber(TextBox.Text) or 2.5
+                        local waitTime = currentValue
 
                         if now - lastResetTime >= 120 then
                             local player = LocalPlayer
@@ -172,9 +331,6 @@ _G.FaDhenAddToggle("Auto Fish", {
         end
     end
 })
-
-
-
 
 
 _G.FaDhenAddToggle("Auto Sell", {
