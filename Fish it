@@ -4,6 +4,7 @@ _G.FaDhenAddTitle("Beta Version")
 
 
 
+
 _G.FaDhenAddToggle("Auto Fish", {
     Callback = function(state)
         print("Auto Fish:", state)
@@ -55,7 +56,7 @@ _G.FaDhenAddToggle("Auto Fish", {
             Title.Position = UDim2.new(0, 10, 0, 5)
             Title.Size = UDim2.new(0, 120, 0, 20)
             Title.Font = Enum.Font.GothamBold
-            Title.Text = "set speed 0-5"
+            Title.Text = "Speed: 3.0"
             Title.TextColor3 = Color3.fromRGB(255, 255, 255)
             Title.TextSize = 12
             Title.TextXAlignment = Enum.TextXAlignment.Left
@@ -63,7 +64,7 @@ _G.FaDhenAddToggle("Auto Fish", {
             -- Slider Background
             SliderFrame.Parent = Frame
             SliderFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            SliderFrame.Position = UDim2.new(0, 10, 0, 30)
+            SliderFrame.Position = UDim2.new(0, 10, 0, 33)
             SliderFrame.Size = UDim2.new(0, 120, 0, 8)
             SliderFrame.BorderSizePixel = 0
             SliderFrame.ClipsDescendants = false
@@ -91,16 +92,17 @@ _G.FaDhenAddToggle("Auto Fish", {
             UICorner_SliderButton.CornerRadius = UDim.new(1, 0)
             UICorner_SliderButton.Parent = SliderButton
 
-            -- Value Label
+            -- Value Label (sekarang kosong/tersembunyi)
             ValueLabel.Parent = Frame
             ValueLabel.BackgroundTransparency = 1
             ValueLabel.Position = UDim2.new(0, 10, 0, 42)
             ValueLabel.Size = UDim2.new(0, 120, 0, 15)
             ValueLabel.Font = Enum.Font.GothamBold
-            ValueLabel.Text = "Speed: 3.0"
+            ValueLabel.Text = ""
             ValueLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
             ValueLabel.TextSize = 11
             ValueLabel.TextXAlignment = Enum.TextXAlignment.Center
+            ValueLabel.Visible = false
 
             Button.Parent = Frame    
             Button.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
@@ -169,7 +171,7 @@ _G.FaDhenAddToggle("Auto Fish", {
                 -- Update posisi button dan bar
                 SliderButton.Position = UDim2.new(percentage, -8, 0.5, -8)
                 SliderBar.Size = UDim2.new(percentage, 0, 1, 0)
-                ValueLabel.Text = string.format("Speed: %.1f", currentValue)
+                Title.Text = string.format("Speed: %.1f", currentValue)
             end
 
             -- Event untuk mulai drag
@@ -232,7 +234,7 @@ _G.FaDhenAddToggle("Auto Fish", {
             local initPercentage = (currentValue - minValue) / (maxValue - minValue)
             SliderButton.Position = UDim2.new(initPercentage, -8, 0.5, -8)
             SliderBar.Size = UDim2.new(initPercentage, 0, 1, 0)
-            ValueLabel.Text = string.format("Speed: %.1f", currentValue)
+            Title.Text = string.format("Speed: %.1f", currentValue)
 
             -- ====== TOGGLE & AUTO FISHING ======
             local isOn = false
@@ -323,7 +325,7 @@ _G.FaDhenAddToggle("Auto Fish", {
             end)
 
         else
-            -- Toggle OFF → Sembunyikan GUI saja, jangan matikan _G.AutoFishingEnabled
+
             if game.CoreGui:FindFirstChild("DeliveryTouchGUI") then
                 game.CoreGui.DeliveryTouchGUI.Enabled = false
             end
@@ -331,6 +333,11 @@ _G.FaDhenAddToggle("Auto Fish", {
         end
     end
 })
+
+
+
+
+
 
 
 _G.FaDhenAddToggle("Auto Sell", {
