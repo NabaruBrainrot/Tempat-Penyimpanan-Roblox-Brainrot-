@@ -2,6 +2,15 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat
 _G.FaDhenAddTitle("Beta Version")
 
 
+
+
+
+
+
+
+
+
+
 _G.FaDhenAddToggle("Auto Fish", {
     Callback = function(state)
         print("Auto Fish:", state)
@@ -72,7 +81,7 @@ _G.FaDhenAddToggle("Auto Fish", {
             SliderBar.Parent = SliderFrame
             SliderBar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
             SliderBar.Position = UDim2.new(0, 0, 0, 0)
-            SliderBar.Size = UDim2.new(0.6, 0, 1, 0) -- Default 60% (value 3)
+            SliderBar.Size = UDim2.new(0.6, 0, 1, 0)
             SliderBar.BorderSizePixel = 0
             UICorner_SliderBar.CornerRadius = UDim.new(1, 0)
             UICorner_SliderBar.Parent = SliderBar
@@ -80,7 +89,7 @@ _G.FaDhenAddToggle("Auto Fish", {
             -- Slider Button (draggable circle)
             SliderButton.Parent = SliderFrame
             SliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            SliderButton.Position = UDim2.new(0.6, -8, 0.5, -8) -- Center on 60%
+            SliderButton.Position = UDim2.new(0.6, -8, 0.5, -8)
             SliderButton.Size = UDim2.new(0, 16, 0, 16)
             SliderButton.Text = ""
             SliderButton.AutoButtonColor = false
@@ -89,7 +98,7 @@ _G.FaDhenAddToggle("Auto Fish", {
             UICorner_SliderButton.CornerRadius = UDim.new(1, 0)
             UICorner_SliderButton.Parent = SliderButton
 
-            -- Value Label (sekarang kosong/tersembunyi)
+            -- Value Label
             ValueLabel.Parent = Frame
             ValueLabel.BackgroundTransparency = 1
             ValueLabel.Position = UDim2.new(0, 10, 0, 42)
@@ -119,7 +128,6 @@ _G.FaDhenAddToggle("Auto Fish", {
             local currentValue = 3
             local dragging = false
 
-            -- Load saved slider value
             local function loadSliderValue()
                 local success, result = pcall(function()
                     return game:GetService("HttpService"):JSONDecode(readfile("AutoFishSliderValue.json"))
@@ -129,12 +137,11 @@ _G.FaDhenAddToggle("Auto Fish", {
                     currentValue = math.clamp(result.speed, minValue, maxValue)
                     print("✅ Loaded slider value:", currentValue)
                 else
-                    currentValue = 3 -- Default value
+                    currentValue = 3
                     print("ℹ️ Using default slider value:", currentValue)
                 end
             end
 
-            -- Save slider value
             local function saveSliderValue()
                 local success, err = pcall(function()
                     local data = {speed = currentValue}
@@ -148,49 +155,40 @@ _G.FaDhenAddToggle("Auto Fish", {
                 end
             end
 
-            -- Load value saat GUI dibuat
             loadSliderValue()
 
-            -- Fungsi untuk update slider
             local function updateSlider(input)
                 local sliderPos = SliderFrame.AbsolutePosition.X
                 local sliderSize = SliderFrame.AbsoluteSize.X
                 local mousePos = input.Position.X
                 
-                -- Hitung posisi relatif
                 local relativePos = math.clamp(mousePos - sliderPos, 0, sliderSize)
                 local percentage = relativePos / sliderSize
                 
-                -- Update value
                 currentValue = minValue + (maxValue - minValue) * percentage
-                currentValue = math.floor(currentValue * 10) / 10 -- Round to 1 decimal
+                currentValue = math.floor(currentValue * 10) / 10
                 
-                -- Update posisi button dan bar
                 SliderButton.Position = UDim2.new(percentage, -8, 0.5, -8)
                 SliderBar.Size = UDim2.new(percentage, 0, 1, 0)
                 Title.Text = string.format("Speed: %.1f", currentValue)
             end
 
-            -- Event untuk mulai drag
             SliderButton.MouseButton1Down:Connect(function()
                 dragging = true
                 SliderButton.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
             end)
 
-            -- Event untuk stop drag
             UserInputService.InputEnded:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 or 
                    input.UserInputType == Enum.UserInputType.Touch then
                     if dragging then
                         dragging = false
                         SliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                        -- Save value saat selesai drag
                         saveSliderValue()
                     end
                 end
             end)
 
-            -- Event untuk update saat drag
             UserInputService.InputChanged:Connect(function(input)
                 if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or
                    input.UserInputType == Enum.UserInputType.Touch) then
@@ -198,7 +196,6 @@ _G.FaDhenAddToggle("Auto Fish", {
                 end
             end)
 
-            -- Klik langsung pada slider frame
             SliderFrame.InputBegan:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 or
                    input.UserInputType == Enum.UserInputType.Touch then
@@ -208,7 +205,6 @@ _G.FaDhenAddToggle("Auto Fish", {
                 end
             end)
 
-            -- Animasi hover
             SliderButton.MouseEnter:Connect(function()
                 if not dragging then
                     TweenService:Create(SliderButton, TweenInfo.new(0.2), {
@@ -227,111 +223,134 @@ _G.FaDhenAddToggle("Auto Fish", {
                 end
             end)
 
-            -- Initialize slider position dengan saved value
             local initPercentage = (currentValue - minValue) / (maxValue - minValue)
             SliderButton.Position = UDim2.new(initPercentage, -8, 0.5, -8)
             SliderBar.Size = UDim2.new(initPercentage, 0, 1, 0)
             Title.Text = string.format("Speed: %.1f", currentValue)
 
-            -- ====== TOGGLE & AUTO FISHING ======
+            -- ====== EQUIP TOOL FUNCTION (2 KALI DENGAN DELAY 0.5 DETIK) ======
+            local function equipTool()
+                local args1 = { 1 }
+                -- Equip pertama
+                game:GetService("ReplicatedStorage"):WaitForChild("Packages")
+                    :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
+                    :WaitForChild("net"):WaitForChild("RE/EquipToolFromHotbar")
+                    :FireServer(unpack(args1))
+                print("🎣 Tool equipped! (1/2)")
+                
+                task.wait(0.5) -- Delay 0.5 detik
+                
+                -- Equip kedua
+                game:GetService("ReplicatedStorage"):WaitForChild("Packages")
+                    :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
+                    :WaitForChild("net"):WaitForChild("RE/EquipToolFromHotbar")
+                    :FireServer(unpack(args1))
+                print("🎣 Tool equipped! (2/2)")
+            end
+
+            -- ====== TOGGLE & AUTO FISHING (SPAM MODE) ======
             local isOn = false
             _G.AutoFishingEnabled = false
-            _G.AutoFishingLoop = nil
+            _G.SpamThread = nil
+            _G.CompleteThread = nil
+            local completeQueue = {}
 
-            local function startFishingLoop()
+            local function startSpamFishing()
                 _G.AutoFishingEnabled = true
-                print("🎣 Auto Fishing Dinyalakan")
+                print("🎣 Auto Fishing Spam Dinyalakan")
 
-                if _G.AutoFishingLoop and coroutine.status(_G.AutoFishingLoop) ~= "dead" then
-                    task.cancel(_G.AutoFishingLoop)
-                end
+                -- **EQUIP TOOL 2 KALI DENGAN DELAY 0.5 DETIK**
+                task.spawn(function()
+                    equipTool() -- Total waktu: 0.5 detik (sudah termasuk delay di dalam function)
+                end)
 
-                if not _G.OriginalCFrame and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                    _G.OriginalCFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
-                end
-
-                _G.AutoFishingLoop = task.spawn(function()
-                    local lastResetTime = os.clock()
+                -- Thread untuk spam Langkah 1 & 2
+                _G.SpamThread = task.spawn(function()
+                    -- **TUNGGU 1 DETIK (0.5 + 0.5) SEBELUM MULAI SPAM**
+                    task.wait(1)
+                    
                     while _G.AutoFishingEnabled do
-                        local now = os.clock()
-                        local waitTime = currentValue
-
-                        if now - lastResetTime >= 120 then
-                            local player = LocalPlayer
-                            if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                                local lastPos = player.Character.HumanoidRootPart.CFrame
-                                print("♻️ Reset karakter di lokasi saat ini...")
-                                player.Character:FindFirstChildOfClass("Humanoid"):TakeDamage(9999)
-                                player.CharacterAdded:Wait()
-                                repeat task.wait() until player.Character:FindFirstChild("HumanoidRootPart")
-                                player.Character:WaitForChild("HumanoidRootPart").CFrame = lastPos
-                            end
-                            lastResetTime = os.clock()
-                        end
-
-                        local args1 = { 1 }
-                        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-                            :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-                            :WaitForChild("net"):WaitForChild("RE/EquipToolFromHotbar")
-                            :FireServer(unpack(args1))
-                        task.wait(0.1)
-
+                        -- Langkah 1
                         local args2 = { 1760498391.426017 }
                         game:GetService("ReplicatedStorage"):WaitForChild("Packages")
                             :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
                             :WaitForChild("net"):WaitForChild("RF/ChargeFishingRod")
                             :InvokeServer(unpack(args2))
-                        task.wait(0.1)
 
+                        -- Langkah 2
                         local args3 = { -0.5718746185302734, 0.9997670786545603 }
                         game:GetService("ReplicatedStorage"):WaitForChild("Packages")
                             :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
                             :WaitForChild("net"):WaitForChild("RF/RequestFishingMinigameStarted")
                             :InvokeServer(unpack(args3))
+                        
+                        -- Tambah ke queue
+                        table.insert(completeQueue, tick() + currentValue)
+                        
+                        task.wait(0.05) -- Delay spam
+                    end
+                end)
 
-                        task.wait(waitTime)
-
-                        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-                            :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-                            :WaitForChild("net"):WaitForChild("RE/FishingCompleted")
-                            :FireServer()
-
-                        if not _G.AutoFishingEnabled then
-                            break
+                -- Thread untuk complete fishing
+                _G.CompleteThread = task.spawn(function()
+                    -- **TUNGGU 1 DETIK (0.5 + 0.5) SEBELUM MULAI COMPLETE**
+                    task.wait(0.1)
+                    
+                    while _G.AutoFishingEnabled do
+                        local now = tick()
+                        
+                        for i = #completeQueue, 1, -1 do
+                            if now >= completeQueue[i] then
+                                game:GetService("ReplicatedStorage"):WaitForChild("Packages")
+                                    :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
+                                    :WaitForChild("net"):WaitForChild("RE/FishingCompleted")
+                                    :FireServer()
+                                table.remove(completeQueue, i)
+                            end
                         end
+                        
+                        task.wait(0.1)
                     end
                 end)
             end
 
-            local function stopFishingLoop()
+            local function stopSpamFishing()
                 _G.AutoFishingEnabled = false
-                print("🛑 Auto Fishing Diminta Berhenti")
+                completeQueue = {}
+                print("🛑 Auto Fishing Spam Dihentikan")
             end
+
+            -- Equip tool saat karakter respawn (2 KALI DENGAN DELAY 0.5 DETIK)
+            LocalPlayer.CharacterAdded:Connect(function(character)
+                if _G.AutoFishingEnabled then
+                    character:WaitForChild("HumanoidRootPart")
+                    task.wait(0.5)
+                    equipTool() -- Akan equip 2 kali dengan delay 0.5 detik
+                    print("♻️ Character respawned, tool re-equipped 2x!")
+                end
+            end)
 
             Button.MouseButton1Click:Connect(function()
                 isOn = not isOn
                 if isOn then
                     Button.Text = "Berhenti"
                     TweenService:Create(Button, TweenInfo.new(0.25), {BackgroundColor3 = Color3.fromRGB(0, 200, 120)}):Play()
-                    startFishingLoop()
+                    startSpamFishing()
                 else
                     Button.Text = "Mulai"
                     TweenService:Create(Button, TweenInfo.new(0.25), {BackgroundColor3 = Color3.fromRGB(0, 170, 255)}):Play()
-                    stopFishingLoop()
+                    stopSpamFishing()
                 end
             end)
 
         else
-
             if game.CoreGui:FindFirstChild("DeliveryTouchGUI") then
                 game.CoreGui.DeliveryTouchGUI.Enabled = false
             end
-            print("🛑 GUI Auto Fishing disembunyikan, loop tetap sesuai tombol GUI.")
+            print("🛑 GUI Auto Fishing disembunyikan")
         end
     end
 })
-
-
 
 
 
