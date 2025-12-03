@@ -1,8 +1,5 @@
 loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/test%20ui"))()
-_G.FaDhenAddTitle("Beta Version")
-
-
-
+_G.FaDhenAddTitle("Fish it")
 
 
 
@@ -238,7 +235,7 @@ _G.FaDhenAddToggle("Auto Fish", {
                     :FireServer(unpack(args1))
                 print("🎣 Tool equipped! (1/2)")
                 
-                task.wait(0.5) -- Delay 0.5 detik
+                task.wait(0.5)
                 
                 -- Equip kedua
                 game:GetService("ReplicatedStorage"):WaitForChild("Packages")
@@ -248,84 +245,76 @@ _G.FaDhenAddToggle("Auto Fish", {
                 print("🎣 Tool equipped! (2/2)")
             end
 
-            -- ====== TOGGLE & AUTO FISHING (SPAM MODE) ======
+            -- ====== AUTO FISHING BERGILIRAN (SEQUENTIAL MODE) ======
             local isOn = false
             _G.AutoFishingEnabled = false
-            _G.SpamThread = nil
-            _G.CompleteThread = nil
-            local completeQueue = {}
+            _G.FishingThread = nil
 
-            local function startSpamFishing()
+            local function startSequentialFishing()
                 _G.AutoFishingEnabled = true
-                print("🎣 Auto Fishing Spam Dinyalakan")
+                print("🎣 Auto Fishing Bergiliran Dinyalakan")
 
-                -- **EQUIP TOOL 2 KALI DENGAN DELAY 0.5 DETIK**
+                -- Equip tool dulu
                 task.spawn(function()
-                    equipTool() -- Total waktu: 0.5 detik (sudah termasuk delay di dalam function)
+                    equipTool()
                 end)
 
-                -- Thread untuk spam Langkah 1 & 2
-                _G.SpamThread = task.spawn(function()
-                    -- **TUNGGU 1 DETIK (0.5 + 0.5) SEBELUM MULAI SPAM**
-                    task.wait(1)
+                -- Loop fishing bergiliran
+                _G.FishingThread = task.spawn(function()
+                    task.wait(1) -- Tunggu equip selesai
                     
                     while _G.AutoFishingEnabled do
-                        -- Langkah 1
-                        local args2 = { 1760498391.426017 }
+                        -- Langkah 1: ChargeFishingRod
                         game:GetService("ReplicatedStorage"):WaitForChild("Packages")
                             :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
                             :WaitForChild("net"):WaitForChild("RF/ChargeFishingRod")
-                            :InvokeServer(unpack(args2))
-
-                        -- Langkah 2
-                        local args3 = { -0.5718746185302734, 0.9997670786545603 }
+                            :InvokeServer()
+                        print("✅ Step 1: ChargeFishingRod")
+                        
+                        task.wait(0.1) -- Delay antar langkah
+                        
+                        -- Langkah 2: RequestFishingMinigameStarted
+                        local args = { 
+                            -1.233184814453125, 
+                            0.9910483840818842, 
+                            tick() * 1000
+                        }
                         game:GetService("ReplicatedStorage"):WaitForChild("Packages")
                             :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
                             :WaitForChild("net"):WaitForChild("RF/RequestFishingMinigameStarted")
-                            :InvokeServer(unpack(args3))
+                            :InvokeServer(unpack(args))
+                        print("✅ Step 2: RequestFishingMinigameStarted")
                         
-                        -- Tambah ke queue
-                        table.insert(completeQueue, tick() + currentValue)
+                        -- Tunggu sesuai slider value
+                        task.wait(currentValue)
                         
-                        task.wait(0.05) -- Delay spam
-                    end
-                end)
-
-                -- Thread untuk complete fishing
-                _G.CompleteThread = task.spawn(function()
-                    -- **TUNGGU 1 DETIK (0.5 + 0.5) SEBELUM MULAI COMPLETE**
-                    task.wait(0.1)
-                    
-                    while _G.AutoFishingEnabled do
-                        local now = tick()
+                        -- Langkah 3: FishingCompleted
+                        game:GetService("ReplicatedStorage"):WaitForChild("Packages")
+                            :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
+                            :WaitForChild("net"):WaitForChild("RE/FishingCompleted")
+                            :FireServer()
+                        print("✅ Step 3: FishingCompleted")
                         
-                        for i = #completeQueue, 1, -1 do
-                            if now >= completeQueue[i] then
-                                game:GetService("ReplicatedStorage"):WaitForChild("Packages")
-                                    :WaitForChild("_Index"):WaitForChild("sleitnick_net@0.2.0")
-                                    :WaitForChild("net"):WaitForChild("RE/FishingCompleted")
-                                    :FireServer()
-                                table.remove(completeQueue, i)
-                            end
-                        end
-                        
-                        task.wait(0.1)
+                        task.wait(0.1) -- Delay sebelum loop ulang
                     end
                 end)
             end
 
-            local function stopSpamFishing()
+            local function stopSequentialFishing()
                 _G.AutoFishingEnabled = false
-                completeQueue = {}
-                print("🛑 Auto Fishing Spam Dihentikan")
+                if _G.FishingThread then
+                    task.cancel(_G.FishingThread)
+                    _G.FishingThread = nil
+                end
+                print("🛑 Auto Fishing Bergiliran Dihentikan")
             end
 
-            -- Equip tool saat karakter respawn (2 KALI DENGAN DELAY 0.5 DETIK)
+            -- Equip tool saat karakter respawn
             LocalPlayer.CharacterAdded:Connect(function(character)
                 if _G.AutoFishingEnabled then
                     character:WaitForChild("HumanoidRootPart")
                     task.wait(0.5)
-                    equipTool() -- Akan equip 2 kali dengan delay 0.5 detik
+                    equipTool()
                     print("♻️ Character respawned, tool re-equipped 2x!")
                 end
             end)
@@ -335,11 +324,11 @@ _G.FaDhenAddToggle("Auto Fish", {
                 if isOn then
                     Button.Text = "Berhenti"
                     TweenService:Create(Button, TweenInfo.new(0.25), {BackgroundColor3 = Color3.fromRGB(0, 200, 120)}):Play()
-                    startSpamFishing()
+                    startSequentialFishing()
                 else
                     Button.Text = "Mulai"
                     TweenService:Create(Button, TweenInfo.new(0.25), {BackgroundColor3 = Color3.fromRGB(0, 170, 255)}):Play()
-                    stopSpamFishing()
+                    stopSequentialFishing()
                 end
             end)
 
@@ -351,6 +340,8 @@ _G.FaDhenAddToggle("Auto Fish", {
         end
     end
 })
+
+
 
 
 
