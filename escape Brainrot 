@@ -1,4 +1,5 @@
 loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/test%20ui"))()
+_G.FaDhenAddTitle("yt fadhengaming")
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Remote = ReplicatedStorage:WaitForChild("RemoteEvents"):WaitForChild("CollectMoney")
