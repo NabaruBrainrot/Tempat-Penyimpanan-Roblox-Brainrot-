@@ -49,7 +49,7 @@ end)
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 230, 0, 250)
 mainFrame.Position = UDim2.new(0.5, -115, 0.4, -125)
-mainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
 mainFrame.BorderSizePixel = 0
 mainFrame.Visible = false
 mainFrame.Active = true
