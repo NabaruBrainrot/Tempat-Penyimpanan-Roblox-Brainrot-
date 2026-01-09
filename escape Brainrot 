@@ -1,4 +1,7 @@
 loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/test%20ui"))()
+_G.FaDhenAddTitle("Escape Brainrot")
+
+
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Remote = ReplicatedStorage:WaitForChild("RemoteEvents"):WaitForChild("CollectMoney")
@@ -6,7 +9,7 @@ local Remote = ReplicatedStorage:WaitForChild("RemoteEvents"):WaitForChild("Coll
 
 local AutoCollect = false
 
-_G.FaDhenAddToggle("Auto Collect", {
+_G.FaDhenAddToggle("Collect Cash", {
     Callback = function(state)
         AutoCollect = state
         print("Collect Cash:", state)
@@ -224,7 +227,7 @@ local function createGui()
     if savedPosition then
         frame.Position = savedPosition
     else
-        frame.Position = UDim2.new(0.5, 81}, {0.5, -167)
+        frame.Position = UDim2.new(0.5, 81, 0.5, -167)
     end
     
     frame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
