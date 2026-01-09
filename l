@@ -1,0 +1,659 @@
+loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/test%20ui"))()
+_G.FaDhenAddTitle("Escape Brainrot")
+
+
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Remote = ReplicatedStorage:WaitForChild("RemoteEvents"):WaitForChild("CollectMoney")
+
+
+local AutoCollect = false
+
+_G.FaDhenAddToggle("Collect Cash", {
+    Callback = function(state)
+        AutoCollect = state
+        print("Collect Cash:", state)
+
+        if state then
+            task.spawn(function()
+                while AutoCollect do
+                    for i = 1, 30 do
+                        if not AutoCollect then break end
+                        Remote:FireServer("Slot"..i)
+                        task.wait() -- anti lag / anti spike
+                    end
+                    task.wait(0.5) -- interval 1 detik
+                end
+            end)
+        end
+    end
+})
+
+
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+
+local folder = workspace:WaitForChild("ActiveTsunamis")
+
+
+local AntiTsunami = false
+local antiConnection = nil
+
+
+local function removeHitbox(obj)
+	if AntiTsunami and obj.Name == "Hitbox" then
+		obj:Destroy()
+	end
+end
+
+_G.FaDhenAddToggle("Remove Tsunami", {
+    Callback = function(state)
+        if state then
+            local folder = workspace:FindFirstChild("ActiveTsunamis")
+            if folder then
+                folder:Destroy()
+                print("ActiveTsunamis berhasil dihapus")
+            else
+                print("ActiveTsunamis tidak ditemukan")
+            end
+        end
+    end
+})
+
+
+
+
+
+
+local guiEnabled = false
+local mainGui = nil
+local heartbeatConnection = nil
+local childAddedConnection = nil
+local childRemovedConnection = nil
+local savedPosition = nil -- Menyimpan posisi terakhir GUI
+
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
+
+
+local targetFolder = workspace:WaitForChild("ActiveBrainrots"):WaitForChild("Secret")
+
+
+local autoProxActive = false
+local autoProxEndTime = 0
+
+
+local function startAutoProximity()
+    if not guiEnabled then return end
+    autoProxActive = true
+    autoProxEndTime = tick() + 0.5
+end
+
+
+local function hasValidRateText(model)
+    local handle = model:FindFirstChild("Handle")
+    if not handle then return false end
+
+    local statsGui = handle:FindFirstChild("StatsGui")
+    if not statsGui then return false end
+
+    local frame = statsGui:FindFirstChild("Frame")
+    if not frame then return false end
+
+    local rate = frame:FindFirstChild("Rate")
+    if not rate or not rate:IsA("TextLabel") then return false end
+    
+    -- Check if text exists and not empty
+    if not rate.Text or rate.Text == "" or rate.Text == "N/A" then return false end
+    
+    return true
+end
+
+
+local function getRateText(model)
+    if not hasValidRateText(model) then return nil end
+    
+    local handle = model:FindFirstChild("Handle")
+    local statsGui = handle:FindFirstChild("StatsGui")
+    local frame = statsGui:FindFirstChild("Frame")
+    local rate = frame:FindFirstChild("Rate")
+    
+    return rate.Text
+end
+
+local function getRateNumber(model)
+    local text = getRateText(model)
+    if not text then return 0 end
+
+    text = string.lower(text)
+    local num = tonumber(string.match(text, "%d+%.?%d*")) or 0
+
+    if string.find(text, "k") then
+        num = num * 1000
+    elseif string.find(text, "m") then
+        num = num * 1000000
+    elseif string.find(text, "b") then
+        num = num * 1000000000
+    end
+
+    return num
+end
+
+
+local function teleportToModel(model)
+    if not guiEnabled then return end
+    
+    local character = player.Character or player.CharacterAdded:Wait()
+    local hrp = character:WaitForChild("HumanoidRootPart", 5)
+    if not hrp then return end
+
+    local targetPart = model.PrimaryPart or model:FindFirstChild("Handle") or model:FindFirstChildWhichIsA("BasePart")
+    if not targetPart then return end
+
+    hrp.CFrame = targetPart.CFrame
+    startAutoProximity()
+end
+
+
+local function makeDraggable(frame)
+    local dragging = false
+    local dragInput, dragStart, startPos
+
+    local function update(input)
+        local delta = input.Position - dragStart
+        local newPos = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+        frame.Position = newPos
+        savedPosition = newPos -- Simpan posisi setiap kali digeser
+    end
+
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or 
+           input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    frame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or 
+           input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            update(input)
+        end
+    end)
+end
+
+
+local function createGui()
+    if mainGui then
+        mainGui:Destroy()
+        mainGui = nil
+    end
+    
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "SecretModelViewer"
+    gui.ResetOnSpawn = false
+    gui.Parent = player:WaitForChild("PlayerGui")
+    mainGui = gui
+
+    -- Main Frame
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 210, 0, 240)
+    
+
+    if savedPosition then
+        frame.Position = savedPosition
+    else
+        frame.Position = UDim2.new(0.5, 81, 0.5, -167)
+    end
+    
+    frame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+    frame.BorderSizePixel = 0
+    frame.ClipsDescendants = true
+    frame.Active = true
+    frame.Parent = gui
+    
+    local mainCorner = Instance.new("UICorner", frame)
+    mainCorner.CornerRadius = UDim.new(0, 10)
+
+    -- Header
+    local header = Instance.new("Frame")
+    header.Size = UDim2.new(1, 0, 0, 35)
+    header.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+    header.BorderSizePixel = 0
+    header.Parent = frame
+    
+    local headerCorner = Instance.new("UICorner", header)
+    headerCorner.CornerRadius = UDim.new(0, 10)
+
+    -- Title
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, -15, 1, 0)
+    title.Position = UDim2.new(0, 10, 0, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "SECRET AUTO FARM"
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.TextSize = 12
+    title.Font = Enum.Font.GothamBold
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.Parent = header
+
+    -- Column Headers
+    local columnFrame = Instance.new("Frame")
+    columnFrame.Size = UDim2.new(1, -10, 0, 20)
+    columnFrame.Position = UDim2.new(0, 5, 0, 40)
+    columnFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+    columnFrame.BorderSizePixel = 0
+    columnFrame.Parent = frame
+    
+    local colCorner = Instance.new("UICorner", columnFrame)
+    colCorner.CornerRadius = UDim.new(0, 5)
+
+    local columns = {
+        {text = "#", pos = 0, size = 0.12},
+        {text = "NAME", pos = 0.12, size = 0.36},
+        {text = "VALUE", pos = 0.48, size = 0.22},
+        {text = "ACTION", pos = 0.7, size = 0.3}
+    }
+
+    for _, col in ipairs(columns) do
+        local label = Instance.new("TextLabel")
+        label.Size = UDim2.new(col.size, 0, 1, 0)
+        label.Position = UDim2.new(col.pos, 0, 0, 0)
+        label.BackgroundTransparency = 1
+        label.Text = col.text
+        label.TextColor3 = Color3.fromRGB(150, 150, 160)
+        label.TextSize = 8
+        label.Font = Enum.Font.GothamBold
+        label.Parent = columnFrame
+    end
+
+    -- Scrolling Frame
+    local scrolling = Instance.new("ScrollingFrame")
+    scrolling.Size = UDim2.new(1, -10, 1, -100)
+    scrolling.Position = UDim2.new(0, 5, 0, 73)
+    scrolling.BackgroundTransparency = 1
+    scrolling.BorderSizePixel = 0
+    scrolling.ScrollBarThickness = 4
+    scrolling.ScrollBarImageColor3 = Color3.fromRGB(88, 101, 242)
+    scrolling.Parent = frame
+
+    local layout = Instance.new("UIListLayout")
+    layout.Padding = UDim.new(0, 5)
+    layout.Parent = scrolling
+    
+
+    local backBtn = Instance.new("TextButton")
+backBtn.Size = UDim2.new(1, -10, 0, 25)
+backBtn.Position = UDim2.new(0, 5, 1, -25)
+backBtn.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+backBtn.Text = "BACK"
+backBtn.TextColor3 = Color3.new(1, 1, 1)
+backBtn.TextSize = 11
+backBtn.Font = Enum.Font.GothamBold
+backBtn.BorderSizePixel = 0
+backBtn.Visible = false
+backBtn.Parent = frame
+
+local backBtnCorner = Instance.new("UICorner", backBtn)
+backBtnCorner.CornerRadius = UDim.new(0, 8)
+
+-- Hover Effect (tetap)
+backBtn.MouseEnter:Connect(function()
+	TweenService:Create(backBtn, TweenInfo.new(0.2), {
+		BackgroundColor3 = Color3.fromRGB(255, 107, 107)
+	}):Play()
+end)
+
+backBtn.MouseLeave:Connect(function()
+	TweenService:Create(backBtn, TweenInfo.new(0.2), {
+		BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+	}):Play()
+end)
+
+
+backBtn.MouseButton1Click:Connect(function()
+	if not guiEnabled then return end
+
+	local character = player.Character or player.CharacterAdded:Wait()
+	local hrp = character:WaitForChild("HumanoidRootPart", 5)
+	if not hrp then return end
+
+
+	hrp.CFrame = CFrame.new(
+		123.538361, 21.1036148, 0.921822429,
+		0.0287084393, 0.123787589, -0.991893351,
+		0.00509225251, 0.992271364, 0.123982146,
+		0.99957478, -0.00861030538, 0.0278562028
+	)
+
+
+	backBtn.Text = "TELEPORTING..."
+	task.wait(0.5)
+	backBtn.Text = "BACK"
+end)
+
+
+    local emptyFrame = Instance.new("Frame")
+    emptyFrame.Size = UDim2.new(1, 0, 1, 0)
+    emptyFrame.BackgroundTransparency = 1
+    emptyFrame.Visible = false
+    emptyFrame.Parent = scrolling
+    
+    local emptyLabel = Instance.new("TextLabel")
+    emptyLabel.Size = UDim2.new(1, 0, 0, 40)
+    emptyLabel.Position = UDim2.new(0, 0, 0.5, -50)
+    emptyLabel.BackgroundTransparency = 1
+    emptyLabel.Text = "No valid models found\nWaiting for models with value..."
+    emptyLabel.TextColor3 = Color3.fromRGB(150, 150, 160)
+    emptyLabel.TextSize = 10
+    emptyLabel.Font = Enum.Font.Gotham
+    emptyLabel.TextWrapped = true
+    emptyLabel.Parent = emptyFrame
+    
+
+    local runScriptBtn = Instance.new("TextButton")
+    runScriptBtn.Size = UDim2.new(0, 120, 0, 35)
+    runScriptBtn.Position = UDim2.new(0.5, -60, 0.5, 0)
+    runScriptBtn.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+    runScriptBtn.Text = "RUN SCRIPT"
+    runScriptBtn.TextColor3 = Color3.new(1, 1, 1)
+    runScriptBtn.TextSize = 11
+    runScriptBtn.Font = Enum.Font.GothamBold
+    runScriptBtn.BorderSizePixel = 0
+    runScriptBtn.Parent = emptyFrame
+    
+    local runBtnCorner = Instance.new("UICorner", runScriptBtn)
+    runBtnCorner.CornerRadius = UDim.new(0, 8)
+    
+
+    runScriptBtn.MouseEnter:Connect(function()
+        TweenService:Create(runScriptBtn, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(108, 121, 255),
+            Size = UDim2.new(0, 125, 0, 37)
+        }):Play()
+    end)
+    
+    runScriptBtn.MouseLeave:Connect(function()
+        TweenService:Create(runScriptBtn, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(88, 101, 242),
+            Size = UDim2.new(0, 120, 0, 35)
+        }):Play()
+    end)
+    
+
+    runScriptBtn.MouseButton1Click:Connect(function()
+        if not guiEnabled then return end
+        
+        local character = player.Character or player.CharacterAdded:Wait()
+        local hrp = character:WaitForChild("HumanoidRootPart", 5)
+        if not hrp then return end
+        
+
+        hrp.CFrame = CFrame.new(2466.04712, 50.1636543, -0.837399483, 0.180595279, 0.529440939, -0.82890147, -0.00590559095, 0.843327045, 0.537368238, 0.98353976, -0.0921510085, 0.15542753)
+        
+
+        TweenService:Create(runScriptBtn, TweenInfo.new(0.1), {
+            Size = UDim2.new(0, 115, 0, 33)
+        }):Play()
+        wait(0.1)
+        TweenService:Create(runScriptBtn, TweenInfo.new(0.1), {
+            Size = UDim2.new(0, 120, 0, 35)
+        }):Play()
+        
+
+        runScriptBtn.Text = "TELEPORTING..."
+        wait(0.5)
+        runScriptBtn.Text = "RUN SCRIPT"
+    end)
+
+    local function refreshList()
+        if not guiEnabled then return end
+        
+        
+        for _, v in ipairs(scrolling:GetChildren()) do
+            if v:IsA("Frame") and v ~= emptyFrame then 
+                v:Destroy() 
+            end
+        end
+
+
+        local data = {}
+        for _, model in ipairs(targetFolder:GetChildren()) do
+            if model:IsA("Model") and hasValidRateText(model) then
+                table.insert(data, {
+                    Model = model,
+                    Rate = getRateNumber(model)
+                })
+            end
+        end
+
+
+        if #data == 0 then
+            emptyFrame.Visible = true
+            backBtn.Visible = false
+            scrolling.CanvasSize = UDim2.new(0, 0, 0, 0)
+            return
+        end
+        
+        emptyFrame.Visible = false
+        backBtn.Visible = true
+
+
+        table.sort(data, function(a, b)
+            return a.Rate > b.Rate
+        end)
+
+
+        for rank, info in ipairs(data) do
+            local model = info.Model
+
+            local item = Instance.new("Frame")
+            item.Size = UDim2.new(1, -4, 0, 25)
+            item.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+            item.BorderSizePixel = 0
+            item.Parent = scrolling
+            
+            local itemCorner = Instance.new("UICorner", item)
+            itemCorner.CornerRadius = UDim.new(0, 6)
+
+
+            local rankBadge = Instance.new("Frame")
+            rankBadge.Size = UDim2.new(0.1, 0, 0, 16)
+            rankBadge.Position = UDim2.new(0.01, 0, 0.5, -8)
+            rankBadge.BackgroundColor3 = rank <= 3 and Color3.fromRGB(255, 215, 0) or Color3.fromRGB(88, 101, 242)
+            rankBadge.BorderSizePixel = 0
+            rankBadge.Parent = item
+            
+            local badgeCorner = Instance.new("UICorner", rankBadge)
+            badgeCorner.CornerRadius = UDim.new(0, 4)
+            
+            local rankLabel = Instance.new("TextLabel")
+            rankLabel.Size = UDim2.new(1, 0, 1, 0)
+            rankLabel.BackgroundTransparency = 1
+            rankLabel.Text = "#" .. rank
+            rankLabel.TextColor3 = Color3.new(0, 0, 0)
+            rankLabel.TextSize = 8
+            rankLabel.Font = Enum.Font.GothamBold
+            rankLabel.Parent = rankBadge
+
+            -- Name
+            local nameLabel = Instance.new("TextLabel")
+            nameLabel.Size = UDim2.new(0.36, -5, 1, 0)
+            nameLabel.Position = UDim2.new(0.12, 2, 0, 0)
+            nameLabel.BackgroundTransparency = 1
+            nameLabel.Text = model.Name
+            nameLabel.TextColor3 = Color3.new(1, 1, 1)
+            nameLabel.TextSize = 8
+            nameLabel.Font = Enum.Font.Gotham
+            nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+            nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
+            nameLabel.Parent = item
+
+            -- Value
+            local valueLabel = Instance.new("TextLabel")
+            valueLabel.Size = UDim2.new(0.22, 0, 1, 0)
+            valueLabel.Position = UDim2.new(0.48, 0, 0, 0)
+            valueLabel.BackgroundTransparency = 1
+            valueLabel.Text = getRateText(model)
+            valueLabel.TextColor3 = Color3.fromRGB(67, 181, 129)
+            valueLabel.TextSize = 8
+            valueLabel.Font = Enum.Font.GothamBold
+            valueLabel.Parent = item
+
+            -- Get Button
+            local getBtn = Instance.new("TextButton")
+            getBtn.Size = UDim2.new(0.26, -4, 0, 18)
+            getBtn.Position = UDim2.new(0.72, 2, 0.5, -9)
+            getBtn.Text = "GET"
+            getBtn.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+            getBtn.TextColor3 = Color3.new(1, 1, 1)
+            getBtn.TextSize = 8
+            getBtn.Font = Enum.Font.GothamBold
+            getBtn.BorderSizePixel = 0
+            getBtn.Parent = item
+            
+            local btnCorner = Instance.new("UICorner", getBtn)
+            btnCorner.CornerRadius = UDim.new(0, 5)
+
+            getBtn.MouseEnter:Connect(function()
+                TweenService:Create(getBtn, TweenInfo.new(0.2), {
+                    BackgroundColor3 = Color3.fromRGB(108, 121, 255)
+                }):Play()
+            end)
+            
+            getBtn.MouseLeave:Connect(function()
+                TweenService:Create(getBtn, TweenInfo.new(0.2), {
+                    BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+                }):Play()
+            end)
+
+            getBtn.MouseButton1Click:Connect(function()
+                teleportToModel(model)
+                
+                TweenService:Create(getBtn, TweenInfo.new(0.1), {
+                    Size = UDim2.new(0.24, -4, 0, 16)
+                }):Play()
+                wait(0.1)
+                TweenService:Create(getBtn, TweenInfo.new(0.1), {
+                    Size = UDim2.new(0.26, -4, 0, 18)
+                }):Play()
+            end)
+        end
+
+        scrolling.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 5)
+    end
+
+    refreshList()
+    
+    childAddedConnection = targetFolder.ChildAdded:Connect(refreshList)
+    childRemovedConnection = targetFolder.ChildRemoved:Connect(refreshList)
+    
+     
+    spawn(function()
+        while guiEnabled and mainGui do
+            wait(0.5) 
+            refreshList()
+        end
+    end)
+    
+    makeDraggable(frame)
+end
+
+
+local function destroyGui()
+    
+    if mainGui then
+        local frame = mainGui:FindFirstChild("Frame")
+        if frame then
+            savedPosition = frame.Position
+        end
+    end
+    
+    if heartbeatConnection then
+        heartbeatConnection:Disconnect()
+        heartbeatConnection = nil
+    end
+    
+    if childAddedConnection then
+        childAddedConnection:Disconnect()
+        childAddedConnection = nil
+    end
+    
+    if childRemovedConnection then
+        childRemovedConnection:Disconnect()
+        childRemovedConnection = nil
+    end
+    
+    if mainGui then
+        mainGui:Destroy()
+        mainGui = nil
+    end
+    
+    autoProxActive = false
+end
+
+
+local function startAutoProximityLoop()
+    if heartbeatConnection then
+        heartbeatConnection:Disconnect()
+    end
+    
+    heartbeatConnection = RunService.Heartbeat:Connect(function()
+        if not guiEnabled or not autoProxActive then return end
+        
+        if tick() > autoProxEndTime then
+            autoProxActive = false
+            return
+        end
+
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            if obj:IsA("ProximityPrompt") and obj.Enabled then
+                obj.HoldDuration = 0
+                pcall(function()
+                    obj:InputHoldBegin()
+                    obj:InputHoldEnd()
+                end)
+            end
+        end
+    end)
+end
+
+
+_G.FaDhenAddToggle("Secret Auto Farm", {
+    Callback = function(state)
+        guiEnabled = state
+        
+        if state then
+            print("✅ Secret Auto Farm: ENABLED")
+            createGui()
+            startAutoProximityLoop()
+        else
+            print("❌ Secret Auto Farm: DISABLED")
+            destroyGui()
+        end
+    end
+})
