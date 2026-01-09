@@ -63,7 +63,7 @@ frameCorner.Parent = mainFrame
 _G.header = Instance.new("Frame")
 _G.header.Name = "Header"
 _G.header.Size = UDim2.new(1, 0, 0, 50)
-_G.header.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+_G.header.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
 _G.header.BorderSizePixel = 0
 _G.header.Parent = mainFrame
 
