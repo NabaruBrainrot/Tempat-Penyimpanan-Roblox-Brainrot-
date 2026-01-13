@@ -329,3 +329,46 @@ end
 
 print("⛔ Anti Tsunami OFF")
 ]])
+
+
+
+-- ===============================
+-- INSTANT PROXIMITY PROMPT (ANTI RESET)
+-- ===============================
+
+local Players = game:GetService("Players")
+local ProximityPromptService = game:GetService("ProximityPromptService")
+
+local player = Players.LocalPlayer
+
+-- Function buat bikin semua prompt jadi instant
+local function makeInstant(prompt)
+    if prompt:IsA("ProximityPrompt") then
+        prompt.HoldDuration = 0
+    end
+end
+
+-- Scan semua prompt yang sudah ada
+for _, v in ipairs(workspace:GetDescendants()) do
+    makeInstant(v)
+end
+
+-- Jika ada prompt baru muncul
+workspace.DescendantAdded:Connect(function(desc)
+    makeInstant(desc)
+end)
+
+-- Saat ProximityPrompt muncul di layar
+ProximityPromptService.PromptShown:Connect(function(prompt)
+    makeInstant(prompt)
+end)
+
+-- Fix agar tetap aktif setelah reset
+player.CharacterAdded:Connect(function()
+    task.wait(0.5)
+    for _, v in ipairs(workspace:GetDescendants()) do
+        makeInstant(v)
+    end
+end)
+
+print("✅ Instant ProximityPrompt AKTIF (Anti Reset)")
