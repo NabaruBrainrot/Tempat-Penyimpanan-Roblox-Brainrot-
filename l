@@ -3,6 +3,171 @@ loadstring(game:HttpGet('https://raw.githubusercontent.com/GhostPlayer352/UI-Lib
 game.CoreGui.GhostGui.MainFrame.Title.Text = "Title Here"
 ---
 
+
+
+
+
+
+
+AddContent("Switch", "Auto Speed", [[
+-- ===== TOGGLE ON =====
+
+_G.AutoSpeed = true
+print("Auto Speed: ON")
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
+
+-- Path TextLabel speed
+local speedLabel = player.PlayerGui
+    :WaitForChild("BottomLeft")
+    :WaitForChild("Frame")
+    :WaitForChild("Speed")
+
+local MULTIPLIER = 120 / 18
+local MAX_SPEED = 300
+local cachedSpeed = 0
+local currentTween
+
+-- 🔄 UPDATE SPEED DARI TEXT
+if not _G.SpeedUpdateThread then
+    _G.SpeedUpdateThread = task.spawn(function()
+        while _G.AutoSpeed do
+            local value = tonumber(speedLabel.Text:match("%d+"))
+            if value then
+                cachedSpeed = value * MULTIPLIER
+                if cachedSpeed > MAX_SPEED then
+                    cachedSpeed = MAX_SPEED
+                end
+            end
+            task.wait(1)
+        end
+    end)
+end
+
+-- 🚶‍♂️ MOVEMENT DENGAN TWEEN (SAAT JALAN)
+if not _G.SpeedMoveConn then
+    _G.SpeedMoveConn = RunService.Heartbeat:Connect(function(dt)
+        if not _G.AutoSpeed then return end
+
+        local char = player.Character
+        if not char then return end
+
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        local hum = char:FindFirstChild("Humanoid")
+        if not (hrp and hum) then return end
+
+        local dir = hum.MoveDirection
+        if dir.Magnitude == 0 then
+            if currentTween then
+                currentTween:Cancel()
+                currentTween = nil
+            end
+            return
+        end
+
+        -- Stop tween lama
+        if currentTween then
+            currentTween:Cancel()
+        end
+
+        -- Hitung jarak langkah kecil (biar natural)
+        local moveDistance = cachedSpeed * dt
+        local goalCFrame = hrp.CFrame + Vector3.new(
+            dir.X * moveDistance,
+            0,
+            dir.Z * moveDistance
+        )
+
+        currentTween = TweenService:Create(
+            hrp,
+            TweenInfo.new(
+                dt,
+                Enum.EasingStyle.Linear,
+                Enum.EasingDirection.Out
+            ),
+            {CFrame = goalCFrame}
+        )
+
+        currentTween:Play()
+    end)
+end
+
+]], [[
+-- ===== TOGGLE OFF =====
+
+_G.AutoSpeed = false
+print("Auto Speed: OFF")
+
+if _G.SpeedMoveConn then
+    _G.SpeedMoveConn:Disconnect()
+    _G.SpeedMoveConn = nil
+end
+
+if _G.SpeedUpdateThread then
+    _G.SpeedUpdateThread = nil
+end
+]])
+
+
+
+AddContent("Switch", "Collect Cash", [[
+-- ===== TOGGLE ON =====
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Remote = ReplicatedStorage:WaitForChild("RemoteEvents"):WaitForChild("CollectMoney")
+
+_G.AutoCollectCash = true
+
+task.spawn(function()
+    while _G.AutoCollectCash do
+        for i = 1, 30 do
+            if not _G.AutoCollectCash then break end
+            Remote:FireServer("Slot"..i)
+            task.wait() -- anti lag
+        end
+        task.wait(0.5)
+    end
+end)
+]], [[
+-- ===== TOGGLE OFF =====
+_G.AutoCollectCash = false
+]])
+
+
+
+
+
+AddContent("Switch", "Upgrade All", [[
+-- ===== TOGGLE ON =====
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Remote = ReplicatedStorage
+    :WaitForChild("RemoteFunctions")
+    :WaitForChild("UpgradeBrainrot")
+
+_G.AutoUpgradeAllSlot = true
+
+task.spawn(function()
+    while _G.AutoUpgradeAllSlot do
+        -- jalankan semua slot SEKALIGUS
+        for i = 1, 30 do
+            if not _G.AutoUpgradeAllSlot then break end
+            task.spawn(function()
+                Remote:InvokeServer("Slot" .. i)
+            end)
+        end
+        task.wait(0.5) -- jeda antar batch
+    end
+end)
+]], [[
+-- ===== TOGGLE OFF =====
+_G.AutoUpgradeAllSlot = false
+]])
+
+
+
+
 AddContent("Switch", "Anti Tsunami", [[
 -- ===== TOGGLE ON =====
 if _G.AntiTsunami then return end
@@ -163,138 +328,4 @@ if workspace:FindFirstChild("SafeCFrameDetectors") then
 end
 
 print("⛔ Anti Tsunami OFF")
-]])
-
-
-
-
-
-
-AddContent("Switch", "Auto Speed", [[
--- ===== TOGGLE ON =====
-
-_G.AutoSpeed = true
-print("Auto Speed: ON")
-
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-
--- Path TextLabel speed
-local speedLabel = player.PlayerGui
-    :WaitForChild("BottomLeft")
-    :WaitForChild("Frame")
-    :WaitForChild("Speed")
-
-local MULTIPLIER = 120 / 18
-local MAX_SPEED = 300 -- 🔒 BATAS MAKS SPEED
-local cachedSpeed = 0
-
--- 🔄 UPDATE TEXT SETIAP 1 DETIK
-if not _G.SpeedUpdateThread then
-    _G.SpeedUpdateThread = task.spawn(function()
-        while _G.AutoSpeed do
-            local value = tonumber(speedLabel.Text:match("%d+"))
-            if value then
-                cachedSpeed = value * MULTIPLIER
-
-                -- 🔒 LIMIT SPEED (TANPA UBAH LOGIC)
-                if cachedSpeed > MAX_SPEED then
-                    cachedSpeed = MAX_SPEED
-                end
-            end
-            task.wait(1)
-        end
-    end)
-end
-
--- 🚀 MOVEMENT (AMAN UNTUK LOMPAT)
-if not _G.SpeedMoveConn then
-    _G.SpeedMoveConn = RunService.Heartbeat:Connect(function()
-        if not _G.AutoSpeed then return end
-
-        local char = player.Character
-        if not char then return end
-
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        local hum = char:FindFirstChild("Humanoid")
-        if not (hrp and hum) then return end
-        if hum.MoveDirection.Magnitude == 0 then return end
-
-        local dir = hum.MoveDirection
-        hrp.Velocity = Vector3.new(
-            dir.X * cachedSpeed,
-            hrp.Velocity.Y, -- ✅ lompat & gravity normal
-            dir.Z * cachedSpeed
-        )
-    end)
-end
-
-]], [[
--- ===== TOGGLE OFF =====
-
-_G.AutoSpeed = false
-print("Auto Speed: OFF")
-
-if _G.SpeedMoveConn then
-    _G.SpeedMoveConn:Disconnect()
-    _G.SpeedMoveConn = nil
-end
-
-_G.SpeedUpdateThread = nil
-]])
-
-
-
-
-AddContent("Switch", "Collect Cash", [[
--- ===== TOGGLE ON =====
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Remote = ReplicatedStorage:WaitForChild("RemoteEvents"):WaitForChild("CollectMoney")
-
-_G.AutoCollectCash = true
-
-task.spawn(function()
-    while _G.AutoCollectCash do
-        for i = 1, 30 do
-            if not _G.AutoCollectCash then break end
-            Remote:FireServer("Slot"..i)
-            task.wait() -- anti lag
-        end
-        task.wait(0.5)
-    end
-end)
-]], [[
--- ===== TOGGLE OFF =====
-_G.AutoCollectCash = false
-]])
-
-
-
-
-
-AddContent("Switch", "Upgrade All", [[
--- ===== TOGGLE ON =====
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Remote = ReplicatedStorage
-    :WaitForChild("RemoteFunctions")
-    :WaitForChild("UpgradeBrainrot")
-
-_G.AutoUpgradeAllSlot = true
-
-task.spawn(function()
-    while _G.AutoUpgradeAllSlot do
-        -- jalankan semua slot SEKALIGUS
-        for i = 1, 30 do
-            if not _G.AutoUpgradeAllSlot then break end
-            task.spawn(function()
-                Remote:InvokeServer("Slot" .. i)
-            end)
-        end
-        task.wait(0.5) -- jeda antar batch
-    end
-end)
-]], [[
--- ===== TOGGLE OFF =====
-_G.AutoUpgradeAllSlot = false
 ]])
