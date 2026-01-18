@@ -1,30 +1,18 @@
--- =====================================
--- HAPUS GUI LAMA JIKA ADA
--- =====================================
 pcall(function()
     game:GetService("CoreGui"):FindFirstChild("PersistentToggleGui"):Destroy()
     game:GetService("CoreGui"):FindFirstChild("PremiumDeliveryGUI"):Destroy()
 end)
 
--- =====================================
--- SERVICES (GLOBAL)
--- =====================================
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
--- #################################################
--- # SCRIPT 1 : TOGGLE CANVASGROUP + OSAKA
--- #################################################
-
--- GUI TOGGLE (PERSISTENT)
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "PersistentToggleGui"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = CoreGui
 
--- TOGGLE BUTTON (IMAGE)
 local toggleImageBtn = Instance.new("ImageButton")
 toggleImageBtn.Name = "HoverButton"
 toggleImageBtn.Size = UDim2.new(0, 55, 0, 55)
@@ -59,7 +47,6 @@ toggleImageBtn.MouseLeave:Connect(function()
     }):Play()
 end)
 
--- AUTO DETECT CanvasGroup + HAPUS blurEffect
 local targetCanvasGroup
 local isOpen = false
 
@@ -98,16 +85,11 @@ toggleImageBtn.MouseButton1Click:Connect(function()
     targetCanvasGroup.Interactable = isOpen
 end)
 
--- LOADSTRING OSAKA
 pcall(function()
     loadstring(game:HttpGet(
         "https://raw.githubusercontent.com/osakaTP2/OsakaTP2/main/Escape%20Tsunami%20For%20BrainrotsV3"
     ))()
 end)
-
--- #################################################
--- # SCRIPT 2 : RADIOACTIVE FARM EVENTPARTS
--- #################################################
 
 local character, humanoidRootPart
 local EventFolder = workspace:WaitForChild("EventParts")
@@ -126,7 +108,6 @@ if player.Character then
 end
 player.CharacterAdded:Connect(setupCharacter)
 
--- GUI FARM
 local gui = Instance.new("ScreenGui", CoreGui)
 gui.Name = "PremiumDeliveryGUI"
 gui.ResetOnSpawn = false
@@ -169,6 +150,7 @@ Instance.new("UICorner", farmToggleBtn).CornerRadius = UDim.new(0,6)
 farmToggleBtn.MouseEnter:Connect(function()
     farmToggleBtn.BackgroundColor3 = Color3.fromRGB(60,60,90)
 end)
+
 farmToggleBtn.MouseLeave:Connect(function()
     if active then
         farmToggleBtn.BackgroundColor3 = Color3.fromRGB(0,200,120)
