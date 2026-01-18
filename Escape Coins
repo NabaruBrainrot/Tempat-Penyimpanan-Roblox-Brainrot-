@@ -1,30 +1,18 @@
--- =====================================
--- HAPUS GUI LAMA JIKA ADA
--- =====================================
 pcall(function()
     game:GetService("CoreGui"):FindFirstChild("PersistentToggleGui"):Destroy()
-    game:GetService("CoreGui"):FindFirstChild("PremiumDeliveryGUI"):Destroy()
+    game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("PremiumDeliveryGUI"):Destroy()
 end)
 
--- =====================================
--- SERVICES (GLOBAL)
--- =====================================
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
--- #################################################
--- # SCRIPT 1 : TOGGLE CANVASGROUP + OSAKA
--- #################################################
-
--- GUI TOGGLE (PERSISTENT)
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "PersistentToggleGui"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = CoreGui
 
--- TOGGLE BUTTON (IMAGE)
 local toggleImageBtn = Instance.new("ImageButton")
 toggleImageBtn.Name = "HoverButton"
 toggleImageBtn.Size = UDim2.new(0, 55, 0, 55)
@@ -36,12 +24,9 @@ toggleImageBtn.Active = true
 toggleImageBtn.Draggable = true
 toggleImageBtn.Parent = ScreenGui
 
-local toggleCorner = Instance.new("UICorner")
-toggleCorner.CornerRadius = UDim.new(0, 9)
-toggleCorner.Parent = toggleImageBtn
+Instance.new("UICorner", toggleImageBtn).CornerRadius = UDim.new(0, 9)
 
-local stroke = Instance.new("UIStroke")
-stroke.Parent = toggleImageBtn
+local stroke = Instance.new("UIStroke", toggleImageBtn)
 stroke.Thickness = 3
 stroke.Color = Color3.fromRGB(255, 255, 255)
 stroke.Transparency = 0.5
@@ -59,23 +44,18 @@ toggleImageBtn.MouseLeave:Connect(function()
     }):Play()
 end)
 
--- AUTO DETECT CanvasGroup + HAPUS blurEffect
 local targetCanvasGroup
 local isOpen = false
 
 local function tryFindTarget()
     local sg = CoreGui:FindFirstChild("ScreenGui")
     if not sg then return end
-
     local children = sg:GetChildren()
     if not children[4] then return end
-
     local cg = children[4]
     if not cg:IsA("CanvasGroup") then return end
-
     local blur = cg:FindFirstChild("blurEffect")
     if blur then blur:Destroy() end
-
     targetCanvasGroup = cg
 end
 
@@ -90,7 +70,6 @@ end)
 
 toggleImageBtn.MouseButton1Click:Connect(function()
     if not targetCanvasGroup then return end
-
     isOpen = not isOpen
     targetCanvasGroup.Visible = isOpen
     targetCanvasGroup.GroupTransparency = isOpen and 0 or 1
@@ -98,38 +77,17 @@ toggleImageBtn.MouseButton1Click:Connect(function()
     targetCanvasGroup.Interactable = isOpen
 end)
 
--- LOADSTRING OSAKA
 pcall(function()
     loadstring(game:HttpGet(
         "https://raw.githubusercontent.com/osakaTP2/OsakaTP2/main/Escape%20Tsunami%20For%20BrainrotsV3"
     ))()
 end)
 
--- #################################################
--- # SCRIPT 2 : RADIOACTIVE FARM EVENTPARTS
--- #################################################
-
-local character, humanoidRootPart
-local EventFolder = workspace:WaitForChild("EventParts")
-
-local PullDelay = 0.1
-local HeightOffset = 3
-local active = false
-
-local function setupCharacter(char)
-    character = char
-    humanoidRootPart = char:WaitForChild("HumanoidRootPart")
-end
-
-if player.Character then
-    setupCharacter(player.Character)
-end
-player.CharacterAdded:Connect(setupCharacter)
-
--- GUI FARM
-local gui = Instance.new("ScreenGui", CoreGui)
+local gui = Instance.new("ScreenGui")
 gui.Name = "PremiumDeliveryGUI"
 gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.Parent = player:WaitForChild("PlayerGui")
 
 local frame = Instance.new("Frame")
 frame.Size = UDim2.new(0, 176, 0, 104)
@@ -155,25 +113,46 @@ garis.Position = UDim2.new(0, 10, 0, 25)
 garis.BackgroundColor3 = Color3.fromRGB(60,60,60)
 garis.BorderSizePixel = 0
 
-local farmToggleBtn = Instance.new("TextButton", frame)
-farmToggleBtn.Size = UDim2.new(0.9, 0, 0, 34)
-farmToggleBtn.Position = UDim2.new(0.05, 0, 0, 42)
-farmToggleBtn.BackgroundColor3 = Color3.fromRGB(45,45,65)
-farmToggleBtn.TextColor3 = Color3.new(1,1,1)
-farmToggleBtn.Font = Enum.Font.GothamSemibold
-farmToggleBtn.TextSize = 14
-farmToggleBtn.Text = "▶ Start"
-farmToggleBtn.AutoButtonColor = false
-Instance.new("UICorner", farmToggleBtn).CornerRadius = UDim.new(0,6)
+local toggleBtn = Instance.new("TextButton", frame)
+toggleBtn.Size = UDim2.new(0.9, 0, 0, 34)
+toggleBtn.Position = UDim2.new(0.05, 0, 0, 42)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(45,45,65)
+toggleBtn.TextColor3 = Color3.new(1,1,1)
+toggleBtn.Font = Enum.Font.GothamSemibold
+toggleBtn.TextSize = 14
+toggleBtn.Text = "▶ Start"
+toggleBtn.AutoButtonColor = false
+Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0,6)
 
-farmToggleBtn.MouseEnter:Connect(function()
-    farmToggleBtn.BackgroundColor3 = Color3.fromRGB(60,60,90)
+toggleBtn.MouseEnter:Connect(function()
+    toggleBtn.BackgroundColor3 = Color3.fromRGB(60,60,90)
 end)
-farmToggleBtn.MouseLeave:Connect(function()
-    if active then
-        farmToggleBtn.BackgroundColor3 = Color3.fromRGB(0,200,120)
-    else
-        farmToggleBtn.BackgroundColor3 = Color3.fromRGB(45,45,65)
+toggleBtn.MouseLeave:Connect(function()
+    toggleBtn.BackgroundColor3 = toggleBtn.Text == "■ Stop"
+        and Color3.fromRGB(0,200,120)
+        or Color3.fromRGB(45,45,65)
+end)
+
+local character, humanoidRootPart
+local EventFolder
+local PullDelay = 0.1
+local HeightOffset = 3
+local active = false
+
+local function setupCharacter(char)
+    character = char
+    humanoidRootPart = char:WaitForChild("HumanoidRootPart", 10)
+end
+
+if player.Character then
+    setupCharacter(player.Character)
+end
+player.CharacterAdded:Connect(setupCharacter)
+
+task.spawn(function()
+    while not EventFolder do
+        EventFolder = workspace:FindFirstChild("EventParts")
+        task.wait(1)
     end
 end)
 
@@ -181,6 +160,7 @@ local function getModelPart(model)
     if model.PrimaryPart then return model.PrimaryPart end
     for _, v in ipairs(model:GetDescendants()) do
         if v:IsA("BasePart") then
+            model.PrimaryPart = v
             return v
         end
     end
@@ -188,7 +168,7 @@ end
 
 task.spawn(function()
     while true do
-        if active and humanoidRootPart then
+        if active and humanoidRootPart and EventFolder then
             for _, model in ipairs(EventFolder:GetChildren()) do
                 if model:IsA("Model") then
                     local part = getModelPart(model)
@@ -204,13 +184,10 @@ task.spawn(function()
     end
 end)
 
-farmToggleBtn.MouseButton1Click:Connect(function()
+toggleBtn.MouseButton1Click:Connect(function()
     active = not active
-    if active then
-        farmToggleBtn.Text = "■ Stop"
-        farmToggleBtn.BackgroundColor3 = Color3.fromRGB(0,200,120)
-    else
-        farmToggleBtn.Text = "▶ Start"
-        farmToggleBtn.BackgroundColor3 = Color3.fromRGB(45,45,65)
-    end
+    toggleBtn.Text = active and "■ Stop" or "▶ Start"
+    toggleBtn.BackgroundColor3 = active
+        and Color3.fromRGB(0,200,120)
+        or Color3.fromRGB(45,45,65)
 end)
