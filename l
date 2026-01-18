@@ -1,374 +1,216 @@
----Ghost Gui UI Library
-loadstring(game:HttpGet('https://raw.githubusercontent.com/GhostPlayer352/UI-Library/refs/heads/main/Ghost%20Gui'))()
-game.CoreGui.GhostGui.MainFrame.Title.Text = "Title Here"
----
+-- =====================================
+-- HAPUS GUI LAMA JIKA ADA
+-- =====================================
+pcall(function()
+    game:GetService("CoreGui"):FindFirstChild("PersistentToggleGui"):Destroy()
+    game:GetService("CoreGui"):FindFirstChild("PremiumDeliveryGUI"):Destroy()
+end)
 
-
-
-
-
-
-
-AddContent("Switch", "Auto Speed", [[
--- ===== TOGGLE ON =====
-
-_G.AutoSpeed = true
-print("Auto Speed: ON")
-
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
+-- =====================================
+-- SERVICES (GLOBAL)
+-- =====================================
 local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
--- Path TextLabel speed
-local speedLabel = player.PlayerGui
-    :WaitForChild("BottomLeft")
-    :WaitForChild("Frame")
-    :WaitForChild("Speed")
+-- #################################################
+-- # SCRIPT 1 : TOGGLE CANVASGROUP + OSAKA
+-- #################################################
 
-local MULTIPLIER = 120 / 18
-local MAX_SPEED = 300
-local cachedSpeed = 0
-local currentTween
+-- GUI TOGGLE (PERSISTENT)
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "PersistentToggleGui"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = CoreGui
 
--- 🔄 UPDATE SPEED DARI TEXT
-if not _G.SpeedUpdateThread then
-    _G.SpeedUpdateThread = task.spawn(function()
-        while _G.AutoSpeed do
-            local value = tonumber(speedLabel.Text:match("%d+"))
-            if value then
-                cachedSpeed = value * MULTIPLIER
-                if cachedSpeed > MAX_SPEED then
-                    cachedSpeed = MAX_SPEED
-                end
-            end
-            task.wait(1)
-        end
-    end)
+-- TOGGLE BUTTON (IMAGE)
+local toggleImageBtn = Instance.new("ImageButton")
+toggleImageBtn.Name = "HoverButton"
+toggleImageBtn.Size = UDim2.new(0, 55, 0, 55)
+toggleImageBtn.Position = UDim2.new(0, 10, 0.2, 0)
+toggleImageBtn.Image = "rbxassetid://116189732890823"
+toggleImageBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+toggleImageBtn.BackgroundTransparency = 0.7
+toggleImageBtn.Active = true
+toggleImageBtn.Draggable = true
+toggleImageBtn.Parent = ScreenGui
+
+local toggleCorner = Instance.new("UICorner")
+toggleCorner.CornerRadius = UDim.new(0, 9)
+toggleCorner.Parent = toggleImageBtn
+
+local stroke = Instance.new("UIStroke")
+stroke.Parent = toggleImageBtn
+stroke.Thickness = 3
+stroke.Color = Color3.fromRGB(255, 255, 255)
+stroke.Transparency = 0.5
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+toggleImageBtn.MouseEnter:Connect(function()
+    TweenService:Create(toggleImageBtn, TweenInfo.new(0.15), {
+        Size = UDim2.new(0, 60, 0, 60)
+    }):Play()
+end)
+
+toggleImageBtn.MouseLeave:Connect(function()
+    TweenService:Create(toggleImageBtn, TweenInfo.new(0.15), {
+        Size = UDim2.new(0, 55, 0, 55)
+    }):Play()
+end)
+
+-- AUTO DETECT CanvasGroup + HAPUS blurEffect
+local targetCanvasGroup
+local isOpen = false
+
+local function tryFindTarget()
+    local sg = CoreGui:FindFirstChild("ScreenGui")
+    if not sg then return end
+
+    local children = sg:GetChildren()
+    if not children[4] then return end
+
+    local cg = children[4]
+    if not cg:IsA("CanvasGroup") then return end
+
+    local blur = cg:FindFirstChild("blurEffect")
+    if blur then blur:Destroy() end
+
+    targetCanvasGroup = cg
 end
-
--- 🚶‍♂️ MOVEMENT DENGAN TWEEN (SAAT JALAN)
-if not _G.SpeedMoveConn then
-    _G.SpeedMoveConn = RunService.Heartbeat:Connect(function(dt)
-        if not _G.AutoSpeed then return end
-
-        local char = player.Character
-        if not char then return end
-
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        local hum = char:FindFirstChild("Humanoid")
-        if not (hrp and hum) then return end
-
-        local dir = hum.MoveDirection
-        if dir.Magnitude == 0 then
-            if currentTween then
-                currentTween:Cancel()
-                currentTween = nil
-            end
-            return
-        end
-
-        -- Stop tween lama
-        if currentTween then
-            currentTween:Cancel()
-        end
-
-        -- Hitung jarak langkah kecil (biar natural)
-        local moveDistance = cachedSpeed * dt
-        local goalCFrame = hrp.CFrame + Vector3.new(
-            dir.X * moveDistance,
-            0,
-            dir.Z * moveDistance
-        )
-
-        currentTween = TweenService:Create(
-            hrp,
-            TweenInfo.new(
-                dt,
-                Enum.EasingStyle.Linear,
-                Enum.EasingDirection.Out
-            ),
-            {CFrame = goalCFrame}
-        )
-
-        currentTween:Play()
-    end)
-end
-
-]], [[
--- ===== TOGGLE OFF =====
-
-_G.AutoSpeed = false
-print("Auto Speed: OFF")
-
-if _G.SpeedMoveConn then
-    _G.SpeedMoveConn:Disconnect()
-    _G.SpeedMoveConn = nil
-end
-
-if _G.SpeedUpdateThread then
-    _G.SpeedUpdateThread = nil
-end
-]])
-
-
-
-AddContent("Switch", "Collect Cash", [[
--- ===== TOGGLE ON =====
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Remote = ReplicatedStorage:WaitForChild("RemoteEvents"):WaitForChild("CollectMoney")
-
-_G.AutoCollectCash = true
 
 task.spawn(function()
-    while _G.AutoCollectCash do
-        for i = 1, 30 do
-            if not _G.AutoCollectCash then break end
-            Remote:FireServer("Slot"..i)
-            task.wait() -- anti lag
+    while true do
+        if not targetCanvasGroup or not targetCanvasGroup.Parent then
+            tryFindTarget()
         end
-        task.wait(0.5)
+        task.wait(0.3)
     end
 end)
-]], [[
--- ===== TOGGLE OFF =====
-_G.AutoCollectCash = false
-]])
 
+toggleImageBtn.MouseButton1Click:Connect(function()
+    if not targetCanvasGroup then return end
 
-
-
-
-AddContent("Switch", "Upgrade All", [[
--- ===== TOGGLE ON =====
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Remote = ReplicatedStorage
-    :WaitForChild("RemoteFunctions")
-    :WaitForChild("UpgradeBrainrot")
-
-_G.AutoUpgradeAllSlot = true
-
-task.spawn(function()
-    while _G.AutoUpgradeAllSlot do
-        -- jalankan semua slot SEKALIGUS
-        for i = 1, 30 do
-            if not _G.AutoUpgradeAllSlot then break end
-            task.spawn(function()
-                Remote:InvokeServer("Slot" .. i)
-            end)
-        end
-        task.wait(0.5) -- jeda antar batch
-    end
+    isOpen = not isOpen
+    targetCanvasGroup.Visible = isOpen
+    targetCanvasGroup.GroupTransparency = isOpen and 0 or 1
+    targetCanvasGroup.Active = isOpen
+    targetCanvasGroup.Interactable = isOpen
 end)
-]], [[
--- ===== TOGGLE OFF =====
-_G.AutoUpgradeAllSlot = false
-]])
 
+-- LOADSTRING OSAKA
+pcall(function()
+    loadstring(game:HttpGet(
+        "https://raw.githubusercontent.com/osakaTP2/OsakaTP2/main/Escape%20Tsunami%20For%20BrainrotsV3"
+    ))()
+end)
 
+-- #################################################
+-- # SCRIPT 2 : RADIOACTIVE FARM EVENTPARTS
+-- #################################################
 
+local character, humanoidRootPart
+local EventFolder = workspace:WaitForChild("EventParts")
 
-AddContent("Switch", "Anti Tsunami", [[
--- ===== TOGGLE ON =====
-if _G.AntiTsunami then return end
-_G.AntiTsunami = true
+local PullDelay = 0.1
+local HeightOffset = 3
+local active = false
 
--- ===== SERVICES =====
-local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-
-local player = Players.LocalPlayer
-
--- ===== VARIABLES =====
-local character, hrp
-local currentTween
-local params = OverlapParams.new()
-params.FilterType = Enum.RaycastFilterType.Blacklist
-
--- ===== SPEED TEXT =====
-local speedLabel = player.PlayerGui
-    :WaitForChild("BottomLeft")
-    :WaitForChild("Frame")
-    :WaitForChild("Speed")
-
--- ===== CONFIG =====
-local COOLDOWN = 2
-local PLAYER_RADIUS = 100
-local PART_RADIUS = 50
-local SPEED_MULT = 6.66
-local MAX_SPEED = 300
-
-local function getTweenSpeed()
-    local num = tonumber(speedLabel.Text:match("%d+")) or 18
-    return math.clamp(num * SPEED_MULT, 1, MAX_SPEED)
-end
-
--- ===== SAFE CFRAMES =====
-local SafeCFrames = {
-    CFrame.new(543.411316, -4.02592373, -0.922426283),
-    CFrame.new(757.379578, -3.1540308, -1.72257304),
-    CFrame.new(1075.6106, -3.23971272, 3.20061111),
-    CFrame.new(1550.67151, -3.26713109, 10.1864586),
-    CFrame.new(2252.74146, -3.2540493, 5.63876724),
-    CFrame.new(2605.51904, -3.22055626, 14.0165806),
-    CFrame.new(398.271912, -3.89251757, -9.20723152),
-    CFrame.new(285.117859, -4.32986689, -8.98183632),
-    CFrame.new(201.416275, -4.02712774, -5.44396925)
-}
-
--- ===== FOLDER =====
-local folder = Instance.new("Folder")
-folder.Name = "SafeCFrameDetectors"
-folder.Parent = Workspace
-
--- ===== DETECTORS =====
-local detectors = {}
-for _, cf in ipairs(SafeCFrames) do
-    local part = Instance.new("Part")
-    part.Size = Vector3.new(6,6,6)
-    part.Anchored = true
-    part.CanCollide = false
-    part.Material = Enum.Material.Neon
-    part.Transparency = 1
-    part.Color = Color3.fromRGB(0,255,0)
-    part.CFrame = cf * CFrame.new(0,5,0)
-    part.Parent = folder
-
-    table.insert(detectors, {
-        Part = part,
-        CFrame = cf,
-        CooldownUntil = 0
-    })
-end
-
--- ===== CHARACTER HANDLER =====
-local function onCharacterAdded(char)
+local function setupCharacter(char)
     character = char
-    hrp = char:WaitForChild("HumanoidRootPart", 10)
-
-    if currentTween then
-        currentTween:Cancel()
-        currentTween = nil
-    end
-
-    params.FilterDescendantsInstances = { folder, character }
+    humanoidRootPart = char:WaitForChild("HumanoidRootPart")
 end
 
 if player.Character then
-    onCharacterAdded(player.Character)
+    setupCharacter(player.Character)
 end
-player.CharacterAdded:Connect(onCharacterAdded)
+player.CharacterAdded:Connect(setupCharacter)
 
--- ===== TWEEN =====
-local function tweenTo(cf)
-    if not hrp then return end
+-- GUI FARM
+local gui = Instance.new("ScreenGui", CoreGui)
+gui.Name = "PremiumDeliveryGUI"
+gui.ResetOnSpawn = false
 
-    if currentTween then
-        currentTween:Cancel()
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 176, 0, 104)
+frame.Position = UDim2.new(0.1, 0, 0.1, 0)
+frame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+frame.Parent = gui
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
+
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0, 25)
+title.BackgroundTransparency = 1
+title.Text = "RadioActive Farm"
+title.TextColor3 = Color3.new(1,1,1)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 16
+
+local garis = Instance.new("Frame", frame)
+garis.Size = UDim2.new(1, -20, 0, 1)
+garis.Position = UDim2.new(0, 10, 0, 25)
+garis.BackgroundColor3 = Color3.fromRGB(60,60,60)
+garis.BorderSizePixel = 0
+
+local farmToggleBtn = Instance.new("TextButton", frame)
+farmToggleBtn.Size = UDim2.new(0.9, 0, 0, 34)
+farmToggleBtn.Position = UDim2.new(0.05, 0, 0, 42)
+farmToggleBtn.BackgroundColor3 = Color3.fromRGB(45,45,65)
+farmToggleBtn.TextColor3 = Color3.new(1,1,1)
+farmToggleBtn.Font = Enum.Font.GothamSemibold
+farmToggleBtn.TextSize = 14
+farmToggleBtn.Text = "▶ Start"
+farmToggleBtn.AutoButtonColor = false
+Instance.new("UICorner", farmToggleBtn).CornerRadius = UDim.new(0,6)
+
+farmToggleBtn.MouseEnter:Connect(function()
+    farmToggleBtn.BackgroundColor3 = Color3.fromRGB(60,60,90)
+end)
+farmToggleBtn.MouseLeave:Connect(function()
+    if active then
+        farmToggleBtn.BackgroundColor3 = Color3.fromRGB(0,200,120)
+    else
+        farmToggleBtn.BackgroundColor3 = Color3.fromRGB(45,45,65)
     end
+end)
 
-    local speed = getTweenSpeed()
-    local dist = (hrp.Position - cf.Position).Magnitude
-    local time = dist / speed
-
-    currentTween = TweenService:Create(
-        hrp,
-        TweenInfo.new(time, Enum.EasingStyle.Linear),
-        { CFrame = cf }
-    )
-    currentTween:Play()
-end
-
--- ===== MAIN LOOP =====
-_G.AntiTsunamiConn = RunService.Heartbeat:Connect(function()
-    if not _G.AntiTsunami then return end
-    if not hrp or not hrp.Parent then return end
-
-    local now = tick()
-
-    local danger = false
-    for _, p in ipairs(Workspace:GetPartBoundsInRadius(hrp.Position, PLAYER_RADIUS, params)) do
-        if p.Name == "Hitbox" then
-            danger = true
-            break
+local function getModelPart(model)
+    if model.PrimaryPart then return model.PrimaryPart end
+    for _, v in ipairs(model:GetDescendants()) do
+        if v:IsA("BasePart") then
+            return v
         end
     end
-    if not danger then return end
+end
 
-    local best, bestDist
-    for _, d in ipairs(detectors) do
-        if now >= d.CooldownUntil then
-            local dist = (hrp.Position - d.Part.Position).Magnitude
-            if not bestDist or dist < bestDist then
-                bestDist = dist
-                best = d
+task.spawn(function()
+    while true do
+        if active and humanoidRootPart then
+            for _, model in ipairs(EventFolder:GetChildren()) do
+                if model:IsA("Model") then
+                    local part = getModelPart(model)
+                    if part then
+                        model:SetPrimaryPartCFrame(
+                            CFrame.new(humanoidRootPart.Position + Vector3.new(0, HeightOffset, 0))
+                        )
+                    end
+                end
             end
         end
-    end
-
-    if best then
-        tweenTo(best.CFrame)
+        task.wait(PullDelay)
     end
 end)
 
-print("✅ Anti Tsunami ON")
-]], [[
--- ===== TOGGLE OFF =====
-_G.AntiTsunami = false
-
-if _G.AntiTsunamiConn then
-    _G.AntiTsunamiConn:Disconnect()
-    _G.AntiTsunamiConn = nil
-end
-
-if workspace:FindFirstChild("SafeCFrameDetectors") then
-    workspace.SafeCFrameDetectors:Destroy()
-end
-
-print("⛔ Anti Tsunami OFF")
-]])
-
-
-
--- ===============================
--- INSTANT PROXIMITY PROMPT (ANTI RESET)
--- ===============================
-
-local Players = game:GetService("Players")
-local ProximityPromptService = game:GetService("ProximityPromptService")
-
-local player = Players.LocalPlayer
-
--- Function buat bikin semua prompt jadi instant
-local function makeInstant(prompt)
-    if prompt:IsA("ProximityPrompt") then
-        prompt.HoldDuration = 0
-    end
-end
-
--- Scan semua prompt yang sudah ada
-for _, v in ipairs(workspace:GetDescendants()) do
-    makeInstant(v)
-end
-
--- Jika ada prompt baru muncul
-workspace.DescendantAdded:Connect(function(desc)
-    makeInstant(desc)
-end)
-
--- Saat ProximityPrompt muncul di layar
-ProximityPromptService.PromptShown:Connect(function(prompt)
-    makeInstant(prompt)
-end)
-
--- Fix agar tetap aktif setelah reset
-player.CharacterAdded:Connect(function()
-    task.wait(0.5)
-    for _, v in ipairs(workspace:GetDescendants()) do
-        makeInstant(v)
+farmToggleBtn.MouseButton1Click:Connect(function()
+    active = not active
+    if active then
+        farmToggleBtn.Text = "■ Stop"
+        farmToggleBtn.BackgroundColor3 = Color3.fromRGB(0,200,120)
+    else
+        farmToggleBtn.Text = "▶ Start"
+        farmToggleBtn.BackgroundColor3 = Color3.fromRGB(45,45,65)
     end
 end)
-
-print("✅ Instant ProximityPrompt AKTIF (Anti Reset)")
