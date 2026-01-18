@@ -1,0 +1,123 @@
+-- Hapus GUI lama jika ada
+pcall(function()
+	game.CoreGui:FindFirstChild("PremiumDeliveryGUI"):Destroy()
+end)
+
+-- SERVICES
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+local character, humanoidRootPart
+
+-- FOLDER TARGET
+local EventFolder = workspace:WaitForChild("EventParts")
+
+-- SETTINGS
+local PullDelay = 0.1
+local HeightOffset = 3
+local active = false
+
+-- ================= CHARACTER HANDLER =================
+local function setupCharacter(char)
+	character = char
+	humanoidRootPart = char:WaitForChild("HumanoidRootPart")
+end
+
+if player.Character then
+	setupCharacter(player.Character)
+end
+player.CharacterAdded:Connect(setupCharacter)
+
+-- ================= GUI =================
+local gui = Instance.new("ScreenGui", CoreGui)
+gui.Name = "PremiumDeliveryGUI"
+gui.ResetOnSpawn = false
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 176, 0, 104)
+frame.Position = UDim2.new(0.1, 0, 0.1, 0)
+frame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+frame.Parent = gui
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
+
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0, 25)
+title.BackgroundTransparency = 1
+title.Text = "RadioActive Farm"
+title.TextColor3 = Color3.new(1,1,1)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 16
+
+local garis = Instance.new("Frame", frame)
+garis.Size = UDim2.new(1, -20, 0, 1)
+garis.Position = UDim2.new(0, 10, 0, 25)
+garis.BackgroundColor3 = Color3.fromRGB(60,60,60)
+garis.BorderSizePixel = 0
+
+local toggleBtn = Instance.new("TextButton", frame)
+toggleBtn.Size = UDim2.new(0.9, 0, 0, 34)
+toggleBtn.Position = UDim2.new(0.05, 0, 0, 42)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(45,45,65)
+toggleBtn.TextColor3 = Color3.new(1,1,1)
+toggleBtn.Font = Enum.Font.GothamSemibold
+toggleBtn.TextSize = 14
+toggleBtn.Text = "▶ Start"
+toggleBtn.AutoButtonColor = false
+Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0,6)
+
+-- Hover
+toggleBtn.MouseEnter:Connect(function()
+	toggleBtn.BackgroundColor3 = Color3.fromRGB(60,60,90)
+end)
+toggleBtn.MouseLeave:Connect(function()
+	if active then
+		toggleBtn.BackgroundColor3 = Color3.fromRGB(0,200,120)
+	else
+		toggleBtn.BackgroundColor3 = Color3.fromRGB(45,45,65)
+	end
+end)
+
+-- ================= MODEL FUNCTION =================
+local function getModelPart(model)
+	if model.PrimaryPart then return model.PrimaryPart end
+	for _, v in ipairs(model:GetDescendants()) do
+		if v:IsA("BasePart") then
+			return v
+		end
+	end
+end
+
+-- ================= LOOP TARIK MODEL =================
+task.spawn(function()
+	while true do
+		if active and humanoidRootPart then
+			for _, model in ipairs(EventFolder:GetChildren()) do
+				if model:IsA("Model") then
+					local part = getModelPart(model)
+					if part then
+						model:SetPrimaryPartCFrame(
+							CFrame.new(humanoidRootPart.Position + Vector3.new(0, HeightOffset, 0))
+						)
+					end
+				end
+			end
+		end
+		task.wait(PullDelay)
+	end
+end)
+
+-- ================= BUTTON LOGIC =================
+toggleBtn.MouseButton1Click:Connect(function()
+	active = not active
+	if active then
+		toggleBtn.Text = "■ Stop"
+		toggleBtn.BackgroundColor3 = Color3.fromRGB(0,200,120)
+	else
+		toggleBtn.Text = "▶ Start"
+		toggleBtn.BackgroundColor3 = Color3.fromRGB(45,45,65)
+	end
+end)
