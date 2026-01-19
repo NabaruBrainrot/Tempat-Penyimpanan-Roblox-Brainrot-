@@ -1,193 +1,187 @@
-pcall(function()
-    game:GetService("CoreGui"):FindFirstChild("PersistentToggleGui"):Destroy()
-    game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("PremiumDeliveryGUI"):Destroy()
-end)
+-- Konfigurasi
+local kodeRahasia = "KEY-KJHG-5T9U-QW2E-AS84-PL37-NM61"
+local linkKeyURL = "https://link-center.net/1365093/13RoDLLWVg1j"
+local statusFile = "fadhen_code.TheJusDinginBrah"
+local KEY_VALID_SECONDS = 172800 -- 24 jam
 
-local TweenService = game:GetService("TweenService")
-local CoreGui = game:GetService("CoreGui")
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
+local isfile = isfile or function() return false end
+local readfile = readfile or function() return "" end
+local writefile = writefile or function() end
 
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "PersistentToggleGui"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = CoreGui
-
-local toggleImageBtn = Instance.new("ImageButton")
-toggleImageBtn.Name = "HoverButton"
-toggleImageBtn.Size = UDim2.new(0, 55, 0, 55)
-toggleImageBtn.Position = UDim2.new(0, 10, 0.2, 0)
-toggleImageBtn.Image = "rbxassetid://116189732890823"
-toggleImageBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-toggleImageBtn.BackgroundTransparency = 0.7
-toggleImageBtn.Active = true
-toggleImageBtn.Draggable = true
-toggleImageBtn.Parent = ScreenGui
-
-Instance.new("UICorner", toggleImageBtn).CornerRadius = UDim.new(0, 9)
-
-local stroke = Instance.new("UIStroke", toggleImageBtn)
-stroke.Thickness = 3
-stroke.Color = Color3.fromRGB(255, 255, 255)
-stroke.Transparency = 0.5
-stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
-toggleImageBtn.MouseEnter:Connect(function()
-    TweenService:Create(toggleImageBtn, TweenInfo.new(0.15), {
-        Size = UDim2.new(0, 60, 0, 60)
-    }):Play()
-end)
-
-toggleImageBtn.MouseLeave:Connect(function()
-    TweenService:Create(toggleImageBtn, TweenInfo.new(0.15), {
-        Size = UDim2.new(0, 55, 0, 55)
-    }):Play()
-end)
-
-local targetCanvasGroup
-local isOpen = false
-
-local function tryFindTarget()
-    local sg = CoreGui:FindFirstChild("ScreenGui")
-    if not sg then return end
-    local children = sg:GetChildren()
-    if not children[4] then return end
-    local cg = children[4]
-    if not cg:IsA("CanvasGroup") then return end
-    local blur = cg:FindFirstChild("blurEffect")
-    if blur then blur:Destroy() end
-    targetCanvasGroup = cg
+local function isKeyStillValid()
+	if not isfile(statusFile) then return false end
+	local success, data = pcall(readfile, statusFile)
+	if not success then return false end
+	local split = string.split(data, ";")
+	if split[1] ~= "verified" then return false end
+	local timestamp = tonumber(split[2])
+	if not timestamp then return false end
+	return (tick() - timestamp) <= KEY_VALID_SECONDS
 end
 
-task.spawn(function()
-    while true do
-        if not targetCanvasGroup or not targetCanvasGroup.Parent then
-            tryFindTarget()
-        end
-        task.wait(0.3)
-    end
-end)
+if isKeyStillValid() then
+	pcall(function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Escape%20Host%20to%20key"))()
 
-toggleImageBtn.MouseButton1Click:Connect(function()
-    if not targetCanvasGroup then return end
-    isOpen = not isOpen
-    targetCanvasGroup.Visible = isOpen
-    targetCanvasGroup.GroupTransparency = isOpen and 0 or 1
-    targetCanvasGroup.Active = isOpen
-    targetCanvasGroup.Interactable = isOpen
-end)
+	end)
+	return
+end
 
-pcall(function()
-    loadstring(game:HttpGet(
-        "https://raw.githubusercontent.com/osakaTP2/OsakaTP2/main/Escape%20Tsunami%20For%20BrainrotsV3"
-    ))()
-end)
+-- GUI
+local TweenService = game:GetService("TweenService")
 
 local gui = Instance.new("ScreenGui")
-gui.Name = "PremiumDeliveryGUI"
+gui.Name = "KeySystemGui"
 gui.ResetOnSpawn = false
-gui.IgnoreGuiInset = true
-gui.Parent = player:WaitForChild("PlayerGui")
+pcall(function()
+	gui.Parent = game:GetService("CoreGui")
+end)
 
+-- Frame utama
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 176, 0, 104)
-frame.Position = UDim2.new(0.1, 0, 0.1, 0)
-frame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-frame.BorderSizePixel = 0
+frame.Size = UDim2.new(0, 370, 0, 200)
+frame.Position = UDim2.new(0.5, 0, 0.41, 0)
+frame.AnchorPoint = Vector2.new(0.5, 0.5)
+frame.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+frame.BackgroundTransparency = 0
 frame.Active = true
 frame.Draggable = true
 frame.Parent = gui
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
 
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1, 0, 0, 25)
-title.BackgroundTransparency = 1
-title.Text = "RadioActive Farm"
-title.TextColor3 = Color3.new(1,1,1)
-title.Font = Enum.Font.GothamBold
-title.TextSize = 16
+local border = Instance.new("UIStroke", frame)
+border.Thickness = 1.5
+border.Color = Color3.fromRGB(80, 80, 100)
+border.Transparency = 0.3
 
-local garis = Instance.new("Frame", frame)
-garis.Size = UDim2.new(1, -20, 0, 1)
-garis.Position = UDim2.new(0, 10, 0, 25)
-garis.BackgroundColor3 = Color3.fromRGB(60,60,60)
-garis.BorderSizePixel = 0
+-- Deskripsi
+local desc = Instance.new("TextLabel", frame)
+desc.Size = UDim2.new(0.9, 0, 0, 30)
+desc.Position = UDim2.new(0.05, 0, 0.1, 0)
+desc.BackgroundTransparency = 1
+desc.Text = "Permanent Key Access"
+desc.Font = Enum.Font.Gotham
+desc.TextColor3 = Color3.fromRGB(235, 235, 235)
+desc.TextSize = 20
+desc.TextWrapped = true
 
-local toggleBtn = Instance.new("TextButton", frame)
-toggleBtn.Size = UDim2.new(0.9, 0, 0, 34)
-toggleBtn.Position = UDim2.new(0.05, 0, 0, 42)
-toggleBtn.BackgroundColor3 = Color3.fromRGB(45,45,65)
-toggleBtn.TextColor3 = Color3.new(1,1,1)
-toggleBtn.Font = Enum.Font.GothamSemibold
-toggleBtn.TextSize = 14
-toggleBtn.Text = "▶ Start"
-toggleBtn.AutoButtonColor = false
-Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0,6)
+-- Input Key
+local textbox = Instance.new("TextBox", frame)
+textbox.Size = UDim2.new(0.9, 0, 0, 45)
+textbox.Position = UDim2.new(0.05, 0, 0.32, 0)
+textbox.PlaceholderText = "Enter Your Key"
+textbox.PlaceholderColor3 = Color3.fromRGB(170, 170, 170)
+textbox.Font = Enum.Font.Gotham
+textbox.Text = ""
+textbox.TextSize = 20
+textbox.TextColor3 = Color3.new(1, 1, 1)
+textbox.TextXAlignment = Enum.TextXAlignment.Center
+textbox.BackgroundColor3 = Color3.fromRGB(50, 50, 65)
+Instance.new("UICorner", textbox).CornerRadius = UDim.new(0, 8)
 
-toggleBtn.MouseEnter:Connect(function()
-    toggleBtn.BackgroundColor3 = Color3.fromRGB(60,60,90)
-end)
-toggleBtn.MouseLeave:Connect(function()
-    toggleBtn.BackgroundColor3 = toggleBtn.Text == "■ Stop"
-        and Color3.fromRGB(0,200,120)
-        or Color3.fromRGB(45,45,65)
-end)
+local stroke = Instance.new("UIStroke", textbox)
+stroke.Color = Color3.fromRGB(80, 80, 100)
+stroke.Thickness = 1
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-local character, humanoidRootPart
-local EventFolder
-local PullDelay = 0.1
-local HeightOffset = 3
-local active = false
+-- TextLabel info invalid
+local infoLabel = Instance.new("TextLabel", frame)
+infoLabel.Size = UDim2.new(0.9, 0, 0, 30)
+infoLabel.Position = UDim2.new(0.05, 0, 0.53, 0)
+infoLabel.BackgroundTransparency = 1
+infoLabel.Text = "If the key is invalid, please try getting a new key."
+infoLabel.Font = Enum.Font.Gotham
+infoLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+infoLabel.TextSize = 16
+infoLabel.TextWrapped = true
+infoLabel.TextXAlignment = Enum.TextXAlignment.Center
+infoLabel.TextTransparency = 1
+infoLabel.Visible = false
 
-local function setupCharacter(char)
-    character = char
-    humanoidRootPart = char:WaitForChild("HumanoidRootPart", 10)
+local showingInfo = false
+
+-- Tombol
+local function createButton(parent, text, pos)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(0.42, 0, 0, 40)
+	btn.Position = pos
+	btn.Text = text
+	btn.Font = Enum.Font.Gotham
+	btn.TextSize = 18
+	btn.TextColor3 = Color3.fromRGB(230, 230, 230)
+	btn.BackgroundColor3 = Color3.fromRGB(50, 50, 65)
+	btn.AutoButtonColor = false
+	btn.Parent = parent
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
+
+	local stroke = Instance.new("UIStroke", btn)
+	stroke.Thickness = 1
+	stroke.Color = Color3.fromRGB(80, 80, 100)
+	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+	-- Hover efek
+	btn.MouseEnter:Connect(function()
+		TweenService:Create(btn, TweenInfo.new(0.12), {
+			BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+		}):Play()
+	end)
+	btn.MouseLeave:Connect(function()
+		TweenService:Create(btn, TweenInfo.new(0.12), {
+			BackgroundColor3 = Color3.fromRGB(50, 50, 65)
+		}):Play()
+	end)
+
+	return btn
 end
 
-if player.Character then
-    setupCharacter(player.Character)
-end
-player.CharacterAdded:Connect(setupCharacter)
-
-task.spawn(function()
-    while not EventFolder do
-        EventFolder = workspace:FindFirstChild("EventParts")
-        task.wait(1)
-    end
+-- Get Key button
+local getKey = createButton(frame, "Get Key", UDim2.new(0.05, 0, 0.72, 0))
+getKey.MouseButton1Click:Connect(function()
+	setclipboard(linkKeyURL)
+	pcall(function()
+		game.StarterGui:SetCore("SendNotification", {
+			Title = "Copied",
+			Text = "Link copied to clipboard!",
+			Duration = 3
+		})
+	end)
 end)
 
-local function getModelPart(model)
-    if model.PrimaryPart then return model.PrimaryPart end
-    for _, v in ipairs(model:GetDescendants()) do
-        if v:IsA("BasePart") then
-            model.PrimaryPart = v
-            return v
-        end
-    end
-end
+-- Verify button
+local verifyBtn = createButton(frame, "Verify", UDim2.new(0.53, 0, 0.72, 0))
+verifyBtn.MouseButton1Click:Connect(function()
+	if string.lower(textbox.Text) == string.lower(kodeRahasia) then
+		verifyBtn.Text = "Verifying..."
+		pcall(function()
+			writefile(statusFile, "verified;" .. tostring(tick()))
+		end)
+		task.wait(0.5)
+		gui:Destroy()
+		pcall(function()
+  loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Escape%20Host%20to%20key"))()
 
-task.spawn(function()
-    while true do
-        if active and humanoidRootPart and EventFolder then
-            for _, model in ipairs(EventFolder:GetChildren()) do
-                if model:IsA("Model") then
-                    local part = getModelPart(model)
-                    if part then
-                        model:SetPrimaryPartCFrame(
-                            CFrame.new(humanoidRootPart.Position + Vector3.new(0, HeightOffset, 0))
-                        )
-                    end
-                end
-            end
-        end
-        task.wait(PullDelay)
-    end
-end)
+		end)
+	else
+		verifyBtn.Text = "Key Invalid!"
 
-toggleBtn.MouseButton1Click:Connect(function()
-    active = not active
-    toggleBtn.Text = active and "■ Stop" or "▶ Start"
-    toggleBtn.BackgroundColor3 = active
-        and Color3.fromRGB(0,200,120)
-        or Color3.fromRGB(45,45,65)
+		if not showingInfo then
+			showingInfo = true
+			infoLabel.Visible = true
+			TweenService:Create(infoLabel, TweenInfo.new(0.3), {
+				TextTransparency = 0
+			}):Play()
+
+			task.delay(5, function()
+				TweenService:Create(infoLabel, TweenInfo.new(0.4), {
+					TextTransparency = 1
+				}):Play()
+				task.wait(0.4)
+				infoLabel.Visible = false
+				showingInfo = false
+			end)
+		end
+
+		task.wait(1.2)
+		verifyBtn.Text = "Verify"
+	end
 end)
