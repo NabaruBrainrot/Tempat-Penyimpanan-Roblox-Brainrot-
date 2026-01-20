@@ -1,8 +1,8 @@
 -- Konfigurasi
-local kodeRahasia = "KEY-KJHG-5T9U-QW2E-AS84-PL37-NM61"
-local linkKeyURL = "https://link-center.net/1365093/13RoDLLWVg1j"
-local statusFile = "fadhen_code.TheJusDinginBrah"
-local KEY_VALID_SECONDS = 172800 -- 24 jam
+local kodeRahasia = "update2026"
+local linkKeyURL = "https://link-center.net/1365093/tZz2PfJlidun"
+local statusFile = "fadhen_code.TheJusDinginBra3h"
+local KEY_VALID_SECONDS = 172800000 -- 24 jam
 
 local isfile = isfile or function() return false end
 local readfile = readfile or function() return "" end
@@ -59,7 +59,7 @@ local desc = Instance.new("TextLabel", frame)
 desc.Size = UDim2.new(0.9, 0, 0, 30)
 desc.Position = UDim2.new(0.05, 0, 0.1, 0)
 desc.BackgroundTransparency = 1
-desc.Text = "Permanent Key Access"
+desc.Text = "Update script working get the last key to open the Script "
 desc.Font = Enum.Font.Gotham
 desc.TextColor3 = Color3.fromRGB(235, 235, 235)
 desc.TextSize = 20
