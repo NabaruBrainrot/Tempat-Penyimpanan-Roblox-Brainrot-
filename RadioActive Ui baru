@@ -1,5 +1,5 @@
 -- Konfigurasi
-local kodeRahasia = "update2026"
+local kodeRahasia = "KJHG-5T9U-QW2E-AS84-PL37-NM65"
 local linkKeyURL = "https://link-center.net/1365093/tZz2PfJlidun"
 local statusFile = "fadhen_code.TheJusDinginBra3h"
 local KEY_VALID_SECONDS = 172800000 -- 24 jam
