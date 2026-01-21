@@ -2,7 +2,7 @@
 local kodeRahasia = "KJHG-5T9U-QW2E-AS84-PL37-NM65"
 local linkKeyURL = "https://direct-link.net/1365093/VZX55fLTI4lw"
 local statusFile = "fadhen_code.TheJusDinginBra3h"
-local KEY_VALID_SECONDS = 172800000 -- 24 jam
+local KEY_VALID_SECONDS = 86400 -- 24 jam
 
 local isfile = isfile or function() return false end
 local readfile = readfile or function() return "" end
@@ -59,7 +59,7 @@ local desc = Instance.new("TextLabel", frame)
 desc.Size = UDim2.new(0.9, 0, 0, 30)
 desc.Position = UDim2.new(0.05, 0, 0.1, 0)
 desc.BackgroundTransparency = 1
-desc.Text = "Update script working get the last key to open the Script "
+desc.Text = "Get the last key ✅"
 desc.Font = Enum.Font.Gotham
 desc.TextColor3 = Color3.fromRGB(235, 235, 235)
 desc.TextSize = 20
