@@ -1,69 +1,159 @@
--- ================= REMOVE GUI LAMA =================
 pcall(function()
-        game.CoreGui:FindFirstChild("DeliveryTouchGUI"):Destroy()
+    game:GetService("CoreGui"):FindFirstChild("PersistentToggleGui"):Destroy()
+    game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("PremiumDeliveryGUI"):Destroy()
 end)
 
--- ================= GUI ONLY (BARU) =================
-local ScreenGui = Instance.new("ScreenGui")
-local Frame = Instance.new("Frame")
-local Button = Instance.new("TextButton")
-local Label = Instance.new("TextLabel")
-local UICorner_Frame = Instance.new("UICorner")
-local UICorner_Button = Instance.new("UICorner")
-local UICorner_Label = Instance.new("UICorner")
-
-ScreenGui.Name = "DeliveryTouchGUI"
-ScreenGui.Parent = game.CoreGui
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
--- Frame
-Frame.Parent = ScreenGui
-Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-Frame.Position = UDim2.new(0, 20, 0, 100)
-Frame.Size = UDim2.new(0, 140, 0, 90)
-Frame.Active = true
-Frame.Draggable = true
-UICorner_Frame.CornerRadius = UDim.new(0, 10)
-UICorner_Frame.Parent = Frame
-
--- Label
-Label.Parent = Frame
-Label.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-Label.Position = UDim2.new(0, 10, 0, 10)
-Label.Size = UDim2.new(0, 120, 0, 25)
-Label.Font = Enum.Font.GothamBold
-Label.Text = "RadioActive Farm"
-Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-Label.TextSize = 14
-UICorner_Label.CornerRadius = UDim.new(0, 6)
-UICorner_Label.Parent = Label
-
--- Button
-Button.Parent = Frame
-Button.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-Button.Position = UDim2.new(0, 10, 0, 45)
-Button.Size = UDim2.new(0, 120, 0, 30)
-Button.Font = Enum.Font.GothamBold
-Button.Text = "▶ Start Farm"
-Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-Button.TextSize = 12
-Button.TextWrapped = true
-UICorner_Button.CornerRadius = UDim.new(0, 8)
-UICorner_Button.Parent = Button
-
--- ================= LOGIC TIDAK DIUBAH =================
-
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
-local character, humanoidRootPart
-local EventFolder = nil
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "PersistentToggleGui"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = CoreGui
 
-local PullDelay = 0.1
+local toggleImageBtn = Instance.new("ImageButton")
+toggleImageBtn.Name = "HoverButton"
+toggleImageBtn.Size = UDim2.new(0, 55, 0, 55)
+toggleImageBtn.Position = UDim2.new(0, 10, 0.2, 0)
+toggleImageBtn.Image = "rbxassetid://116189732890823"
+toggleImageBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+toggleImageBtn.BackgroundTransparency = 0.7
+toggleImageBtn.Active = true
+toggleImageBtn.Draggable = true
+toggleImageBtn.Parent = ScreenGui
+
+Instance.new("UICorner", toggleImageBtn).CornerRadius = UDim.new(0, 9)
+
+local stroke = Instance.new("UIStroke", toggleImageBtn)
+stroke.Thickness = 3
+stroke.Color = Color3.fromRGB(255, 255, 255)
+stroke.Transparency = 0.5
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+toggleImageBtn.MouseEnter:Connect(function()
+    TweenService:Create(toggleImageBtn, TweenInfo.new(0.15), {
+        Size = UDim2.new(0, 60, 0, 60)
+    }):Play()
+end)
+
+toggleImageBtn.MouseLeave:Connect(function()
+    TweenService:Create(toggleImageBtn, TweenInfo.new(0.15), {
+        Size = UDim2.new(0, 55, 0, 55)
+    }):Play()
+end)
+
+local targetCanvasGroup
+local isOpen = false
+
+local function tryFindTarget()
+    local sg = CoreGui:FindFirstChild("ScreenGui")
+    if not sg then return end
+    local children = sg:GetChildren()
+    if not children[4] then return end
+    local cg = children[4]
+    if not cg:IsA("CanvasGroup") then return end
+    local blur = cg:FindFirstChild("blurEffect")
+    if blur then blur:Destroy() end
+    targetCanvasGroup = cg
+end
+
+task.spawn(function()
+    while true do
+        if not targetCanvasGroup or not targetCanvasGroup.Parent then
+            tryFindTarget()
+        end
+        task.wait(0.3)
+    end
+end)
+
+toggleImageBtn.MouseButton1Click:Connect(function()
+    if not targetCanvasGroup then return end
+    isOpen = not isOpen
+    targetCanvasGroup.Visible = isOpen
+    targetCanvasGroup.GroupTransparency = isOpen and 0 or 1
+    targetCanvasGroup.Active = isOpen
+    targetCanvasGroup.Interactable = isOpen
+end)
+
+pcall(function()
+    loadstring(game:HttpGet(
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/osakaTP2/OsakaTP2/main/Escape%20tsunamiV3.5"))()
+    ))()
+end)
+
+task.spawn(function()
+    local playerGui = player:WaitForChild("PlayerGui")
+    local osakaGui = playerGui:WaitForChild("OsakaTP_UpdateUI", 30)
+    if osakaGui then
+        task.wait(0.1)
+        osakaGui:Destroy()
+    end
+end)
+
+pcall(function()
+        player.PlayerGui:FindFirstChild("PremiumDeliveryGUI"):Destroy()
+end)
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "PremiumDeliveryGUI"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 141, 0, 83)
+frame.AnchorPoint = Vector2.new(0.5, 0.5)
+frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+frame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+frame.Parent = gui
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0, 20)
+title.BackgroundTransparency = 1
+title.Text = "RadioActive Farm"
+title.TextColor3 = Color3.new(1,1,1)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 13
+
+local garis = Instance.new("Frame", frame)
+garis.Size = UDim2.new(1, -16, 0, 1)
+garis.Position = UDim2.new(0, 8, 0, 20)
+garis.BackgroundColor3 = Color3.fromRGB(60,60,60)
+garis.BorderSizePixel = 0
+
+local toggleBtn = Instance.new("TextButton", frame)
+toggleBtn.Size = UDim2.new(0.9, 0, 0, 27)
+toggleBtn.Position = UDim2.new(0.05, 0, 0, 34)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(45,45,65)
+toggleBtn.TextColor3 = Color3.new(1,1,1)
+toggleBtn.Font = Enum.Font.GothamSemibold
+toggleBtn.TextSize = 11
+toggleBtn.Text = "▶ Start"
+toggleBtn.AutoButtonColor = false
+Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0,5)
+
+toggleBtn.MouseEnter:Connect(function()
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(60,60,90)
+end)
+
+toggleBtn.MouseLeave:Connect(function()
+        toggleBtn.BackgroundColor3 = toggleBtn.Text == "■ Stop"
+                and Color3.fromRGB(0,200,120)
+                or Color3.fromRGB(45,45,65)
+end)
+
+local character, humanoidRootPart
+local EventFolder
+local TeleportDelay = 0.1
 local HeightOffset = 3
 local active = false
 
--- Character handler (aman)
 local function setupCharacter(char)
         character = char
         humanoidRootPart = char:WaitForChild("HumanoidRootPart", 10)
@@ -74,7 +164,6 @@ if player.Character then
 end
 player.CharacterAdded:Connect(setupCharacter)
 
--- Cari EventParts TANPA BLOKIR GUI
 task.spawn(function()
         while not EventFolder do
                 EventFolder = workspace:FindFirstChild("EventParts")
@@ -82,7 +171,6 @@ task.spawn(function()
         end
 end)
 
--- Model part
 local function getModelPart(model)
         if model.PrimaryPart then return model.PrimaryPart end
         for _, v in ipairs(model:GetDescendants()) do
@@ -93,36 +181,44 @@ local function getModelPart(model)
         end
 end
 
--- Loop tarik model
-task.spawn(function()
-        while true do
-                if active and humanoidRootPart and EventFolder then
-                        for _, model in ipairs(EventFolder:GetChildren()) do
-                                if model:IsA("Model") then
-                                        local part = getModelPart(model)
-                                        if part then
-                                                model:SetPrimaryPartCFrame(
-                                                        CFrame.new(
-                                                                humanoidRootPart.Position + Vector3.new(0, HeightOffset, 0)
-                                                        )
-                                                )
-                                        end
+local function getNearestModelPart()
+        if not humanoidRootPart or not EventFolder then return end
+        local nearestPart
+        local shortestDistance = math.huge
+
+        for _, model in ipairs(EventFolder:GetChildren()) do
+                if model:IsA("Model") then
+                        local part = getModelPart(model)
+                        if part then
+                                local dist = (humanoidRootPart.Position - part.Position).Magnitude
+                                if dist < shortestDistance then
+                                        shortestDistance = dist
+                                        nearestPart = part
                                 end
                         end
                 end
-                task.wait(PullDelay)
+        end
+
+        return nearestPart
+end
+
+task.spawn(function()
+        while true do
+                if active and humanoidRootPart then
+                        local targetPart = getNearestModelPart()
+                        if targetPart then
+                                humanoidRootPart.CFrame =
+                                        targetPart.CFrame + Vector3.new(0, HeightOffset, 0)
+                        end
+                end
+                task.wait(TeleportDelay)
         end
 end)
 
--- ================= BUTTON LOGIC (SAMA) =================
-Button.MouseButton1Click:Connect(function()
+toggleBtn.MouseButton1Click:Connect(function()
         active = not active
-
-        if active then
-                Button.Text = "■ Stop Farm"
-                Button.BackgroundColor3 = Color3.fromRGB(0, 200, 120)
-        else
-                Button.Text = "▶ Start Farm"
-                Button.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-        end
+        toggleBtn.Text = active and "■ Stop" or "▶ Start"
+        toggleBtn.BackgroundColor3 = active
+                and Color3.fromRGB(0,200,120)
+                or Color3.fromRGB(45,45,65)
 end)
