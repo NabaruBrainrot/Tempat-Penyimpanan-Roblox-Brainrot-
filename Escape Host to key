@@ -79,7 +79,7 @@ end)
 
 pcall(function()
     loadstring(game:HttpGet(
-        "https://raw.githubusercontent.com/osakaTP2/OsakaTP2/main/Escape%20Tsunami%20For%20BrainrotsV3"
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/osakaTP2/OsakaTP2/main/Escape%20tsunamiV3.5"))()
     ))()
 end)
 
@@ -93,7 +93,7 @@ task.spawn(function()
 end)
 
 pcall(function()
-	player.PlayerGui:FindFirstChild("PremiumDeliveryGUI"):Destroy()
+        player.PlayerGui:FindFirstChild("PremiumDeliveryGUI"):Destroy()
 end)
 
 local gui = Instance.new("ScreenGui")
@@ -139,13 +139,13 @@ toggleBtn.AutoButtonColor = false
 Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0,5)
 
 toggleBtn.MouseEnter:Connect(function()
-	toggleBtn.BackgroundColor3 = Color3.fromRGB(60,60,90)
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(60,60,90)
 end)
 
 toggleBtn.MouseLeave:Connect(function()
-	toggleBtn.BackgroundColor3 = toggleBtn.Text == "■ Stop"
-		and Color3.fromRGB(0,200,120)
-		or Color3.fromRGB(45,45,65)
+        toggleBtn.BackgroundColor3 = toggleBtn.Text == "■ Stop"
+                and Color3.fromRGB(0,200,120)
+                or Color3.fromRGB(45,45,65)
 end)
 
 local character, humanoidRootPart
@@ -155,70 +155,70 @@ local HeightOffset = 3
 local active = false
 
 local function setupCharacter(char)
-	character = char
-	humanoidRootPart = char:WaitForChild("HumanoidRootPart", 10)
+        character = char
+        humanoidRootPart = char:WaitForChild("HumanoidRootPart", 10)
 end
 
 if player.Character then
-	setupCharacter(player.Character)
+        setupCharacter(player.Character)
 end
 player.CharacterAdded:Connect(setupCharacter)
 
 task.spawn(function()
-	while not EventFolder do
-		EventFolder = workspace:FindFirstChild("EventParts")
-		task.wait(1)
-	end
+        while not EventFolder do
+                EventFolder = workspace:FindFirstChild("EventParts")
+                task.wait(1)
+        end
 end)
 
 local function getModelPart(model)
-	if model.PrimaryPart then return model.PrimaryPart end
-	for _, v in ipairs(model:GetDescendants()) do
-		if v:IsA("BasePart") then
-			model.PrimaryPart = v
-			return v
-		end
-	end
+        if model.PrimaryPart then return model.PrimaryPart end
+        for _, v in ipairs(model:GetDescendants()) do
+                if v:IsA("BasePart") then
+                        model.PrimaryPart = v
+                        return v
+                end
+        end
 end
 
 local function getNearestModelPart()
-	if not humanoidRootPart or not EventFolder then return end
-	local nearestPart
-	local shortestDistance = math.huge
+        if not humanoidRootPart or not EventFolder then return end
+        local nearestPart
+        local shortestDistance = math.huge
 
-	for _, model in ipairs(EventFolder:GetChildren()) do
-		if model:IsA("Model") then
-			local part = getModelPart(model)
-			if part then
-				local dist = (humanoidRootPart.Position - part.Position).Magnitude
-				if dist < shortestDistance then
-					shortestDistance = dist
-					nearestPart = part
-				end
-			end
-		end
-	end
+        for _, model in ipairs(EventFolder:GetChildren()) do
+                if model:IsA("Model") then
+                        local part = getModelPart(model)
+                        if part then
+                                local dist = (humanoidRootPart.Position - part.Position).Magnitude
+                                if dist < shortestDistance then
+                                        shortestDistance = dist
+                                        nearestPart = part
+                                end
+                        end
+                end
+        end
 
-	return nearestPart
+        return nearestPart
 end
 
 task.spawn(function()
-	while true do
-		if active and humanoidRootPart then
-			local targetPart = getNearestModelPart()
-			if targetPart then
-				humanoidRootPart.CFrame =
-					targetPart.CFrame + Vector3.new(0, HeightOffset, 0)
-			end
-		end
-		task.wait(TeleportDelay)
-	end
+        while true do
+                if active and humanoidRootPart then
+                        local targetPart = getNearestModelPart()
+                        if targetPart then
+                                humanoidRootPart.CFrame =
+                                        targetPart.CFrame + Vector3.new(0, HeightOffset, 0)
+                        end
+                end
+                task.wait(TeleportDelay)
+        end
 end)
 
 toggleBtn.MouseButton1Click:Connect(function()
-	active = not active
-	toggleBtn.Text = active and "■ Stop" or "▶ Start"
-	toggleBtn.BackgroundColor3 = active
-		and Color3.fromRGB(0,200,120)
-		or Color3.fromRGB(45,45,65)
+        active = not active
+        toggleBtn.Text = active and "■ Stop" or "▶ Start"
+        toggleBtn.BackgroundColor3 = active
+                and Color3.fromRGB(0,200,120)
+                or Color3.fromRGB(45,45,65)
 end)
