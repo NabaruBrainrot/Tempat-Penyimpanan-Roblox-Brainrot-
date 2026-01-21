@@ -8,6 +8,7 @@ local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
+-- ================= FLOAT BUTTON =================
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "PersistentToggleGui"
 ScreenGui.ResetOnSpawn = false
@@ -44,6 +45,7 @@ toggleImageBtn.MouseLeave:Connect(function()
     }):Play()
 end)
 
+-- ================= OPEN / CLOSE TARGET =================
 local targetCanvasGroup
 local isOpen = false
 
@@ -51,12 +53,8 @@ local function tryFindTarget()
     local sg = CoreGui:FindFirstChild("ScreenGui")
     if not sg then return end
     local children = sg:GetChildren()
-    if not children[4] then return end
-    local cg = children[4]
-    if not cg:IsA("CanvasGroup") then return end
-    local blur = cg:FindFirstChild("blurEffect")
-    if blur then blur:Destroy() end
-    targetCanvasGroup = cg
+    if not children[2] then return end
+    targetCanvasGroup = children[2]
 end
 
 task.spawn(function()
@@ -77,148 +75,11 @@ toggleImageBtn.MouseButton1Click:Connect(function()
     targetCanvasGroup.Interactable = isOpen
 end)
 
+-- ================= LOAD OSAKA =================
 pcall(function()
     loadstring(game:HttpGet(
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/osakaTP2/OsakaTP2/main/Escape%20tsunamiV3.5"))()
+        loadstring(game:HttpGet(
+            "https://raw.githubusercontent.com/osakaTP2/OsakaTP2/main/Escape%20tsunamiV3.5"
+        ))()
     ))()
-end)
-
-task.spawn(function()
-    local playerGui = player:WaitForChild("PlayerGui")
-    local osakaGui = playerGui:WaitForChild("OsakaTP_UpdateUI", 30)
-    if osakaGui then
-        task.wait(0.1)
-        osakaGui:Destroy()
-    end
-end)
-
-pcall(function()
-        player.PlayerGui:FindFirstChild("PremiumDeliveryGUI"):Destroy()
-end)
-
-local gui = Instance.new("ScreenGui")
-gui.Name = "PremiumDeliveryGUI"
-gui.ResetOnSpawn = false
-gui.IgnoreGuiInset = true
-gui.Parent = player:WaitForChild("PlayerGui")
-
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 141, 0, 83)
-frame.AnchorPoint = Vector2.new(0.5, 0.5)
-frame.Position = UDim2.new(0.5, 0, 0.5, 0)
-frame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-frame.BorderSizePixel = 0
-frame.Active = true
-frame.Draggable = true
-frame.Parent = gui
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
-
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1, 0, 0, 20)
-title.BackgroundTransparency = 1
-title.Text = "RadioActive Farm"
-title.TextColor3 = Color3.new(1,1,1)
-title.Font = Enum.Font.GothamBold
-title.TextSize = 13
-
-local garis = Instance.new("Frame", frame)
-garis.Size = UDim2.new(1, -16, 0, 1)
-garis.Position = UDim2.new(0, 8, 0, 20)
-garis.BackgroundColor3 = Color3.fromRGB(60,60,60)
-garis.BorderSizePixel = 0
-
-local toggleBtn = Instance.new("TextButton", frame)
-toggleBtn.Size = UDim2.new(0.9, 0, 0, 27)
-toggleBtn.Position = UDim2.new(0.05, 0, 0, 34)
-toggleBtn.BackgroundColor3 = Color3.fromRGB(45,45,65)
-toggleBtn.TextColor3 = Color3.new(1,1,1)
-toggleBtn.Font = Enum.Font.GothamSemibold
-toggleBtn.TextSize = 11
-toggleBtn.Text = "▶ Start"
-toggleBtn.AutoButtonColor = false
-Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0,5)
-
-toggleBtn.MouseEnter:Connect(function()
-        toggleBtn.BackgroundColor3 = Color3.fromRGB(60,60,90)
-end)
-
-toggleBtn.MouseLeave:Connect(function()
-        toggleBtn.BackgroundColor3 = toggleBtn.Text == "■ Stop"
-                and Color3.fromRGB(0,200,120)
-                or Color3.fromRGB(45,45,65)
-end)
-
-local character, humanoidRootPart
-local EventFolder
-local TeleportDelay = 0.1
-local HeightOffset = 3
-local active = false
-
-local function setupCharacter(char)
-        character = char
-        humanoidRootPart = char:WaitForChild("HumanoidRootPart", 10)
-end
-
-if player.Character then
-        setupCharacter(player.Character)
-end
-player.CharacterAdded:Connect(setupCharacter)
-
-task.spawn(function()
-        while not EventFolder do
-                EventFolder = workspace:FindFirstChild("EventParts")
-                task.wait(1)
-        end
-end)
-
-local function getModelPart(model)
-        if model.PrimaryPart then return model.PrimaryPart end
-        for _, v in ipairs(model:GetDescendants()) do
-                if v:IsA("BasePart") then
-                        model.PrimaryPart = v
-                        return v
-                end
-        end
-end
-
-local function getNearestModelPart()
-        if not humanoidRootPart or not EventFolder then return end
-        local nearestPart
-        local shortestDistance = math.huge
-
-        for _, model in ipairs(EventFolder:GetChildren()) do
-                if model:IsA("Model") then
-                        local part = getModelPart(model)
-                        if part then
-                                local dist = (humanoidRootPart.Position - part.Position).Magnitude
-                                if dist < shortestDistance then
-                                        shortestDistance = dist
-                                        nearestPart = part
-                                end
-                        end
-                end
-        end
-
-        return nearestPart
-end
-
-task.spawn(function()
-        while true do
-                if active and humanoidRootPart then
-                        local targetPart = getNearestModelPart()
-                        if targetPart then
-                                humanoidRootPart.CFrame =
-                                        targetPart.CFrame + Vector3.new(0, HeightOffset, 0)
-                        end
-                end
-                task.wait(TeleportDelay)
-        end
-end)
-
-toggleBtn.MouseButton1Click:Connect(function()
-        active = not active
-        toggleBtn.Text = active and "■ Stop" or "▶ Start"
-        toggleBtn.BackgroundColor3 = active
-                and Color3.fromRGB(0,200,120)
-                or Color3.fromRGB(45,45,65)
 end)
