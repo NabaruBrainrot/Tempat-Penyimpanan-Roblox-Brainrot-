@@ -2,29 +2,29 @@
 local kodeRahasia = "KJHG-5T9U-QW2E-AS84-PL37-NM65"
 local linkKeyURL = "https://direct-link.net/1365093/VZX55fLTI4lw"
 local statusFile = "fadhen_code.TheJusDinginBra3h"
-local KEY_VALID_SECONDS = 172800000 -- 24 jam
+local KEY_VALID_SECONDS = 86400 -- 24 jam
 
 local isfile = isfile or function() return false end
 local readfile = readfile or function() return "" end
 local writefile = writefile or function() end
 
 local function isKeyStillValid()
-	if not isfile(statusFile) then return false end
-	local success, data = pcall(readfile, statusFile)
-	if not success then return false end
-	local split = string.split(data, ";")
-	if split[1] ~= "verified" then return false end
-	local timestamp = tonumber(split[2])
-	if not timestamp then return false end
-	return (tick() - timestamp) <= KEY_VALID_SECONDS
+        if not isfile(statusFile) then return false end
+        local success, data = pcall(readfile, statusFile)
+        if not success then return false end
+        local split = string.split(data, ";")
+        if split[1] ~= "verified" then return false end
+        local timestamp = tonumber(split[2])
+        if not timestamp then return false end
+        return (tick() - timestamp) <= KEY_VALID_SECONDS
 end
 
 if isKeyStillValid() then
-	pcall(function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Escape%20Host%20to%20key"))()
+        pcall(function()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Escape%20Host%20to%20key"))()
 
-	end)
-	return
+        end)
+        return
 end
 
 -- GUI
@@ -34,7 +34,7 @@ local gui = Instance.new("ScreenGui")
 gui.Name = "KeySystemGui"
 gui.ResetOnSpawn = false
 pcall(function()
-	gui.Parent = game:GetService("CoreGui")
+        gui.Parent = game:GetService("CoreGui")
 end)
 
 -- Frame utama
@@ -59,7 +59,7 @@ local desc = Instance.new("TextLabel", frame)
 desc.Size = UDim2.new(0.9, 0, 0, 30)
 desc.Position = UDim2.new(0.05, 0, 0.1, 0)
 desc.BackgroundTransparency = 1
-desc.Text = "Update script working get the last key to open the Script "
+desc.Text = "Get the last key ✅"
 desc.Font = Enum.Font.Gotham
 desc.TextColor3 = Color3.fromRGB(235, 235, 235)
 desc.TextSize = 20
@@ -102,86 +102,86 @@ local showingInfo = false
 
 -- Tombol
 local function createButton(parent, text, pos)
-	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(0.42, 0, 0, 40)
-	btn.Position = pos
-	btn.Text = text
-	btn.Font = Enum.Font.Gotham
-	btn.TextSize = 18
-	btn.TextColor3 = Color3.fromRGB(230, 230, 230)
-	btn.BackgroundColor3 = Color3.fromRGB(50, 50, 65)
-	btn.AutoButtonColor = false
-	btn.Parent = parent
-	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(0.42, 0, 0, 40)
+        btn.Position = pos
+        btn.Text = text
+        btn.Font = Enum.Font.Gotham
+        btn.TextSize = 18
+        btn.TextColor3 = Color3.fromRGB(230, 230, 230)
+        btn.BackgroundColor3 = Color3.fromRGB(50, 50, 65)
+        btn.AutoButtonColor = false
+        btn.Parent = parent
+        Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
 
-	local stroke = Instance.new("UIStroke", btn)
-	stroke.Thickness = 1
-	stroke.Color = Color3.fromRGB(80, 80, 100)
-	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+        local stroke = Instance.new("UIStroke", btn)
+        stroke.Thickness = 1
+        stroke.Color = Color3.fromRGB(80, 80, 100)
+        stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-	-- Hover efek
-	btn.MouseEnter:Connect(function()
-		TweenService:Create(btn, TweenInfo.new(0.12), {
-			BackgroundColor3 = Color3.fromRGB(60, 60, 80)
-		}):Play()
-	end)
-	btn.MouseLeave:Connect(function()
-		TweenService:Create(btn, TweenInfo.new(0.12), {
-			BackgroundColor3 = Color3.fromRGB(50, 50, 65)
-		}):Play()
-	end)
+        -- Hover efek
+        btn.MouseEnter:Connect(function()
+                TweenService:Create(btn, TweenInfo.new(0.12), {
+                        BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+                }):Play()
+        end)
+        btn.MouseLeave:Connect(function()
+                TweenService:Create(btn, TweenInfo.new(0.12), {
+                        BackgroundColor3 = Color3.fromRGB(50, 50, 65)
+                }):Play()
+        end)
 
-	return btn
+        return btn
 end
 
 -- Get Key button
 local getKey = createButton(frame, "Get Key", UDim2.new(0.05, 0, 0.72, 0))
 getKey.MouseButton1Click:Connect(function()
-	setclipboard(linkKeyURL)
-	pcall(function()
-		game.StarterGui:SetCore("SendNotification", {
-			Title = "Copied",
-			Text = "Link copied to clipboard!",
-			Duration = 3
-		})
-	end)
+        setclipboard(linkKeyURL)
+        pcall(function()
+                game.StarterGui:SetCore("SendNotification", {
+                        Title = "Copied",
+                        Text = "Link copied to clipboard!",
+                        Duration = 3
+                })
+        end)
 end)
 
 -- Verify button
 local verifyBtn = createButton(frame, "Verify", UDim2.new(0.53, 0, 0.72, 0))
 verifyBtn.MouseButton1Click:Connect(function()
-	if string.lower(textbox.Text) == string.lower(kodeRahasia) then
-		verifyBtn.Text = "Verifying..."
-		pcall(function()
-			writefile(statusFile, "verified;" .. tostring(tick()))
-		end)
-		task.wait(0.5)
-		gui:Destroy()
-		pcall(function()
+        if string.lower(textbox.Text) == string.lower(kodeRahasia) then
+                verifyBtn.Text = "Verifying..."
+                pcall(function()
+                        writefile(statusFile, "verified;" .. tostring(tick()))
+                end)
+                task.wait(0.5)
+                gui:Destroy()
+                pcall(function()
   loadstring(game:HttpGet("https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Escape%20Host%20to%20key"))()
 
-		end)
-	else
-		verifyBtn.Text = "Key Invalid!"
+                end)
+        else
+                verifyBtn.Text = "Key Invalid!"
 
-		if not showingInfo then
-			showingInfo = true
-			infoLabel.Visible = true
-			TweenService:Create(infoLabel, TweenInfo.new(0.3), {
-				TextTransparency = 0
-			}):Play()
+                if not showingInfo then
+                        showingInfo = true
+                        infoLabel.Visible = true
+                        TweenService:Create(infoLabel, TweenInfo.new(0.3), {
+                                TextTransparency = 0
+                        }):Play()
 
-			task.delay(5, function()
-				TweenService:Create(infoLabel, TweenInfo.new(0.4), {
-					TextTransparency = 1
-				}):Play()
-				task.wait(0.4)
-				infoLabel.Visible = false
-				showingInfo = false
-			end)
-		end
+                        task.delay(5, function()
+                                TweenService:Create(infoLabel, TweenInfo.new(0.4), {
+                                        TextTransparency = 1
+                                }):Play()
+                                task.wait(0.4)
+                                infoLabel.Visible = false
+                                showingInfo = false
+                        end)
+                end
 
-		task.wait(1.2)
-		verifyBtn.Text = "Verify"
-	end
+                task.wait(1.2)
+                verifyBtn.Text = "Verify"
+        end
 end)
