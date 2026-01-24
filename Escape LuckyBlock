@@ -1,0 +1,151 @@
+--// SERVICES
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+--// HAPUS GUI LAMA
+pcall(function()
+	player.PlayerGui:FindFirstChild("LuckyBlockGUI"):Destroy()
+	player.PlayerGui:FindFirstChild("PremiumDeliveryGUI"):Destroy()
+end)
+
+--// CHARACTER
+local char, hrp
+local function setCharacter(character)
+	char = character
+	hrp = character:WaitForChild("HumanoidRootPart")
+end
+
+if player.Character then
+	setCharacter(player.Character)
+end
+
+player.CharacterAdded:Connect(function(character)
+	task.wait(0.2)
+	setCharacter(character)
+end)
+
+repeat task.wait() until hrp and hrp.Parent
+
+--// ================= GUI (TIDAK DIUBAH) =================
+local gui = Instance.new("ScreenGui")
+gui.Name = "PremiumDeliveryGUI"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Parent = gui
+frame.Size = UDim2.new(0, 141, 0, 83)
+frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+frame.AnchorPoint = Vector2.new(0.5, 0.5)
+frame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+
+local title = Instance.new("TextLabel")
+title.Parent = frame
+title.Size = UDim2.new(1, 0, 0, 20)
+title.BackgroundTransparency = 1
+title.Text = "luckyBlock Farm"
+title.TextColor3 = Color3.new(1,1,1)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 13
+
+local garis = Instance.new("Frame")
+garis.Parent = frame
+garis.Size = UDim2.new(1, -16, 0, 1)
+garis.Position = UDim2.new(0, 8, 0, 20)
+garis.BackgroundColor3 = Color3.fromRGB(60,60,60)
+garis.BorderSizePixel = 0
+
+local button = Instance.new("TextButton")
+button.Parent = frame
+button.Size = UDim2.new(0.9, 0, 0, 27)
+button.Position = UDim2.new(0.05, 0, 0, 34)
+button.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+button.Text = "▶ Start"
+button.TextColor3 = Color3.new(1,1,1)
+button.Font = Enum.Font.GothamSemibold
+button.TextSize = 11
+button.AutoButtonColor = false
+Instance.new("UICorner", button).CornerRadius = UDim.new(0, 5)
+
+button.MouseEnter:Connect(function()
+	button.BackgroundColor3 = Color3.fromRGB(60, 60, 90)
+end)
+button.MouseLeave:Connect(function()
+	button.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+end)
+
+--// ================= LOGIC ASLI =================
+local running = false
+local alive = true
+local savedCFrame = nil
+local folder = workspace:WaitForChild("ActiveLuckyBlocks")
+
+local function getNearestModel()
+	if not hrp then return nil end
+	local nearest, shortest = nil, math.huge
+	for _, model in pairs(folder:GetChildren()) do
+		if model:IsA("Model") then
+			local part = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
+			if part then
+				local dist = (hrp.Position - part.Position).Magnitude
+				if dist < shortest then
+					shortest = dist
+					nearest = model
+				end
+			end
+		end
+	end
+	return nearest
+end
+
+local function firePrompt(model)
+	for _, v in pairs(model:GetDescendants()) do
+		if v:IsA("ProximityPrompt") then
+			v.HoldDuration = 0
+			pcall(function()
+				fireproximityprompt(v)
+			end)
+		end
+	end
+end
+
+task.spawn(function()
+	while alive do
+		task.wait(0.15)
+		if running and hrp and hrp.Parent then
+			local target = getNearestModel()
+			if target then
+				local part = target.PrimaryPart or target:FindFirstChildWhichIsA("BasePart")
+				if part then
+					hrp.CFrame = part.CFrame + Vector3.new(0,3,0)
+					firePrompt(target)
+				end
+			end
+		end
+	end
+end)
+
+--// TOGGLE (PAKAI BUTTON INI)
+button.MouseButton1Click:Connect(function()
+	if not running then
+		savedCFrame = hrp.CFrame
+		running = true
+		button.Text = "■ Stop"
+	else
+		running = false
+		button.Text = "▶ Start"
+		task.wait()
+		if hrp and savedCFrame then
+			hrp.CFrame = savedCFrame
+		end
+	end
+end)
+
+gui.Destroying:Connect(function()
+	alive = false
+end)
