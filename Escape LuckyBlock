@@ -20,7 +20,7 @@ if player.Character then
 end
 
 player.CharacterAdded:Connect(function(character)
-    task.wait(0.2)
+    task.wait(0.1)
     setCharacter(character)
 end)
 
@@ -84,21 +84,25 @@ local running = false
 local alive = true
 local folder = workspace:WaitForChild("ActiveLuckyBlocks")
 
+local MAX_DISTANCE = 200 -- 🔥 BATAS JARAK MAKSIMUM
+
 local function getNearestModel()
     if not hrp then return nil end
-    local nearest, shortest = nil, math.huge
+    local nearest, shortest = nil, MAX_DISTANCE
+
     for _, model in pairs(folder:GetChildren()) do
         if model:IsA("Model") then
             local part = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
             if part then
                 local dist = (hrp.Position - part.Position).Magnitude
-                if dist < shortest then
+                if dist <= MAX_DISTANCE and dist < shortest then
                     shortest = dist
                     nearest = model
                 end
             end
         end
     end
+
     return nearest
 end
 
