@@ -4,24 +4,24 @@ local player = Players.LocalPlayer
 
 --// HAPUS GUI LAMA
 pcall(function()
-	player.PlayerGui:FindFirstChild("LuckyBlockGUI"):Destroy()
-	player.PlayerGui:FindFirstChild("PremiumDeliveryGUI"):Destroy()
+    player.PlayerGui:FindFirstChild("LuckyBlockGUI"):Destroy()
+    player.PlayerGui:FindFirstChild("PremiumDeliveryGUI"):Destroy()
 end)
 
 --// CHARACTER
 local char, hrp
 local function setCharacter(character)
-	char = character
-	hrp = character:WaitForChild("HumanoidRootPart")
+    char = character
+    hrp = character:WaitForChild("HumanoidRootPart")
 end
 
 if player.Character then
-	setCharacter(player.Character)
+    setCharacter(player.Character)
 end
 
 player.CharacterAdded:Connect(function(character)
-	task.wait(0.2)
-	setCharacter(character)
+    task.wait(0.2)
+    setCharacter(character)
 end)
 
 repeat task.wait() until hrp and hrp.Parent
@@ -73,79 +73,107 @@ button.AutoButtonColor = false
 Instance.new("UICorner", button).CornerRadius = UDim.new(0, 5)
 
 button.MouseEnter:Connect(function()
-	button.BackgroundColor3 = Color3.fromRGB(60, 60, 90)
+    button.BackgroundColor3 = Color3.fromRGB(60, 60, 90)
 end)
 button.MouseLeave:Connect(function()
-	button.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+    button.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
 end)
 
 --// ================= LOGIC ASLI =================
 local running = false
 local alive = true
-local savedCFrame = nil
 local folder = workspace:WaitForChild("ActiveLuckyBlocks")
 
 local function getNearestModel()
-	if not hrp then return nil end
-	local nearest, shortest = nil, math.huge
-	for _, model in pairs(folder:GetChildren()) do
-		if model:IsA("Model") then
-			local part = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
-			if part then
-				local dist = (hrp.Position - part.Position).Magnitude
-				if dist < shortest then
-					shortest = dist
-					nearest = model
-				end
-			end
-		end
-	end
-	return nearest
+    if not hrp then return nil end
+    local nearest, shortest = nil, math.huge
+    for _, model in pairs(folder:GetChildren()) do
+        if model:IsA("Model") then
+            local part = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
+            if part then
+                local dist = (hrp.Position - part.Position).Magnitude
+                if dist < shortest then
+                    shortest = dist
+                    nearest = model
+                end
+            end
+        end
+    end
+    return nearest
 end
 
 local function firePrompt(model)
-	for _, v in pairs(model:GetDescendants()) do
-		if v:IsA("ProximityPrompt") then
-			v.HoldDuration = 0
-			pcall(function()
-				fireproximityprompt(v)
-			end)
-		end
-	end
+    for _, v in pairs(model:GetDescendants()) do
+        if v:IsA("ProximityPrompt") then
+            v.HoldDuration = 0
+            pcall(function()
+                fireproximityprompt(v)
+            end)
+        end
+    end
 end
 
 task.spawn(function()
-	while alive do
-		task.wait(0.15)
-		if running and hrp and hrp.Parent then
-			local target = getNearestModel()
-			if target then
-				local part = target.PrimaryPart or target:FindFirstChildWhichIsA("BasePart")
-				if part then
-					hrp.CFrame = part.CFrame + Vector3.new(0,3,0)
-					firePrompt(target)
-				end
-			end
-		end
-	end
+    while alive do
+        task.wait(0.15)
+        if running and hrp and hrp.Parent then
+            local target = getNearestModel()
+            if target then
+                local part = target.PrimaryPart or target:FindFirstChildWhichIsA("BasePart")
+                if part then
+                    hrp.CFrame = part.CFrame + Vector3.new(0,3,0)
+                    firePrompt(target)
+                end
+            end
+        end
+    end
 end)
 
---// TOGGLE (PAKAI BUTTON INI)
+--// ================= SAFE CFRAMES =================
+local SafeCFrames = {
+    CFrame.new(543.411316, -4.02592373, -0.922426283),
+    CFrame.new(757.379578, -3.1540308, -1.72257304),
+    CFrame.new(1075.6106, -3.23971272, 3.20061111),
+    CFrame.new(1550.67151, -3.26713109, 10.1864586),
+    CFrame.new(2252.74146, -3.2540493, 5.63876724),
+    CFrame.new(2605.51904, -3.22055626, 14.0165806),
+    CFrame.new(398.271912, -3.89251757, -9.20723152),
+    CFrame.new(285.117859, -4.32986689, -8.98183632),
+    CFrame.new(201.416275, -4.02712774, -5.44396925)
+}
+
+local function getNearestCFrame()
+    if not hrp then return nil end
+    local nearest, shortest = nil, math.huge
+    for _, cf in ipairs(SafeCFrames) do
+        local dist = (hrp.Position - cf.Position).Magnitude
+        if dist < shortest then
+            shortest = dist
+            nearest = cf
+        end
+    end
+    return nearest
+end
+
+--// ================= TOGGLE =================
 button.MouseButton1Click:Connect(function()
-	if not running then
-		savedCFrame = hrp.CFrame
-		running = true
-		button.Text = "■ Stop"
-	else
-		running = false
-		button.Text = "▶ Start"
-		task.wait()
-		if hrp and savedCFrame then
-			hrp.CFrame = savedCFrame
-		end
-	end
+    if not running then
+        running = true
+        button.Text = "■ Stop"
+    else
+        running = false
+        button.Text = "▶ Start"
+        task.wait()
+
+        if hrp then
+            local nearestCF = getNearestCFrame()
+            if nearestCF then
+                hrp.CFrame = nearestCF
+            end
+        end
+    end
 end)
 
 gui.Destroying:Connect(function()
-	alive = false
+    alive = false
 end)
