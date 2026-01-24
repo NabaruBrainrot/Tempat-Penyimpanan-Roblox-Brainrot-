@@ -1,6 +1,9 @@
 pcall(function()
-    game:GetService("CoreGui"):FindFirstChild("PersistentToggleGui"):Destroy()
-    game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("PremiumDeliveryGUI"):Destroy()
+    local cg = game:GetService("CoreGui"):FindFirstChild("PersistentToggleGui")
+    if cg then cg:Destroy() end
+
+    local pg = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("PremiumDeliveryGUI")
+    if pg then pg:Destroy() end
 end)
 
 local TweenService = game:GetService("TweenService")
@@ -77,9 +80,13 @@ end)
 
 -- ================= LOAD OSAKA =================
 pcall(function()
+    -- script 1
     loadstring(game:HttpGet(
-        loadstring(game:HttpGet(
-            "https://raw.githubusercontent.com/osakaTP2/OsakaTP2/main/Escape%20tsunamiV3.5"
-        ))()
+        "https://raw.githubusercontent.com/osakaTP2/OsakaTP2/main/Escape%20tsunamiV3.5"
+    ))()
+
+    -- script 2
+    loadstring(game:HttpGet(
+        "https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/Escape%20LuckyBlock"
     ))()
 end)
