@@ -1,3 +1,89 @@
+pcall(function()
+    local cg = game:GetService("CoreGui"):FindFirstChild("PersistentToggleGui")
+    if cg then cg:Destroy() end
+
+    local pg = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("PremiumDeliveryGUI")
+    if pg then pg:Destroy() end
+end)
+
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+
+-- ================= FLOAT BUTTON =================
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "PersistentToggleGui"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = CoreGui
+
+local toggleImageBtn = Instance.new("ImageButton")
+toggleImageBtn.Name = "HoverButton"
+toggleImageBtn.Size = UDim2.new(0, 55, 0, 55)
+toggleImageBtn.Position = UDim2.new(0, 10, 0.2, 0)
+toggleImageBtn.Image = "rbxassetid://108846514953006"
+toggleImageBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+toggleImageBtn.BackgroundTransparency = 0.7
+toggleImageBtn.Active = true
+toggleImageBtn.Draggable = true
+toggleImageBtn.Parent = ScreenGui
+
+Instance.new("UICorner", toggleImageBtn).CornerRadius = UDim.new(0, 9)
+
+local stroke = Instance.new("UIStroke", toggleImageBtn)
+stroke.Thickness = 3
+stroke.Color = Color3.fromRGB(255, 255, 255)
+stroke.Transparency = 0.5
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+toggleImageBtn.MouseEnter:Connect(function()
+    TweenService:Create(toggleImageBtn, TweenInfo.new(0.15), {
+        Size = UDim2.new(0, 60, 0, 60)
+    }):Play()
+end)
+
+toggleImageBtn.MouseLeave:Connect(function()
+    TweenService:Create(toggleImageBtn, TweenInfo.new(0.15), {
+        Size = UDim2.new(0, 55, 0, 55)
+    }):Play()
+end)
+
+-- ================= TARGET GUI (ANTI LAG) =================
+local TARGET_SIZE = UDim2.new(0, 500, 0, 340)
+local targetFrame
+local isOpen = false
+local preloaded = false
+
+task.spawn(function()
+    while not targetFrame do
+        local screenGui = CoreGui:FindFirstChild("ScreenGui")
+        if screenGui then
+            for _, v in ipairs(screenGui:GetChildren()) do
+                if v:IsA("Frame") and v.Size == TARGET_SIZE then
+                    targetFrame = v
+
+                    -- 🔥 PRELOAD GUI (INI KUNCI ANTI LAG)
+                    targetFrame.Visible = true
+                    task.wait() -- 1 frame render
+                    targetFrame.Visible = false
+
+                    preloaded = true
+                    break
+                end
+            end
+        end
+        task.wait(0.25)
+    end
+end)
+
+toggleImageBtn.MouseButton1Click:Connect(function()
+    if not targetFrame or not preloaded then return end
+    isOpen = not isOpen
+    targetFrame.Visible = isOpen
+end)
+
+
+
+
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
@@ -73,7 +159,7 @@ do
     Options.MyToggle:SetValue(false)
 
 
-    
+
     local Slider = Tabs.Main:AddSlider("Slider", {
         Title = "Slider",
         Description = "This is a slider",
@@ -108,7 +194,7 @@ do
     end)
 
 
-    
+
     local MultiDropdown = Tabs.Main:AddDropdown("MultiDropdown", {
         Title = "Dropdown",
         Description = "You can select multiple values.",
@@ -141,7 +227,7 @@ do
     Colorpicker:OnChanged(function()
         print("Colorpicker changed:", Colorpicker.Value)
     end)
-    
+
     Colorpicker:SetValueRGB(Color3.fromRGB(0, 255, 140))
 
 
