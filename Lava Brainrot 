@@ -1,0 +1,295 @@
+pcall(function()
+    local cg = game:GetService("CoreGui"):FindFirstChild("PersistentToggleGui")
+    if cg then cg:Destroy() end
+
+    local pg = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("PremiumDeliveryGUI")
+    if pg then pg:Destroy() end
+end)
+
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+
+-- ================= FLOAT BUTTON =================
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "PersistentToggleGui"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = CoreGui
+
+local toggleImageBtn = Instance.new("ImageButton")
+toggleImageBtn.Name = "HoverButton"
+toggleImageBtn.Size = UDim2.new(0, 55, 0, 55)
+toggleImageBtn.Position = UDim2.new(0, 10, 0.2, 0)
+toggleImageBtn.Image = "rbxassetid://108846514953006"
+toggleImageBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+toggleImageBtn.BackgroundTransparency = 0.7
+toggleImageBtn.Active = true
+toggleImageBtn.Draggable = true
+toggleImageBtn.Parent = ScreenGui
+
+Instance.new("UICorner", toggleImageBtn).CornerRadius = UDim.new(0, 9)
+
+local stroke = Instance.new("UIStroke", toggleImageBtn)
+stroke.Thickness = 3
+stroke.Color = Color3.fromRGB(255, 255, 255)
+stroke.Transparency = 0.5
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+toggleImageBtn.MouseEnter:Connect(function()
+    TweenService:Create(toggleImageBtn, TweenInfo.new(0.15), {
+        Size = UDim2.new(0, 60, 0, 60)
+    }):Play()
+end)
+
+toggleImageBtn.MouseLeave:Connect(function()
+    TweenService:Create(toggleImageBtn, TweenInfo.new(0.15), {
+        Size = UDim2.new(0, 55, 0, 55)
+    }):Play()
+end)
+
+-- ================= TARGET GUI (ANTI LAG) =================
+local TARGET_SIZE = UDim2.new(0, 500, 0, 340)
+local targetFrame
+local isOpen = false
+local preloaded = false
+
+task.spawn(function()
+    while not targetFrame do
+        local screenGui = CoreGui:FindFirstChild("ScreenGui")
+        if screenGui then
+            for _, v in ipairs(screenGui:GetChildren()) do
+                if v:IsA("Frame") and v.Size == TARGET_SIZE then
+                    targetFrame = v
+                    targetFrame.Visible = true
+                    task.wait()
+                    targetFrame.Visible = false
+                    preloaded = true
+                    break
+                end
+            end
+        end
+        task.wait(0.25)
+    end
+end)
+
+toggleImageBtn.MouseButton1Click:Connect(function()
+    if not targetFrame or not preloaded then return end
+    isOpen = not isOpen
+    targetFrame.Visible = isOpen
+end)
+
+-- ================= FLUENT =================
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+
+local Window = Fluent:CreateWindow({
+    Title = "Muscle Legend " .. Fluent.Version,
+    SubTitle = "by FaDhen",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(500, 340),
+    Acrylic = true,
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.LeftControl
+})
+
+-- ================= TABS =================
+local Tabs = {
+    Main = Window:AddTab({ Title = "Main" }),
+    Misc = Window:AddTab({ Title = "Misc" }),
+    
+    
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+}
+
+local Options = Fluent.Options
+
+-- ================= MAIN COMPONENTS =================
+
+-- ================= SERVICES =================
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
+
+player.CharacterAdded:Connect(function(c)
+	char = c
+	hrp = c:WaitForChild("HumanoidRootPart")
+end)
+
+-- ================= ANTI JATUH (PART PIJAKAN) =================
+local function buatPijakan(nama, posisi)
+	if workspace:FindFirstChild(nama) then
+		workspace[nama]:Destroy()
+	end
+
+	local part = Instance.new("Part")
+	part.Name = nama
+	part.Size = Vector3.new(12, 1, 12)
+	part.Anchored = true
+	part.CanCollide = true
+	part.Transparency = 1
+	part.CFrame = posisi
+	part.Parent = workspace
+
+	return part
+end
+
+-- ================= ZONE CFRAME =================
+local locations = {
+	Mythic = CFrame.new(-0.391, 113.238, -1376.501),
+	Secret = CFrame.new(-11.994, 165.660, -1858.365),
+	Celestial = CFrame.new(1.669, 227.420, -2484.436),
+}
+
+-- ================= TWEEN TELEPORT =================
+local function tweenTeleport(nama, targetCFrame)
+	if not hrp then return end
+
+	-- pijakan
+	buatPijakan("Platform_" .. nama, targetCFrame - Vector3.new(0, 3, 0))
+
+	-- naik dulu
+	local upTween = TweenService:Create(
+		hrp,
+		TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		{CFrame = hrp.CFrame + Vector3.new(0, 50, 0)}
+	)
+
+	-- ke target
+	local moveTween = TweenService:Create(
+		hrp,
+		TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+		{CFrame = targetCFrame + Vector3.new(0, 3, 0)}
+	)
+
+	upTween:Play()
+	upTween.Completed:Wait()
+	moveTween:Play()
+end
+
+-- ================= GUI DROPDOWN + TOGGLE =================
+local SelectedZone = "Mythic"
+
+local ZoneDropdown = Tabs.Main:AddDropdown("Zone", {
+	Title = "Select Zone",
+	Values = {"Mythic", "Secret", "Celestial"},
+	Default = "Mythic",
+	Multi = false
+})
+
+Options.Zone:OnChanged(function(Value)
+	SelectedZone = Value
+	print("Select Zone:", Value)
+end)
+
+Tabs.Main:AddToggle("AutoFarm", {
+	Title = "Teleport Zone",
+	Default = false
+})
+
+Options.AutoFarm:OnChanged(function(Value)
+	print("AutoFarm:", Value)
+
+	if Value then
+		if locations[SelectedZone] then
+			tweenTeleport(SelectedZone, locations[SelectedZone])
+		end
+	end
+end)
+
+Tabs.Main:AddButton({
+    Title = "Confirm Brainrot",
+    Description = "Click confirm if you are Stealing Brainrot ",
+    Callback = function()
+        local player = Players.LocalPlayer
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+
+        local part = workspace.GameFolder.Baseplate
+
+        firetouchinterest(hrp, part, 0)
+        task.wait(0.1)
+        firetouchinterest(hrp, part, 1)
+
+        print("Fire sekali")
+    end
+})
+
+
+
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+Tabs.Main:AddButton({
+    Title = "SafeZone",
+    Description = "Button sekali klik",
+    Callback = function()
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+
+        local tweenInfo = TweenInfo.new(
+            0.25, -- DURASI (makin kecil makin cepat)
+            Enum.EasingStyle.Linear,
+            Enum.EasingDirection.Out
+        )
+
+        local goal = {
+            CFrame = CFrame.new(-0.602, 30.567, -24.122)
+        }
+
+        local tween = TweenService:Create(hrp, tweenInfo, goal)
+        tween:Play()
+    end
+})
+
+
+
+-- 🔘 BUTTON
+Tabs.Misc:AddButton({
+    Title = "BoostJump",
+    Description = "click to open",
+    Callback = function()
+        print("Button ditekan")
+
+        loadstring(game:HttpGet(
+            "https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/BoostJump"
+        ))()
+    end
+})
+
+
+
+
+
+-- ================= SAVE / INTERFACE =================
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+
+InterfaceManager:SetFolder("FluentScriptHub")
+SaveManager:SetFolder("FluentScriptHub/specific-game")
+
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+
+Window:SelectTab(1)
+
+Fluent:Notify({
+    Title = "Fluent Ui",
+    Content = "script executed",
+    Duration = 5
+})
+
+SaveManager:LoadAutoloadConfig()
+
+
+
+
+
+
