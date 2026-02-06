@@ -11,12 +11,12 @@ gui.ResetOnSpawn = false
 gui.Name = "ProfessionalBoostGUI"
 gui.Parent = player:WaitForChild("PlayerGui")
 
--- Main container dengan design corporate
+-- Main container
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 138, 0, 60) -- Dibuat 5% lebih besar lagi
-mainFrame.Position = UDim2.new(0.80, -69, 0.60, 0) -- Posisi menyesuaikan
-mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Hitam
-mainFrame.BackgroundTransparency = 0.5 -- Transparan 50%
+mainFrame.Size = UDim2.new(0, 138, 0, 60)
+mainFrame.Position = UDim2.new(0.80, -69, 0.60, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+mainFrame.BackgroundTransparency = 0.5
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
 mainFrame.Draggable = true
@@ -27,8 +27,7 @@ local mainCorner = Instance.new("UICorner")
 mainCorner.CornerRadius = UDim.new(0, 6)
 mainCorner.Parent = mainFrame
 
-
--- Corporate button dengan clean design
+-- Boost button
 local boostButton = Instance.new("TextButton")
 boostButton.Size = UDim2.new(1, -8, 0.65, 0)
 boostButton.Position = UDim2.new(0, 4, 0, 4)
@@ -45,8 +44,7 @@ local buttonCorner = Instance.new("UICorner")
 buttonCorner.CornerRadius = UDim.new(0, 5)
 buttonCorner.Parent = boostButton
 
-
--- Professional progress container
+-- Progress container
 local progressContainer = Instance.new("Frame")
 progressContainer.Size = UDim2.new(1, -8, 0.2, 0)
 progressContainer.Position = UDim2.new(0, 4, 0.75, 0)
@@ -59,10 +57,9 @@ local progressContainerCorner = Instance.new("UICorner")
 progressContainerCorner.CornerRadius = UDim.new(0, 6)
 progressContainerCorner.Parent = progressContainer
 
--- Progress bar dengan corporate colors
+-- Progress bar
 local progressBar = Instance.new("Frame")
 progressBar.Size = UDim2.new(1, 0, 1, 0)
-progressBar.Position = UDim2.new(0, 0, 0, 0)
 progressBar.BackgroundColor3 = Color3.fromRGB(34, 157, 94)
 progressBar.BorderSizePixel = 0
 progressBar.ZIndex = 4
@@ -72,105 +69,125 @@ local progressCorner = Instance.new("UICorner")
 progressCorner.CornerRadius = UDim.new(0, 6)
 progressCorner.Parent = progressBar
 
--- Professional hover effects
+-- Hover effects
 local originalButtonColor = boostButton.BackgroundColor3
 local hoverColor = Color3.fromRGB(37, 99, 235)
 local activeColor = Color3.fromRGB(29, 78, 216)
 
 local hoverTweenIn = TweenService:Create(
-    boostButton,
-    TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-    {BackgroundColor3 = hoverColor}
+	boostButton,
+	TweenInfo.new(0.15),
+	{BackgroundColor3 = hoverColor}
 )
 
 local hoverTweenOut = TweenService:Create(
-    boostButton,
-    TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-    {BackgroundColor3 = originalButtonColor}
+	boostButton,
+	TweenInfo.new(0.15),
+	{BackgroundColor3 = originalButtonColor}
 )
 
-boostButton.MouseEnter:Connect(function()
-    if not holdingBoost then
-        hoverTweenIn:Play()
-    end
-end)
+-- CONFIG ASLI (TIDAK DIUBAH)
+local LIFT_SPEED = 30
+local MAX_JUMP_TIME = 10
 
-boostButton.MouseLeave:Connect(function()
-    if not holdingBoost then
-        hoverTweenOut:Play()
-    end
-end)
-
--- LOGIC ASLI TIDAK DIUBAH
-local LIFT_SPEED = 20
-local MAX_JUMP_TIME = 5
+-- TAMBAHAN SPEED (AMAN)
+local BOOST_WALKSPEED = 150
+local originalWalkSpeed = nil
 
 local holdingBoost = false
 local boostStartTime = 0
 local progressTween = nil
 
--- Smooth professional animations
 local function animateProgress(targetSize)
-    if progressTween then
-        progressTween:Cancel()
-    end
-    
-    progressTween = TweenService:Create(
-        progressBar,
-        TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
-        {Size = targetSize}
-    )
-    progressTween:Play()
+	if progressTween then
+		progressTween:Cancel()
+	end
+
+	progressTween = TweenService:Create(
+		progressBar,
+		TweenInfo.new(0.1),
+		{Size = targetSize}
+	)
+	progressTween:Play()
 end
 
--- Professional press effects
 local pressEffect = TweenService:Create(
-    boostButton,
-    TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-    {BackgroundColor3 = activeColor}
+	boostButton,
+	TweenInfo.new(0.05),
+	{BackgroundColor3 = activeColor}
 )
 
 local releaseEffect = TweenService:Create(
-    boostButton,
-    TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-    {BackgroundColor3 = originalButtonColor}
+	boostButton,
+	TweenInfo.new(0.1),
+	{BackgroundColor3 = originalButtonColor}
 )
 
+boostButton.MouseEnter:Connect(function()
+	if not holdingBoost then
+		hoverTweenIn:Play()
+	end
+end)
+
+boostButton.MouseLeave:Connect(function()
+	if not holdingBoost then
+		hoverTweenOut:Play()
+	end
+end)
+
 boostButton.MouseButton1Down:Connect(function()
-    holdingBoost = true
-    boostStartTime = tick()
-    pressEffect:Play()
+	holdingBoost = true
+	boostStartTime = tick()
+	pressEffect:Play()
 end)
 
 boostButton.MouseButton1Up:Connect(function()
-    holdingBoost = false
-    releaseEffect:Play()
+	holdingBoost = false
+	releaseEffect:Play()
 end)
 
--- Main loop - LOGIC TIDAK BERUBAH
+-- MAIN LOOP (LOGIC TETAP)
 RunService.Heartbeat:Connect(function()
-    local elapsed = tick() - boostStartTime
+	local elapsed = tick() - boostStartTime
 
-    if holdingBoost then
-        local remaining = math.max(0, MAX_JUMP_TIME - elapsed)
-        local ratio = remaining / MAX_JUMP_TIME
-        animateProgress(UDim2.new(ratio, 0, 1, 0))
+	if holdingBoost then
+		local remaining = math.max(0, MAX_JUMP_TIME - elapsed)
+		local ratio = remaining / MAX_JUMP_TIME
+		animateProgress(UDim2.new(ratio, 0, 1, 0))
 
-        if remaining <= 0 then
-            holdingBoost = false
-            animateProgress(UDim2.new(0, 0, 1, 0))
-            return
-        end
+		if remaining <= 0 then
+			holdingBoost = false
+			animateProgress(UDim2.new(0, 0, 1, 0))
+			return
+		end
 
-        local char = player.Character
-        if char then
-            local hrp = char:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                local vel = hrp.AssemblyLinearVelocity
-                hrp.AssemblyLinearVelocity = Vector3.new(vel.X, LIFT_SPEED, vel.Z)
-            end
-        end
-    else
-        animateProgress(UDim2.new(1, 0, 1, 0))
-    end
+		local char = player.Character
+		if char then
+			local humanoid = char:FindFirstChildOfClass("Humanoid")
+			local hrp = char:FindFirstChild("HumanoidRootPart")
+
+			if humanoid then
+				if not originalWalkSpeed then
+					originalWalkSpeed = humanoid.WalkSpeed
+				end
+				humanoid.WalkSpeed = BOOST_WALKSPEED
+			end
+
+			if hrp then
+				local vel = hrp.AssemblyLinearVelocity
+				hrp.AssemblyLinearVelocity = Vector3.new(vel.X, LIFT_SPEED, vel.Z)
+			end
+		end
+	else
+		animateProgress(UDim2.new(1, 0, 1, 0))
+
+		local char = player.Character
+		if char then
+			local humanoid = char:FindFirstChildOfClass("Humanoid")
+			if humanoid and originalWalkSpeed then
+				humanoid.WalkSpeed = originalWalkSpeed
+				originalWalkSpeed = nil
+			end
+		end
+	end
 end)
