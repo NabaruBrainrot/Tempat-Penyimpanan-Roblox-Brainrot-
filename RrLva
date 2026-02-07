@@ -50,7 +50,7 @@ end)
 -- ================= TARGET GUI (ANTI LAG) =================
 local TARGET_SIZE = UDim2.new(0, 500, 0, 340)
 local targetFrame
-local isOpen = true
+local isOpen = false
 local preloaded = false
 
 task.spawn(function()
@@ -84,7 +84,7 @@ local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/d
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
 local Window = Fluent:CreateWindow({
-    Title = "Surviva Lava for Brainrot" .. Fluent.Version,
+    Title = "Survive Lava for Brainrot" .. Fluent.Version,
     SubTitle = "RrLva",
     TabWidth = 160,
     Size = UDim2.fromOffset(500, 340),
