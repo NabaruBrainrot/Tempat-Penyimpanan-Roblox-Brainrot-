@@ -106,75 +106,131 @@ local Options = Fluent.Options
 
 -- ================= MAIN COMPONENTS =================
 
--- ================= SERVICES =================
+
+-- =========================
+-- SERVICES
+-- =========================
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
-
 local player = Players.LocalPlayer
-local char = player.Character or player.CharacterAdded:Wait()
-local hrp = char:WaitForChild("HumanoidRootPart")
 
-player.CharacterAdded:Connect(function(c)
-	char = c
-	hrp = c:WaitForChild("HumanoidRootPart")
-end)
+local char
+local hrp
 
--- ================= ANTI JATUH (PART PIJAKAN) =================
-local function buatPijakan(nama, posisi)
-	if workspace:FindFirstChild(nama) then
-		workspace[nama]:Destroy()
-	end
+-- =========================
+-- STATE
+-- =========================
+local SelectedZone = "Mythic"
+local AutoFarm = false
+local HasTeleported = false
 
-	local part = Instance.new("Part")
-	part.Name = nama
-	part.Size = Vector3.new(12, 1, 12)
-	part.Anchored = true
-	part.CanCollide = true
-	part.Transparency = 1
-	part.CFrame = posisi
-	part.Parent = workspace
-
-	return part
+-- =========================
+-- CHARACTER SETUP (ANTI RESET)
+-- =========================
+local function setupCharacter(character)
+	char = character
+	hrp = char:WaitForChild("HumanoidRootPart")
+	HasTeleported = false
 end
 
--- ================= ZONE CFRAME =================
+if player.Character then
+	setupCharacter(player.Character)
+end
+
+player.CharacterAdded:Connect(setupCharacter)
+
+-- =========================
+-- ZONE PATH
+-- =========================
 local locations = {
-	Mythic = CFrame.new(-0.391, 113.238, -1376.501),
-	Secret = CFrame.new(-11.994, 165.660, -1858.365),
-	Celestial = CFrame.new(1.669, 227.420, -2484.436),
+	Mythic = workspace.GameFolder.Brainrots.Mythic,
+	Celestial = workspace.GameFolder.Brainrots.Celestial,
+	Secret = workspace.GameFolder.Brainrots.Secret
 }
 
--- ================= TWEEN TELEPORT =================
-local function tweenTeleport(nama, targetCFrame)
-	if not hrp then return end
+-- =========================
+-- PARSE CASH
+-- =========================
+local function parseCash(text)
+	if not text then return 0 end
+	text = text:lower()
 
-	-- pijakan
-	buatPijakan("Platform_" .. nama, targetCFrame - Vector3.new(0, 3, 0))
-
-	-- naik dulu
-	local upTween = TweenService:Create(
-		hrp,
-		TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{CFrame = hrp.CFrame + Vector3.new(0, 50, 0)}
-	)
-
-	-- ke target
-	local moveTween = TweenService:Create(
-		hrp,
-		TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
-		{CFrame = targetCFrame + Vector3.new(0, 3, 0)}
-	)
-
-	upTween:Play()
-	upTween.Completed:Wait()
-	moveTween:Play()
+	local num = tonumber(text:match("%$([%d%.]+)")) or 0
+	if text:find("m") then
+		return num * 1_000_000
+	elseif text:find("k") then
+		return num * 1_000
+	end
+	return num
 end
 
--- ================= GUI DROPDOWN + TOGGLE =================
-local SelectedZone = "Mythic"
+-- =========================
+-- TWEEN FUNCTION
+-- =========================
+local function tweenTo(cf, time)
+	if not hrp then return end
+	local tween = TweenService:Create(
+		hrp,
+		TweenInfo.new(time, Enum.EasingStyle.Linear),
+		{CFrame = cf}
+	)
+	tween:Play()
+	tween.Completed:Wait()
+end
 
-local ZoneDropdown = Tabs.Main:AddDropdown("Zone", {
-	Title = "Select Zone",
+-- =========================
+-- TELEPORT LOGIC
+-- =========================
+local function teleportZone(zone)
+	if HasTeleported then return end
+	if not hrp then return end
+
+	local folder = locations[zone]
+	if not folder then return end
+
+	local highest = 0
+	local targetRoot = nil
+
+	for _, model in ipairs(folder:GetChildren()) do
+		if model:IsA("Model") then
+			local root = model:FindFirstChild("RootPart")
+			if root then
+				local cash =
+					root:FindFirstChild("BrainrotAtt")
+					and root.BrainrotAtt:FindFirstChild("BillboardGui")
+					and root.BrainrotAtt.BillboardGui:FindFirstChild("Cash")
+
+				if cash and cash:IsA("TextLabel") then
+					local value = parseCash(cash.Text)
+					if value > highest then
+						highest = value
+						targetRoot = root
+					end
+				end
+			end
+		end
+	end
+
+	if targetRoot then
+		HasTeleported = true
+
+		-- 🔼 STEP 1: NAIK 50 STUDS
+		local upCF = hrp.CFrame + Vector3.new(0, 50, 0)
+		tweenTo(upCF, 0.5)
+
+		task.wait(0.1)
+
+		-- 🎯 STEP 2: TWEEN KE TARGET
+		local targetCF = targetRoot.CFrame + Vector3.new(0, 3, 0)
+		tweenTo(targetCF, 0.6)
+	end
+end
+
+-- =========================
+-- DROPDOWN
+-- =========================
+Tabs.Main:AddDropdown("Zone", {
+	Title = "Select Brainrot",
 	Values = {"Mythic", "Secret", "Celestial"},
 	Default = "Mythic",
 	Multi = false
@@ -182,23 +238,32 @@ local ZoneDropdown = Tabs.Main:AddDropdown("Zone", {
 
 Options.Zone:OnChanged(function(Value)
 	SelectedZone = Value
-	print("Select Zone:", Value)
 end)
 
+-- =========================
+-- TOGGLE
+-- =========================
 Tabs.Main:AddToggle("AutoFarm", {
-	Title = "Teleport Zone",
+	Title = "Auto Farm",
 	Default = false
 })
 
 Options.AutoFarm:OnChanged(function(Value)
-	print("AutoFarm:", Value)
+	AutoFarm = Value
 
 	if Value then
-		if locations[SelectedZone] then
-			tweenTeleport(SelectedZone, locations[SelectedZone])
-		end
+		HasTeleported = false
+		task.spawn(function()
+			while AutoFarm do
+				teleportZone(SelectedZone)
+				task.wait(0.3)
+			end
+		end)
 	end
 end)
+
+
+
 
 Tabs.Main:AddButton({
     Title = "Confirm Brainrot",
@@ -248,6 +313,105 @@ Tabs.Main:AddButton({
 
 
 
+
+
+-- ================= SERVICES =================
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
+
+player.CharacterAdded:Connect(function(c)
+        char = c
+        hrp = c:WaitForChild("HumanoidRootPart")
+end)
+
+-- ================= ANTI JATUH (PART PIJAKAN) =================
+local function buatPijakan(nama, posisi)
+        if workspace:FindFirstChild(nama) then
+                workspace[nama]:Destroy()
+        end
+
+        local part = Instance.new("Part")
+        part.Name = nama
+        part.Size = Vector3.new(12, 1, 12)
+        part.Anchored = true
+        part.CanCollide = true
+        part.Transparency = 1
+        part.CFrame = posisi
+        part.Parent = workspace
+
+        return part
+end
+
+-- ================= ZONE CFRAME =================
+local locations = {
+        Mythic = CFrame.new(-0.391, 113.238, -1376.501),
+        Secret = CFrame.new(-11.994, 165.660, -1858.365),
+        Celestial = CFrame.new(1.669, 227.420, -2484.436),
+}
+
+-- ================= TWEEN TELEPORT =================
+local function tweenTeleport(nama, targetCFrame)
+        if not hrp then return end
+
+        -- pijakan
+        buatPijakan("Platform_" .. nama, targetCFrame - Vector3.new(0, 3, 0))
+
+        -- naik dulu
+        local upTween = TweenService:Create(
+                hrp,
+                TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+                {CFrame = hrp.CFrame + Vector3.new(0, 50, 0)}
+        )
+
+        -- ke target
+        local moveTween = TweenService:Create(
+                hrp,
+                TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+                {CFrame = targetCFrame + Vector3.new(0, 3, 0)}
+        )
+
+        upTween:Play()
+        upTween.Completed:Wait()
+        moveTween:Play()
+end
+
+-- ================= GUI DROPDOWN + TOGGLE =================
+local SelectedZone = "Mythic"
+
+local ZoneDropdown = Tabs.Misc:AddDropdown("Zone", {
+        Title = "Select Zone",
+        Values = {"Mythic", "Secret", "Celestial"},
+        Default = "Mythic",
+        Multi = false
+})
+
+Options.Zone:OnChanged(function(Value)
+        SelectedZone = Value
+        print("Select Zone:", Value)
+end)
+
+Tabs.Misc:AddToggle("AutoFarm", {
+        Title = "Teleport Zone",
+        Default = false
+})
+
+Options.AutoFarm:OnChanged(function(Value)
+        print("AutoFarm:", Value)
+
+        if Value then
+                if locations[SelectedZone] then
+                        tweenTeleport(SelectedZone, locations[SelectedZone])
+                end
+        end
+end)
+
+
+
+
 -- 🔘 BUTTON
 Tabs.Misc:AddButton({
     Title = "BoostJump",
@@ -281,7 +445,7 @@ SaveManager:BuildConfigSection(Tabs.Settings)
 Window:SelectTab(1)
 
 Fluent:Notify({
-    Title = "Fluent Ui",
+    Title = "Universal X",
     Content = "script executed",
     Duration = 5
 })
