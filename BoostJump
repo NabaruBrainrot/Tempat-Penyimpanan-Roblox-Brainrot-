@@ -91,7 +91,7 @@ local LIFT_SPEED = 30
 local MAX_JUMP_TIME = 10
 
 -- TAMBAHAN SPEED (AMAN)
-local BOOST_WALKSPEED = 150
+local BOOST_WALKSPEED = 100
 local originalWalkSpeed = nil
 
 local holdingBoost = false
