@@ -106,7 +106,6 @@ local Options = Fluent.Options
 
 -- ================= MAIN COMPONENTS =================
 
-
 -- =========================
 -- SERVICES
 -- =========================
@@ -140,9 +139,14 @@ end
 player.CharacterAdded:Connect(setupCharacter)
 
 -- =========================
--- ZONE PATH
+-- ZONE PATH (DITAMBAHKAN)
 -- =========================
 local locations = {
+	Common = workspace.GameFolder.Brainrots.Common,
+	Rare = workspace.GameFolder.Brainrots.Rare,
+	Epic = workspace.GameFolder.Brainrots.Epic,
+	Legendary = workspace.GameFolder.Brainrots.Legendary,
+
 	Mythic = workspace.GameFolder.Brainrots.Mythic,
 	Celestial = workspace.GameFolder.Brainrots.Celestial,
 	Secret = workspace.GameFolder.Brainrots.Secret
@@ -227,12 +231,18 @@ local function teleportZone(zone)
 end
 
 -- =========================
--- DROPDOWN
+-- DROPDOWN (DITAMBAHKAN)
 -- =========================
 Tabs.Main:AddDropdown("Zone", {
 	Title = "Select Brainrot",
-	Values = {"Mythic", "Secret", "Celestial"},
-	Default = "Mythic",
+	Values = {
+		"Epic",
+		"Legendary",
+		"Mythic",
+		"Secret",
+		"Celestial"
+	},
+	Default = "Epic",
 	Multi = false
 })
 
@@ -263,25 +273,72 @@ Options.AutoFarm:OnChanged(function(Value)
 end)
 
 
+-- =========================
+-- CLAIM LOOP SYSTEM
+-- =========================
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 
+local claimParts = {}
+local claimEnabled = false
 
-Tabs.Main:AddButton({
-    Title = "Confirm Brainrot",
-    Description = "Click confirm if you are Stealing Brainrot ",
-    Callback = function()
-        local player = Players.LocalPlayer
-        local char = player.Character or player.CharacterAdded:Wait()
-        local hrp = char:WaitForChild("HumanoidRootPart")
-
-        local part = workspace.GameFolder.Baseplate
-
-        firetouchinterest(hrp, part, 0)
-        task.wait(0.1)
-        firetouchinterest(hrp, part, 1)
-
-        print("Fire sekali")
+local function addIfClaim(obj)
+    if obj:IsA("BasePart") and obj.Name == "Claim" then
+        claimParts[obj] = true
     end
+end
+
+local function removeIfClaim(obj)
+    if claimParts[obj] then
+        claimParts[obj] = nil
+    end
+end
+
+-- initial scan
+for _, obj in ipairs(workspace:GetDescendants()) do
+    addIfClaim(obj)
+end
+
+workspace.DescendantAdded:Connect(addIfClaim)
+workspace.DescendantRemoving:Connect(removeIfClaim)
+
+-- =========================
+-- TOGGLE FLUENT
+-- =========================
+local ClaimToggle = Tabs.Main:AddToggle("ClaimLoop", {
+    Title = "Collect Cash",
+    Default = false
 })
+
+ClaimToggle:OnChanged(function(Value)
+    claimEnabled = Value
+end)
+
+Options.ClaimLoop:SetValue(false)
+
+-- =========================
+-- LOOP
+-- =========================
+task.spawn(function()
+    while true do
+        if claimEnabled then
+            local character = player.Character
+            local hrp = character and character:FindFirstChild("HumanoidRootPart")
+
+            if hrp then
+                for claim, _ in pairs(claimParts) do
+                    if claim and claim.Parent then
+                        firetouchinterest(hrp, claim, 0)
+                        firetouchinterest(hrp, claim, 1)
+                    end
+                end
+            end
+        end
+
+        task.wait(0.03)
+    end
+end)
+
 
 
 
@@ -291,7 +348,7 @@ local player = Players.LocalPlayer
 
 Tabs.Main:AddButton({
     Title = "SafeZone",
-    Description = "Button sekali klik",
+    Description = "Teleport SafeZone",
     Callback = function()
         local char = player.Character or player.CharacterAdded:Wait()
         local hrp = char:WaitForChild("HumanoidRootPart")
@@ -315,107 +372,47 @@ Tabs.Main:AddButton({
 
 
 
--- ================= SERVICES =================
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
+-- =========================
+-- STATE
+-- =========================
+local AntiAFK = false
 
-local player = Players.LocalPlayer
-local char = player.Character or player.CharacterAdded:Wait()
-local hrp = char:WaitForChild("HumanoidRootPart")
-
-player.CharacterAdded:Connect(function(c)
-        char = c
-        hrp = c:WaitForChild("HumanoidRootPart")
-end)
-
--- ================= ANTI JATUH (PART PIJAKAN) =================
-local function buatPijakan(nama, posisi)
-        if workspace:FindFirstChild(nama) then
-                workspace[nama]:Destroy()
-        end
-
-        local part = Instance.new("Part")
-        part.Name = nama
-        part.Size = Vector3.new(12, 1, 12)
-        part.Anchored = true
-        part.CanCollide = true
-        part.Transparency = 1
-        part.CFrame = posisi
-        part.Parent = workspace
-
-        return part
-end
-
--- ================= ZONE CFRAME =================
-local locations = {
-        Mythic = CFrame.new(-0.391, 113.238, -1376.501),
-        Secret = CFrame.new(-11.994, 165.660, -1858.365),
-        Celestial = CFrame.new(1.669, 227.420, -2484.436),
-}
-
--- ================= TWEEN TELEPORT =================
-local function tweenTeleport(nama, targetCFrame)
-        if not hrp then return end
-
-        -- pijakan
-        buatPijakan("Platform_" .. nama, targetCFrame - Vector3.new(0, 3, 0))
-
-        -- naik dulu
-        local upTween = TweenService:Create(
-                hrp,
-                TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-                {CFrame = hrp.CFrame + Vector3.new(0, 50, 0)}
-        )
-
-        -- ke target
-        local moveTween = TweenService:Create(
-                hrp,
-                TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
-                {CFrame = targetCFrame + Vector3.new(0, 3, 0)}
-        )
-
-        upTween:Play()
-        upTween.Completed:Wait()
-        moveTween:Play()
-end
-
--- ================= GUI DROPDOWN + TOGGLE =================
-local SelectedZone = "Mythic"
-
-local ZoneDropdown = Tabs.Misc:AddDropdown("Zone", {
-        Title = "Select Zone",
-        Values = {"Mythic", "Secret", "Celestial"},
-        Default = "Mythic",
-        Multi = false
+-- =========================
+-- TOGGLE (FLUENT STYLE)
+-- =========================
+Tabs.Misc:AddToggle("AntiAFK", {
+    Title = "Anti AFK",
+    Default = false
 })
 
-Options.Zone:OnChanged(function(Value)
-        SelectedZone = Value
-        print("Select Zone:", Value)
+Options.AntiAFK:OnChanged(function(Value)
+    AntiAFK = Value
+
+    if Value then
+        task.spawn(function()
+            local Players = game:GetService("Players")
+            local VirtualUser = game:GetService("VirtualUser")
+            local player = Players.LocalPlayer
+
+            while AntiAFK do
+                VirtualUser:CaptureController()
+                VirtualUser:ClickButton2(Vector2.new())
+                task.wait(60) -- kirim input tiap 60 detik (ringan & aman)
+            end
+        end)
+    end
 end)
 
-Tabs.Misc:AddToggle("AutoFarm", {
-        Title = "Teleport Zone",
-        Default = false
-})
 
-Options.AutoFarm:OnChanged(function(Value)
-        print("AutoFarm:", Value)
 
-        if Value then
-                if locations[SelectedZone] then
-                        tweenTeleport(SelectedZone, locations[SelectedZone])
-                end
-        end
-end)
 
 
 
 
 -- 🔘 BUTTON
 Tabs.Misc:AddButton({
-    Title = "BoostJump",
-    Description = "click to open",
+    Title = "InfJump",
+    Description = "",
     Callback = function()
         print("Button ditekan")
 
