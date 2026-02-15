@@ -1,4 +1,3 @@
-
 pcall(function()
     local cg = game:GetService("CoreGui"):FindFirstChild("PersistentToggleGui")
     if cg then cg:Destroy() end
@@ -11,6 +10,7 @@ local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 
+-- ================= FLOAT BUTTON =================
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "PersistentToggleGui"
 ScreenGui.ResetOnSpawn = false
@@ -47,6 +47,7 @@ toggleImageBtn.MouseLeave:Connect(function()
     }):Play()
 end)
 
+-- ================= TARGET GUI (ANTI LAG) =================
 local TARGET_SIZE = UDim2.new(0, 500, 0, 340)
 local targetFrame
 local isOpen = false
@@ -77,6 +78,7 @@ toggleImageBtn.MouseButton1Click:Connect(function()
     targetFrame.Visible = isOpen
 end)
 
+-- ================= FLUENT =================
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
@@ -91,14 +93,22 @@ local Window = Fluent:CreateWindow({
     MinimizeKey = Enum.KeyCode.LeftControl
 })
 
+-- ================= TABS =================
 local Tabs = {
     Main = Window:AddTab({ Title = "Main" }),
     Misc = Window:AddTab({ Title = "Misc" }),
+
+
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 
 local Options = Fluent.Options
 
+-- ================= MAIN COMPONENTS =================
+
+-- =========================
+-- SERVICES
+-- =========================
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
@@ -106,10 +116,16 @@ local player = Players.LocalPlayer
 local char
 local hrp
 
+-- =========================
+-- STATE
+-- =========================
 local SelectedZone = "Mythic"
 local AutoFarm = false
 local HasTeleported = false
 
+-- =========================
+-- CHARACTER SETUP (ANTI RESET)
+-- =========================
 local function setupCharacter(character)
         char = character
         hrp = char:WaitForChild("HumanoidRootPart")
@@ -122,16 +138,23 @@ end
 
 player.CharacterAdded:Connect(setupCharacter)
 
+-- =========================
+-- ZONE PATH
+-- =========================
 local locations = {
         Common = workspace.GameFolder.Brainrots.Common,
         Rare = workspace.GameFolder.Brainrots.Rare,
         Epic = workspace.GameFolder.Brainrots.Epic,
         Legendary = workspace.GameFolder.Brainrots.Legendary,
+
         Mythic = workspace.GameFolder.Brainrots.Mythic,
         Celestial = workspace.GameFolder.Brainrots.Celestial,
         Secret = workspace.GameFolder.Brainrots.Secret
 }
 
+-- =========================
+-- PARSE CASH
+-- =========================
 local function parseCash(text)
         if not text then return 0 end
         text = text:lower()
@@ -145,6 +168,9 @@ local function parseCash(text)
         return num
 end
 
+-- =========================
+-- TELEPORT LOGIC
+-- =========================
 local function teleportZone(zone)
         if HasTeleported then return end
         if not hrp then return end
@@ -178,14 +204,19 @@ local function teleportZone(zone)
         if targetRoot then
                 HasTeleported = true
 
+                -- 🔼 STEP 1: TELEPORT KE ATAS 100 STUDS (LANGSUNG)
                 hrp.CFrame = hrp.CFrame + Vector3.new(0, 100, 0)
 
                 task.wait(0.1)
 
+                -- 🎯 STEP 2: TELEPORT KE TARGET (LANGSUNG)
                 hrp.CFrame = targetRoot.CFrame + Vector3.new(0, 3, 0)
         end
 end
 
+-- =========================
+-- DROPDOWN
+-- =========================
 Tabs.Main:AddDropdown("Zone", {
         Title = "Select Brainrot",
         Values = {
@@ -203,6 +234,9 @@ Options.Zone:OnChanged(function(Value)
         SelectedZone = Value
 end)
 
+-- =========================
+-- TOGGLE
+-- =========================
 Tabs.Main:AddToggle("AutoFarm", {
         Title = "Auto Farm",
         Default = false
@@ -221,6 +255,9 @@ Options.AutoFarm:OnChanged(function(Value)
                 end)
         end
 end)
+
+
+
 
 Tabs.Main:AddButton({
     Title = "Tp Brainrot",
@@ -284,10 +321,12 @@ Tabs.Main:AddButton({
                     or model:FindFirstChildWhichIsA("BasePart")
 
                 if targetPart then
+                    -- teleport langsung ke atas
                     hrp.CFrame = targetPart.CFrame + Vector3.new(0, 100, 0)
 
                     task.wait(0.05)
 
+                    -- tween ke target
                     tweenTo(targetPart.CFrame + Vector3.new(0, 3, 0))
 
                     print("Teleport ke:", model.Name)
@@ -301,6 +340,11 @@ Tabs.Main:AddButton({
     end
 })
 
+
+
+
+
+
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
@@ -313,7 +357,7 @@ Tabs.Main:AddButton({
         local hrp = char:WaitForChild("HumanoidRootPart")
 
         local tweenInfo = TweenInfo.new(
-            0.25,
+            0.25, -- DURASI (makin kecil makin cepat)
             Enum.EasingStyle.Linear,
             Enum.EasingDirection.Out
         )
@@ -327,6 +371,11 @@ Tabs.Main:AddButton({
     end
 })
 
+
+-----Misc 
+-- =========================
+-- CLAIM LOOP SYSTEM
+-- =========================
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
@@ -345,6 +394,7 @@ local function removeIfClaim(obj)
     end
 end
 
+-- initial scan
 for _, obj in ipairs(workspace:GetDescendants()) do
     addIfClaim(obj)
 end
@@ -352,6 +402,9 @@ end
 workspace.DescendantAdded:Connect(addIfClaim)
 workspace.DescendantRemoving:Connect(removeIfClaim)
 
+-- =========================
+-- TOGGLE FLUENT
+-- =========================
 local ClaimToggle = Tabs.Misc:AddToggle("ClaimLoop", {
     Title = "Collect Cash",
     Default = false
@@ -363,6 +416,9 @@ end)
 
 Options.ClaimLoop:SetValue(false)
 
+-- =========================
+-- LOOP
+-- =========================
 task.spawn(function()
     while true do
         if claimEnabled then
@@ -382,6 +438,10 @@ task.spawn(function()
         task.wait(0.03)
     end
 end)
+
+
+
+
 
 local AutoSpeed = false
 
@@ -412,8 +472,16 @@ Toggle:OnChanged(function(Value)
     end
 end)
 
+
+
+-- =========================
+-- STATE
+-- =========================
 local AntiAFK = false
 
+-- =========================
+-- TOGGLE (FLUENT STYLE)
+-- =========================
 Tabs.Misc:AddToggle("AntiAFK", {
     Title = "Anti AFK",
     Default = false
@@ -431,12 +499,19 @@ Options.AntiAFK:OnChanged(function(Value)
             while AntiAFK do
                 VirtualUser:CaptureController()
                 VirtualUser:ClickButton2(Vector2.new())
-                task.wait(60)
+                task.wait(60) -- kirim input tiap 60 detik (ringan & aman)
             end
         end)
     end
 end)
 
+
+
+
+
+
+
+-- 🔘 BUTTON
 Tabs.Misc:AddButton({
     Title = "InfJump",
     Description = "",
@@ -449,6 +524,11 @@ Tabs.Misc:AddButton({
     end
 })
 
+
+
+
+
+-- ================= SAVE / INTERFACE =================
 SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
 
