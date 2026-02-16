@@ -128,7 +128,7 @@ copyBtn.MouseButton1Click:Connect(function()
             TextTransparency = 0
         }):Play()
 
-        task.delay(2, function()
+        task.delay(10, function()
             TweenService:Create(infoLabel, TweenInfo.new(0.35), {
                 TextTransparency = 1
             }):Play()
