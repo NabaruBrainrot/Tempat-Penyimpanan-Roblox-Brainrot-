@@ -1,0 +1,63 @@
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/jensonhirst/Orion/main/source')))()
+
+
+local Window = OrionLib:MakeWindow({Name = "Muscle Master", HidePremium = false, SaveConfig = true, ConfigFolder = "OrionTest"})
+
+
+local Tab = Window:MakeTab({
+	Name = "Farm",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+
+
+
+
+local AutoMachine = false
+local AutoRebirth = false
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-- ===== Toggle Auto Machine =====
+Tab:AddToggle({
+    Name = "Auto Machine",
+    Default = false,
+    Callback = function(Value)
+        AutoMachine = Value
+    end    
+})
+
+-- ===== Toggle Auto Rebirth =====
+Tab:AddToggle({
+    Name = "Auto Rebirth",
+    Default = false,
+    Callback = function(Value)
+        AutoRebirth = Value
+    end    
+})
+
+-- ===== Loop Machine =====
+task.spawn(function()
+    while true do
+        if AutoMachine then
+            ReplicatedStorage
+                :WaitForChild("RemotesEvent")
+                :WaitForChild("MachineActiveEvent")
+                :FireServer()
+        end
+        task.wait(0.1)
+    end
+end)
+
+-- ===== Loop Rebirth =====
+task.spawn(function()
+    while true do
+        if AutoRebirth then
+            ReplicatedStorage
+                :WaitForChild("RemotesEvent")
+                :WaitForChild("RebirthEvent")
+                :FireServer()
+        end
+        task.wait(0.2)
+    end
+end)
