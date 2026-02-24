@@ -93,7 +93,7 @@ local function RunScriptBelow10()
     table.insert(runningThreads, task.spawn(function()
         while AutoFarmEnabled do
             MachineRemote:FireServer()
-            task.wait(0.03)
+            task.wait(0.1)
         end
     end))
 end
@@ -148,7 +148,7 @@ local function RunScriptAboveOrEqual10()
     table.insert(runningThreads, task.spawn(function()
         while AutoFarmEnabled do
             MachineRemote:FireServer()
-            task.wait(0.05)
+            task.wait(0.1)
         end
     end))
 end
@@ -211,7 +211,7 @@ task.spawn(function()
                 :WaitForChild("MachineActiveEvent")
                 :FireServer()
         end
-        task.wait(0.05)
+        task.wait(0.1)
     end
 end)
 
@@ -227,3 +227,159 @@ task.spawn(function()
         task.wait(0.1)
     end
 end)
+
+
+
+
+-- =========================
+-- SERVICES & PLAYER
+-- =========================
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local leaderstats = player:WaitForChild("leaderstats")
+local rebirths = leaderstats:WaitForChild("Rebirths")
+
+-- =========================
+-- STATE
+-- =========================
+local AutoFarmEnabled = false
+local runningThreads = {}
+
+local function stopAll()
+    AutoFarmEnabled = false
+    for _, t in ipairs(runningThreads) do
+        if t then task.cancel(t) end
+    end
+    table.clear(runningThreads)
+end
+
+-- =========================
+-- SCRIPT A : REBIRTH ≤ 10
+-- =========================
+local function RunScriptBelowOrEqual10()
+
+    local TARGET_POSITIONS = {
+        CFrame.new(-41.5637741, 3.47935009, 44.4185333, -1, 0, 0, 0, 1, 0, 0, 0, -1),
+        CFrame.new(-24.1162872, 3.47935009, 44.4185333, -1, 0, 0, 0, 1, 0, 0, 0, -1),
+    }
+
+    local EPSILON = 0.01
+    local MachinesFolder = workspace:WaitForChild("MachinesFolder")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local MachineRemote = ReplicatedStorage
+        :WaitForChild("RemotesEvent")
+        :WaitForChild("MachineActiveEvent")
+
+    local targetPrompts = {}
+
+    for _, obj in ipairs(MachinesFolder:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            for _, cf in ipairs(TARGET_POSITIONS) do
+                if (obj.Position - cf.Position).Magnitude < EPSILON then
+                    local prompt = obj:FindFirstChild("ProximityPromptMachine")
+                    if prompt and prompt:IsA("ProximityPrompt") then
+                        table.insert(targetPrompts, prompt)
+                    end
+                end
+            end
+        end
+    end
+
+    if #targetPrompts == 0 then return end
+
+    table.insert(runningThreads, task.spawn(function()
+        local index = 1
+        while AutoFarmEnabled do
+            local prompt = targetPrompts[index]
+            if prompt and prompt.Enabled then
+                fireproximityprompt(prompt)
+            end
+            index = index % #targetPrompts + 1
+            task.wait(0.1)
+        end
+    end))
+
+    table.insert(runningThreads, task.spawn(function()
+        while AutoFarmEnabled do
+            MachineRemote:FireServer()
+            task.wait(0.1)
+        end
+    end))
+end
+
+-- =========================
+-- SCRIPT B : REBIRTH > 10
+-- =========================
+local function RunScriptAbove10()
+
+    local TARGET_POSITIONS = {
+        CFrame.new(2712.48022, 3.71804452, 299.783295, 1, 0, 0, 0, 1, 0, 0, 0, 1),
+        CFrame.new(2691.11182, 3.71804452, 299.783295, 1, 0, 0, 0, 1, 0, 0, 0, 1),
+        CFrame.new(2613.02808, 4.78257084, 289.732025, 1, 0, 0, 0, 1, 0, 0, 0, 1),
+        CFrame.new(2584.5542, 4.78257084, 289.732025, 1, 0, 0, 0, 1, 0, 0, 0, 1),
+    }
+
+    local EPSILON = 0.01
+    local MachinesFolder = workspace:WaitForChild("MachinesFolder")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local MachineRemote = ReplicatedStorage
+        :WaitForChild("RemotesEvent")
+        :WaitForChild("MachineActiveEvent")
+
+    local targetPrompts = {}
+
+    for _, obj in ipairs(MachinesFolder:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            for _, cf in ipairs(TARGET_POSITIONS) do
+                if (obj.Position - cf.Position).Magnitude < EPSILON then
+                    local prompt = obj:FindFirstChild("ProximityPromptMachine")
+                    if prompt and prompt:IsA("ProximityPrompt") then
+                        table.insert(targetPrompts, prompt)
+                    end
+                end
+            end
+        end
+    end
+
+    if #targetPrompts == 0 then return end
+
+    table.insert(runningThreads, task.spawn(function()
+        local index = 1
+        while AutoFarmEnabled do
+            local prompt = targetPrompts[index]
+            if prompt and prompt.Enabled then
+                fireproximityprompt(prompt)
+            end
+            index = index % #targetPrompts + 1
+            task.wait(0.1)
+        end
+    end))
+
+    table.insert(runningThreads, task.spawn(function()
+        while AutoFarmEnabled do
+            MachineRemote:FireServer()
+            task.wait(0.1)
+        end
+    end))
+end
+
+-- =========================
+-- TOGGLE UI
+-- =========================
+Tab:AddToggle({
+    Name = "Auto Glitch",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            stopAll()
+            AutoFarmEnabled = true
+            if rebirths.Value <= 10 then
+                RunScriptBelowOrEqual10()
+            else
+                RunScriptAbove10()
+            end
+        else
+            stopAll()
+        end
+    end
+})
