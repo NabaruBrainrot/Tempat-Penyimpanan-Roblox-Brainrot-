@@ -138,7 +138,7 @@ end
 -- TOGGLE UI
 -- =========================
 Tab:AddToggle({
-    Name = "Auto [Strong]",
+    Name = "Auto Farm",
     Default = false,
     Callback = function(Value)
         if Value then
@@ -288,7 +288,7 @@ end
 -- TOGGLE UI
 -- =========================
 Tab:AddToggle({
-    Name = "Auto [Edurance]",
+    Name = "Auto Glitch",
     Default = false,
     Callback = function(Value)
         if Value then
@@ -304,3 +304,42 @@ Tab:AddToggle({
         end
     end
 })
+
+
+
+
+
+
+
+
+
+local AutoRebirth = false
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-- =========================
+-- TOGGLE AUTO REBIRTH
+-- =========================
+Tab:AddToggle({
+    Name = "Auto Rebirth",
+    Default = false,
+    Callback = function(Value)
+        AutoRebirth = Value
+    end
+})
+
+-- =========================
+-- LOOP AUTO REBIRTH
+-- =========================
+task.spawn(function()
+    while true do
+        if AutoRebirth then
+            ReplicatedStorage
+                :WaitForChild("RemotesEvent")
+                :WaitForChild("RebirthEvent")
+                :FireServer()
+        end
+        task.wait(0.1)
+    end
+end)
+
+OrionLib:Init()
