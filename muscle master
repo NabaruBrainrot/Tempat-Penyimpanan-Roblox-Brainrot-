@@ -343,3 +343,39 @@ task.spawn(function()
 end)
 
 OrionLib:Init()
+
+
+
+
+local Players = game:GetService("Players")
+local VirtualUser = game:GetService("VirtualUser")
+
+local player = Players.LocalPlayer
+local AntiAFKConnection = nil
+
+local function EnableAntiAFK()
+    if AntiAFKConnection then return end
+    AntiAFKConnection = player.Idled:Connect(function()
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton2(Vector2.new(0, 0))
+    end)
+end
+
+local function DisableAntiAFK()
+    if AntiAFKConnection then
+        AntiAFKConnection:Disconnect()
+        AntiAFKConnection = nil
+    end
+end
+
+Tab:AddToggle({
+    Name = "Anti AFK",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            EnableAntiAFK()
+        else
+            DisableAntiAFK()
+        end
+    end
+})
