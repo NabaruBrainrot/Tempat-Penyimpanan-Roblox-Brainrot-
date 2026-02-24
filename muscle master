@@ -5,11 +5,84 @@ local Window = OrionLib:MakeWindow({Name = "Muscle Master", HidePremium = false,
 
 
 local Tab = Window:MakeTab({
-	Name = "Farm",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
+        Name = "Farm",
+        Icon = "rbxassetid://4483345998",
+        PremiumOnly = false
 })
 
+
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local MachinesFolder = workspace:WaitForChild("MachinesFolder")
+
+local MachineRemote = ReplicatedStorage
+    :WaitForChild("RemotesEvent")
+    :WaitForChild("MachineActiveEvent")
+
+local TARGET_POSITIONS = {
+    Vector3.new(2747.89795, 7.65916204, 105.534966),
+    Vector3.new(2747.89795, 7.65916204, 126.657951),
+    Vector3.new(2743.69092, 11.6664858, 233.435394),
+    Vector3.new(2743.69092, 11.6664858, 258.496918),
+}
+
+local EPSILON = 0.01
+local targetPrompts = {}
+
+for _, obj in ipairs(MachinesFolder:GetDescendants()) do
+    if obj:IsA("BasePart") then
+        for _, pos in ipairs(TARGET_POSITIONS) do
+            if (obj.Position - pos).Magnitude < EPSILON then
+                local prompt = obj:FindFirstChild("ProximityPromptMachine")
+                if prompt and prompt:IsA("ProximityPrompt") then
+                    table.insert(targetPrompts, prompt)
+                end
+            end
+        end
+    end
+end
+
+local AutoMachine = false
+local PromptTask, RemoteTask
+
+local function StartAutoMachine()
+    if PromptTask or RemoteTask then return end
+
+    PromptTask = task.spawn(function()
+        local index = 1
+        while AutoMachine do
+            local prompt = targetPrompts[index]
+            if prompt and prompt.Enabled then
+                fireproximityprompt(prompt)
+            end
+            index += 1
+            if index > #targetPrompts then
+                index = 1
+            end
+            task.wait(0.1)
+        end
+        PromptTask = nil
+    end)
+
+    RemoteTask = task.spawn(function()
+        while AutoMachine do
+            MachineRemote:FireServer()
+            task.wait(0.03)
+        end
+        RemoteTask = nil
+    end)
+end
+
+Tab:AddToggle({
+    Name = "Auto Farm World 10",
+    Default = false,
+    Callback = function(Value)
+        AutoMachine = Value
+        if Value then
+            StartAutoMachine()
+        end
+    end
+})
 
 
 
@@ -45,7 +118,7 @@ task.spawn(function()
                 :WaitForChild("MachineActiveEvent")
                 :FireServer()
         end
-        task.wait(0.1)
+        task.wait(0.05)
     end
 end)
 
@@ -58,6 +131,6 @@ task.spawn(function()
                 :WaitForChild("RebirthEvent")
                 :FireServer()
         end
-        task.wait(0.2)
+        task.wait(0.1)
     end
 end)
