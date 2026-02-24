@@ -1,3 +1,4 @@
+
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/jensonhirst/Orion/main/source')))()
 
 
@@ -12,77 +13,169 @@ local Tab = Window:MakeTab({
 
 
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local MachinesFolder = workspace:WaitForChild("MachinesFolder")
+-- =========================
+-- SERVICES & PLAYER
+-- =========================
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local leaderstats = player:WaitForChild("leaderstats")
+local rebirths = leaderstats:WaitForChild("Rebirths")
 
-local MachineRemote = ReplicatedStorage
-    :WaitForChild("RemotesEvent")
-    :WaitForChild("MachineActiveEvent")
+-- =========================
+-- STATE
+-- =========================
+local AutoFarmEnabled = false
+local runningThreads = {}
 
-local TARGET_POSITIONS = {
-    Vector3.new(2747.89795, 7.65916204, 105.534966),
-    Vector3.new(2747.89795, 7.65916204, 126.657951),
-    Vector3.new(2743.69092, 11.6664858, 233.435394),
-    Vector3.new(2743.69092, 11.6664858, 258.496918),
-}
+local function stopAll()
+    AutoFarmEnabled = false
+    for _, t in ipairs(runningThreads) do
+        if t then task.cancel(t) end
+    end
+    table.clear(runningThreads)
+end
 
-local EPSILON = 0.01
-local targetPrompts = {}
+-- =========================
+-- SCRIPT A : REBIRTH < 10
+-- =========================
+local function RunScriptBelow10()
+    local TARGET_POSITIONS = {
+        CFrame.new(
+            -120.774185, 5.02033472, -56.9413261,
+            -1.00000024, 0, 0,
+            0, -1.1920929e-07, -1.00000012,
+            -0, -1.00000012, -1.1920929e-07
+        ),
+        CFrame.new(
+            -94.2546463, 5.02033472, -35.0815392,
+            -1.00000024, -0, 0,
+            0, -1.1920929e-07, -1.00000012,
+            0, -1.00000012, -1.1920929e-07
+        )
+    }
 
-for _, obj in ipairs(MachinesFolder:GetDescendants()) do
-    if obj:IsA("BasePart") then
-        for _, pos in ipairs(TARGET_POSITIONS) do
-            if (obj.Position - pos).Magnitude < EPSILON then
-                local prompt = obj:FindFirstChild("ProximityPromptMachine")
-                if prompt and prompt:IsA("ProximityPrompt") then
-                    table.insert(targetPrompts, prompt)
+    local EPSILON = 0.01
+    local MachinesFolder = workspace:WaitForChild("MachinesFolder")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local MachineRemote = ReplicatedStorage
+        :WaitForChild("RemotesEvent")
+        :WaitForChild("MachineActiveEvent")
+
+    local targetPrompts = {}
+
+    for _, obj in ipairs(MachinesFolder:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            for _, cf in ipairs(TARGET_POSITIONS) do
+                if (obj.Position - cf.Position).Magnitude < EPSILON then
+                    local prompt = obj:FindFirstChild("ProximityPromptMachine")
+                    if prompt and prompt:IsA("ProximityPrompt") then
+                        table.insert(targetPrompts, prompt)
+                    end
                 end
             end
         end
     end
-end
 
-local AutoMachine = false
-local PromptTask, RemoteTask
+    if #targetPrompts == 0 then return end
 
-local function StartAutoMachine()
-    if PromptTask or RemoteTask then return end
-
-    PromptTask = task.spawn(function()
+    table.insert(runningThreads, task.spawn(function()
         local index = 1
-        while AutoMachine do
+        while AutoFarmEnabled do
             local prompt = targetPrompts[index]
             if prompt and prompt.Enabled then
                 fireproximityprompt(prompt)
             end
-            index += 1
-            if index > #targetPrompts then
-                index = 1
-            end
+            index = index % #targetPrompts + 1
             task.wait(0.1)
         end
-        PromptTask = nil
-    end)
+    end))
 
-    RemoteTask = task.spawn(function()
-        while AutoMachine do
+    table.insert(runningThreads, task.spawn(function()
+        while AutoFarmEnabled do
             MachineRemote:FireServer()
             task.wait(0.03)
         end
-        RemoteTask = nil
-    end)
+    end))
 end
 
+-- =========================
+-- SCRIPT B : REBIRTH ≥ 10
+-- =========================
+local function RunScriptAboveOrEqual10()
+    local TARGET_POSITIONS = {
+        Vector3.new(2747.89795, 7.65916204, 105.534966),
+        Vector3.new(2747.89795, 7.65916204, 126.657951),
+        Vector3.new(2743.69092, 11.6664858, 233.435394),
+        Vector3.new(2743.69092, 11.6664858, 258.496918),
+    }
+
+    local EPSILON = 0.01
+    local MachinesFolder = workspace:WaitForChild("MachinesFolder")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local MachineRemote = ReplicatedStorage
+        :WaitForChild("RemotesEvent")
+        :WaitForChild("MachineActiveEvent")
+
+    local targetPrompts = {}
+
+    for _, obj in ipairs(MachinesFolder:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            for _, pos in ipairs(TARGET_POSITIONS) do
+                if (obj.Position - pos).Magnitude < EPSILON then
+                    local prompt = obj:FindFirstChild("ProximityPromptMachine")
+                    if prompt and prompt:IsA("ProximityPrompt") then
+                        table.insert(targetPrompts, prompt)
+                    end
+                end
+            end
+        end
+    end
+
+    if #targetPrompts == 0 then return end
+
+    table.insert(runningThreads, task.spawn(function()
+        local index = 1
+        while AutoFarmEnabled do
+            local prompt = targetPrompts[index]
+            if prompt and prompt.Enabled then
+                fireproximityprompt(prompt)
+            end
+            index = index % #targetPrompts + 1
+            task.wait(0.1)
+        end
+    end))
+
+    table.insert(runningThreads, task.spawn(function()
+        while AutoFarmEnabled do
+            MachineRemote:FireServer()
+            task.wait(0.05)
+        end
+    end))
+end
+
+-- =========================
+-- TOGGLE UI
+-- =========================
 Tab:AddToggle({
-    Name = "Auto Farm World 10",
+    Name = "Auto Farm",
     Default = false,
     Callback = function(Value)
-        AutoMachine = Value
         if Value then
-            StartAutoMachine()
+            stopAll()
+            AutoFarmEnabled = true
+            if rebirths.Value < 10 then
+                RunScriptBelow10()
+            else
+                RunScriptAboveOrEqual10()
+            end
+        else
+            stopAll()
         end
     end
 })
+
+
+
 
 
 
