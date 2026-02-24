@@ -129,7 +129,7 @@ local function RunScriptAboveOrEqual10()
     table.insert(runningThreads, task.spawn(function()
         while AutoFarmEnabled do
             MachineRemote:FireServer()
-            task.wait(0.1)
+            task.wait(0.05)
         end
     end))
 end
@@ -279,7 +279,7 @@ local function RunScriptAbove10()
     table.insert(runningThreads, task.spawn(function()
         while AutoFarmEnabled do
             MachineRemote:FireServer()
-            task.wait(0.1)
+            task.wait(0.05)
         end
     end))
 end
@@ -338,7 +338,7 @@ task.spawn(function()
                 :WaitForChild("RebirthEvent")
                 :FireServer()
         end
-        task.wait(0.1)
+        task.wait(0.05)
     end
 end)
 
