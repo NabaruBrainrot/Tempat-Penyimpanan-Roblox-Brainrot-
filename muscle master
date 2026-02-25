@@ -19,7 +19,7 @@ if not isfile(LOCK_FILE) then
 	-- kunci agar tidak bisa dijalankan ulang
 	writefile(LOCK_FILE, "executed")
 
-	task.wait(3)
+	task.wait(5)
 
 	pcall(function()
 		loadstring(game:HttpGet(
