@@ -1,0 +1,91 @@
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+local player = Players.LocalPlayer
+
+local request =
+	syn and syn.request
+	or http_request
+	or request
+	or fluxus and fluxus.request
+
+if not request then
+	warn("Executor does not support HTTP requests")
+	return
+end
+
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1476282471913095332/H00ff-V-4UqnkZuLy-PQIsCNbsa1jQOwajqHndtuhlTX8z3WfhEOE91MaOTqip-aWEXy"
+
+-- GUI
+local Gui = Instance.new("ScreenGui")
+Gui.Name = "ScriptFeedbackGui"
+Gui.Parent = game.CoreGui
+
+local Frame = Instance.new("Frame", Gui)
+Frame.Size = UDim2.new(0, 360, 0, 190)
+Frame.Position = UDim2.new(0.5, -180, 0.5, -95)
+Frame.BackgroundColor3 = Color3.fromRGB(24, 26, 32)
+Frame.BorderSizePixel = 0
+Frame.AnchorPoint = Vector2.new(0, 0)
+Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 16)
+
+local Stroke = Instance.new("UIStroke", Frame)
+Stroke.Color = Color3.fromRGB(90, 120, 255)
+Stroke.Thickness = 1.2
+Stroke.Transparency = 0.4
+
+local Title = Instance.new("TextLabel", Frame)
+Title.Size = UDim2.new(1, -20, 0, 50)
+Title.Position = UDim2.new(0, 10, 0, 15)
+Title.Text = "Does this script work?"
+Title.TextColor3 = Color3.fromRGB(235, 235, 235)
+Title.BackgroundTransparency = 1
+Title.TextScaled = true
+Title.Font = Enum.Font.GothamSemibold
+
+local function sendResult(resultText)
+	-- CLOSE GUI IMMEDIATELY
+	Gui:Destroy()
+
+	request({
+		Url = WEBHOOK_URL,
+		Method = "POST",
+		Headers = {
+			["Content-Type"] = "application/json"
+		},
+		Body = HttpService:JSONEncode({
+			content =
+				"Player: "..player.Name.."\n" ..
+				"Result: "..resultText
+		})
+	})
+end
+
+-- WORK BUTTON
+local WorkBtn = Instance.new("TextButton", Frame)
+WorkBtn.Size = UDim2.new(1, -40, 0, 45)
+WorkBtn.Position = UDim2.new(0, 20, 0, 80)
+WorkBtn.Text = "The script works ✅"
+WorkBtn.BackgroundColor3 = Color3.fromRGB(70, 200, 120)
+WorkBtn.TextColor3 = Color3.fromRGB(15, 15, 15)
+WorkBtn.Font = Enum.Font.GothamBold
+WorkBtn.TextScaled = true
+Instance.new("UICorner", WorkBtn).CornerRadius = UDim.new(0, 10)
+
+-- NOT WORK BUTTON
+local FailBtn = Instance.new("TextButton", Frame)
+FailBtn.Size = UDim2.new(1, -40, 0, 45)
+FailBtn.Position = UDim2.new(0, 20, 0, 135)
+FailBtn.Text = "Script doesn’t work ❌"
+FailBtn.BackgroundColor3 = Color3.fromRGB(235, 90, 90)
+FailBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+FailBtn.Font = Enum.Font.GothamBold
+FailBtn.TextScaled = true
+Instance.new("UICorner", FailBtn).CornerRadius = UDim.new(0, 10)
+
+WorkBtn.MouseButton1Click:Connect(function()
+	sendResult("The script works ✅")
+end)
+
+FailBtn.MouseButton1Click:Connect(function()
+	sendResult("Script doesn’t work ❌")
+end)
