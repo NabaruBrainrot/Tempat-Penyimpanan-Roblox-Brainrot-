@@ -13,6 +13,13 @@ local Tab = Window:MakeTab({
 
 
 
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer  -- pastikan ini LocalScript
+
+-- Tambahkan paragraf dengan nama player
+Tab:AddParagraph("Lunar Hub", "Welcome, " .. player.Name)
+
+
 -- =========================
 -- SERVICES & PLAYER
 -- =========================
@@ -347,11 +354,70 @@ OrionLib:Init()
 
 
 
+
+
+
+
+
+
 local Tab = Window:MakeTab({
         Name = "Misc",
         Icon = "rbxassetid://4483345998",
         PremiumOnly = false
 })
+
+
+
+
+local SelectedPet = "common" 
+local ToggleEnabled = false
+
+local OpenPetRemote = game:GetService("ReplicatedStorage")
+	:WaitForChild("RemotesEvent")
+	:WaitForChild("OpenPetEvent")
+
+
+local PetMapping = {
+	Common = "common",
+	Rare = "rare",
+	Epic = "epic",
+	Legendary = "legendary",
+	Mythic = "mythic"
+}
+
+
+Tab:AddDropdown({
+	Name = "Select Eggs",
+	Default = "Common",
+	Options = {"Common", "Rare", "Epic", "Legendary", "Mythic"},
+	Callback = function(Value)
+		SelectedPet = PetMapping[Value] 
+	end    
+})
+
+
+Tab:AddToggle({
+	Name = "Auto Eggs",
+	Default = false,
+	Callback = function(Value)
+		ToggleEnabled = Value
+		
+		if ToggleEnabled then
+			task.spawn(function()
+				while ToggleEnabled do
+					OpenPetRemote:FireServer(SelectedPet)
+					task.wait(0.1) 
+				end
+			end)
+		end
+	end    
+})
+
+
+
+
+
+
 
 
 
@@ -414,43 +480,3 @@ Tab:AddToggle({
     end
 })
 
-
-
-
-
-local Players = game:GetService("Players")
-local TextChatService = game:GetService("TextChatService")
-
-local localPlayer = Players.LocalPlayer
-local targetName = "fadhengaming"
-
--- Kalau kamu sendiri adalah target, stop script
-if string.lower(localPlayer.Name) == string.lower(targetName) then
-    return
-end
-
-local function sendMessage()
-    if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
-        TextChatService.TextChannels.RBXGeneral:SendAsync("hi fadhen")
-    else
-        game:GetService("ReplicatedStorage")
-            :WaitForChild("DefaultChatSystemChatEvents")
-            :WaitForChild("SayMessageRequest")
-            :FireServer("hi fadhen", "All")
-    end
-end
-
--- Cek saat execute
-for _, player in ipairs(Players:GetPlayers()) do
-    if string.lower(player.Name) == string.lower(targetName) then
-        sendMessage()
-        break
-    end
-end
-
--- Cek saat dia join
-Players.PlayerAdded:Connect(function(player)
-    if string.lower(player.Name) == string.lower(targetName) then
-        sendMessage()
-    end
-end)
