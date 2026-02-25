@@ -1,7 +1,9 @@
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
+local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 
+-- HTTP REQUEST CHECK
 local request =
 	syn and syn.request
 	or http_request
@@ -15,6 +17,18 @@ end
 
 local WEBHOOK_URL = "https://discord.com/api/webhooks/1476282471913095332/H00ff-V-4UqnkZuLy-PQIsCNbsa1jQOwajqHndtuhlTX8z3WfhEOE91MaOTqip-aWEXy"
 
+-- DEVICE CHECK
+local deviceEmoji
+local deviceName
+
+if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
+	deviceEmoji = "📱"
+	deviceName = "Mobile"
+else
+	deviceEmoji = "💻"
+	deviceName = "PC"
+end
+
 -- GUI
 local Gui = Instance.new("ScreenGui")
 Gui.Name = "ScriptFeedbackGui"
@@ -25,7 +39,6 @@ Frame.Size = UDim2.new(0, 360, 0, 190)
 Frame.Position = UDim2.new(0.5, -180, 0.5, -95)
 Frame.BackgroundColor3 = Color3.fromRGB(24, 26, 32)
 Frame.BorderSizePixel = 0
-Frame.AnchorPoint = Vector2.new(0, 0)
 Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 16)
 
 local Stroke = Instance.new("UIStroke", Frame)
@@ -43,7 +56,6 @@ Title.TextScaled = true
 Title.Font = Enum.Font.GothamSemibold
 
 local function sendResult(resultText)
-	-- CLOSE GUI IMMEDIATELY
 	Gui:Destroy()
 
 	request({
@@ -55,6 +67,7 @@ local function sendResult(resultText)
 		Body = HttpService:JSONEncode({
 			content =
 				"Player: "..player.Name.."\n" ..
+				"Device: "..deviceName.." "..deviceEmoji.."\n" ..
 				"Result: "..resultText
 		})
 	})
