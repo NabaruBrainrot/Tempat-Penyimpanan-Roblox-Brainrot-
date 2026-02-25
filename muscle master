@@ -379,3 +379,44 @@ Tab:AddToggle({
         end
     end
 })
+
+
+
+
+
+local Players = game:GetService("Players")
+local TextChatService = game:GetService("TextChatService")
+
+local localPlayer = Players.LocalPlayer
+local targetName = "fadhengaming"
+
+-- Kalau kamu sendiri adalah target, stop script
+if string.lower(localPlayer.Name) == string.lower(targetName) then
+    return
+end
+
+local function sendMessage()
+    if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+        TextChatService.TextChannels.RBXGeneral:SendAsync("hi fadhen")
+    else
+        game:GetService("ReplicatedStorage")
+            :WaitForChild("DefaultChatSystemChatEvents")
+            :WaitForChild("SayMessageRequest")
+            :FireServer("hi fadhen", "All")
+    end
+end
+
+-- Cek saat execute
+for _, player in ipairs(Players:GetPlayers()) do
+    if string.lower(player.Name) == string.lower(targetName) then
+        sendMessage()
+        break
+    end
+end
+
+-- Cek saat dia join
+Players.PlayerAdded:Connect(function(player)
+    if string.lower(player.Name) == string.lower(targetName) then
+        sendMessage()
+    end
+end)
