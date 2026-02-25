@@ -1,0 +1,479 @@
+local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/bananaGanteng/Legend/refs/heads/main/BedahNih.lua"))()
+
+local Window = OrionLib:MakeWindow({Name = "Legend", HidePremium = false, SaveConfig = true, ConfigFolder = "OrionTest"})
+
+
+local Tab = Window:MakeTab({
+        Name = "Farm",
+        Icon = "rbxassetid://4483345998",
+        PremiumOnly = false
+})
+
+
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer  -- pastikan ini LocalScript
+
+-- Tambahkan paragraf dengan nama player
+Tab:AddParagraph("Lunar Hub", "Welcome, " .. player.Name)
+
+
+-- =========================
+-- SERVICES & PLAYER
+-- =========================
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local leaderstats = player:WaitForChild("leaderstats")
+local rebirths = leaderstats:WaitForChild("Rebirths")
+
+-- =========================
+-- STATE
+-- =========================
+local AutoFarmEnabled = false
+local runningThreads = {}
+local rng = Random.new()
+
+local function stopAll()
+    AutoFarmEnabled = false
+    for _, t in ipairs(runningThreads) do
+        if t then task.cancel(t) end
+    end
+    table.clear(runningThreads)
+end
+
+-- ============================================================
+--  FUNGSI UTIL: KUMPULKAN PROMPT DARI POSISI TARGET (SUPER CEPAT)
+-- ============================================================
+local function GetPrompts(MachinesFolder, positions)
+    local EPSILON = 0.01
+    local prompts = {}
+
+    for _, obj in ipairs(MachinesFolder:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            local pos = obj.Position
+            for _, target in ipairs(positions) do
+                if (pos - target).Magnitude < EPSILON then
+                    local prompt = obj:FindFirstChild("ProximityPromptMachine")
+                    if prompt and prompt:IsA("ProximityPrompt") then
+                        prompts[#prompts+1] = prompt
+                    end
+                end
+            end
+        end
+    end
+
+    return prompts
+end
+
+-- =========================
+-- SCRIPT A : REBIRTH < 10
+-- =========================
+local function RunScriptBelow10()
+    local TARGET_POSITIONS = {
+        CFrame.new(-120.774185, 5.02033472, -56.9413261).Position,
+        CFrame.new(-94.2546463, 5.02033472, -35.0815392).Position
+    }
+
+    local MachinesFolder = workspace:WaitForChild("MachinesFolder")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local MachineRemote = ReplicatedStorage.RemotesEvent.MachineActiveEvent
+
+    local prompts = GetPrompts(MachinesFolder, TARGET_POSITIONS)
+    if #prompts == 0 then return end
+
+    -- THREAD 1: Fire prompt random
+    table.insert(runningThreads, task.spawn(function()
+        while AutoFarmEnabled do
+            local prompt = prompts[rng:NextInteger(1, #prompts)]
+            if prompt and prompt.Enabled then
+                fireproximityprompt(prompt)
+            end            
+            task.wait(0.1)
+        end
+    end))
+
+    -- THREAD 2: Remote (tetap 0.1)
+    table.insert(runningThreads, task.spawn(function()
+        while AutoFarmEnabled do
+            MachineRemote:FireServer()
+            task.wait(0.1)
+        end
+    end))
+end
+
+-- =========================
+-- SCRIPT B : REBIRTH ≥ 10
+-- =========================
+local function RunScriptAboveOrEqual10()
+    local TARGET_POSITIONS = {
+        Vector3.new(2747.89795, 7.65916204, 105.534966),
+        Vector3.new(2747.89795, 7.65916204, 126.657951),
+        Vector3.new(2743.69092, 11.6664858, 233.435394),
+        Vector3.new(2743.69092, 11.6664858, 258.496918),
+    }
+
+    local MachinesFolder = workspace:WaitForChild("MachinesFolder")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local MachineRemote = ReplicatedStorage.RemotesEvent.MachineActiveEvent
+
+    local prompts = GetPrompts(MachinesFolder, TARGET_POSITIONS)
+    if #prompts == 0 then return end
+
+    -- THREAD 1: Fire prompt random
+    table.insert(runningThreads, task.spawn(function()
+        while AutoFarmEnabled do
+            local prompt = prompts[rng:NextInteger(1, #prompts)]
+            if prompt and prompt.Enabled then
+                fireproximityprompt(prompt)
+            end
+            task.wait(0.1)
+        end
+    end))
+
+    -- THREAD 2: Remote (tetap 0.1)
+    table.insert(runningThreads, task.spawn(function()
+        while AutoFarmEnabled do
+            MachineRemote:FireServer()
+            task.wait(0.05)
+        end
+    end))
+end
+
+-- =========================
+-- TOGGLE UI
+-- =========================
+Tab:AddToggle({
+    Name = "Auto Farm",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            stopAll()
+            AutoFarmEnabled = true
+            if rebirths.Value < 10 then
+                RunScriptBelow10()
+            else
+                RunScriptAboveOrEqual10()
+            end
+        else
+            stopAll()
+        end
+    end
+})
+
+
+
+
+
+
+
+
+
+-- =========================
+-- SERVICES & PLAYER
+-- =========================
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local leaderstats = player:WaitForChild("leaderstats")
+local rebirths = leaderstats:WaitForChild("Rebirths")
+
+-- =========================
+-- STATE
+-- =========================
+local AutoFarmEnabled = false
+local runningThreads = {}
+local rng = Random.new()
+
+local function stopAll()
+    AutoFarmEnabled = false
+    for _, t in ipairs(runningThreads) do
+        if t then task.cancel(t) end
+    end
+    table.clear(runningThreads)
+end
+
+-- =========================
+-- UTIL CEPAT: AMBIL PROMPT
+-- =========================
+local function CollectPrompts(folder, positions)
+    local EPSILON = 0.01
+    local prompts = {}
+
+    for _, obj in ipairs(folder:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            local pos = obj.Position
+            for _, cf in ipairs(positions) do
+                if (pos - cf.Position).Magnitude < EPSILON then
+                    local prompt = obj:FindFirstChild("ProximityPromptMachine")
+                    if prompt and prompt:IsA("ProximityPrompt") then
+                        prompts[#prompts+1] = prompt
+                    end
+                end
+            end
+        end
+    end
+
+    return prompts
+end
+
+-- =========================
+-- SCRIPT A : REBIRTH ≤ 10
+-- =========================
+local function RunScriptBelowOrEqual10()
+    local TARGET_POSITIONS = {
+        CFrame.new(-41.5637741, 3.47935009, 44.4185333),
+        CFrame.new(-24.1162872, 3.47935009, 44.4185333),
+    }
+
+    local MachinesFolder = workspace:WaitForChild("MachinesFolder")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local MachineRemote = ReplicatedStorage.RemotesEvent.MachineActiveEvent
+
+    local prompts = CollectPrompts(MachinesFolder, TARGET_POSITIONS)
+    if #prompts == 0 then return end
+
+    -- FIRE PROMPT (RANDOM, SATU-SATU)
+    table.insert(runningThreads, task.spawn(function()
+        while AutoFarmEnabled do
+            local prompt = prompts[rng:NextInteger(1, #prompts)]
+            if prompt and prompt.Enabled then
+                fireproximityprompt(prompt)
+            end
+            task.wait(0.1)
+        end
+    end))
+
+    -- REMOTE EVENT
+    table.insert(runningThreads, task.spawn(function()
+        while AutoFarmEnabled do
+            MachineRemote:FireServer()
+            task.wait(0.1)
+        end
+    end))
+end
+
+-- =========================
+-- SCRIPT B : REBIRTH > 10
+-- =========================
+local function RunScriptAbove10()
+    local TARGET_POSITIONS = {
+        CFrame.new(2712.48022, 3.71804452, 299.783295),
+        CFrame.new(2691.11182, 3.71804452, 299.783295),
+        CFrame.new(2613.02808, 4.78257084, 289.732025),
+        CFrame.new(2584.5542, 4.78257084, 289.732025),
+    }
+
+    local MachinesFolder = workspace:WaitForChild("MachinesFolder")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local MachineRemote = ReplicatedStorage.RemotesEvent.MachineActiveEvent
+
+    local prompts = CollectPrompts(MachinesFolder, TARGET_POSITIONS)
+    if #prompts == 0 then return end
+
+    -- FIRE PROMPT (RANDOM, SATU-SATU)
+    table.insert(runningThreads, task.spawn(function()
+        while AutoFarmEnabled do
+            local prompt = prompts[rng:NextInteger(1, #prompts)]
+            if prompt and prompt.Enabled then
+                fireproximityprompt(prompt)
+            end
+            task.wait(0.1)
+        end
+    end))
+
+    -- REMOTE EVENT
+    table.insert(runningThreads, task.spawn(function()
+        while AutoFarmEnabled do
+            MachineRemote:FireServer()
+            task.wait(0.05)
+        end
+    end))
+end
+
+-- =========================
+-- TOGGLE UI
+-- =========================
+Tab:AddToggle({
+    Name = "Auto Glitch",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            stopAll()
+            AutoFarmEnabled = true
+            if rebirths.Value <= 10 then
+                RunScriptBelowOrEqual10()
+            else
+                RunScriptAbove10()
+            end
+        else
+            stopAll()
+        end
+    end
+})
+
+
+
+
+
+
+
+
+
+local AutoRebirth = false
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-- =========================
+-- TOGGLE AUTO REBIRTH
+-- =========================
+Tab:AddToggle({
+    Name = "Auto Rebirth",
+    Default = false,
+    Callback = function(Value)
+        AutoRebirth = Value
+    end
+})
+
+-- =========================
+-- LOOP AUTO REBIRTH
+-- =========================
+task.spawn(function()
+    while true do
+        if AutoRebirth then
+            ReplicatedStorage
+                :WaitForChild("RemotesEvent")
+                :WaitForChild("RebirthEvent")
+                :FireServer()
+        end
+        task.wait(0.05)
+    end
+end)
+
+OrionLib:Init()
+
+
+
+
+
+
+
+
+
+
+local Tab = Window:MakeTab({
+        Name = "Misc",
+        Icon = "rbxassetid://4483345998",
+        PremiumOnly = false
+})
+
+
+
+
+local SelectedPet = "common" 
+local ToggleEnabled = false
+
+local OpenPetRemote = game:GetService("ReplicatedStorage")
+        :WaitForChild("RemotesEvent")
+        :WaitForChild("OpenPetEvent")
+
+
+local PetMapping = {
+        Common = "common",
+        Rare = "rare",
+        Epic = "epic",
+        Legendary = "legendary",
+        Mythic = "mythic"
+}
+
+
+Tab:AddDropdown({
+        Name = "Select Eggs",
+        Default = "Common",
+        Options = {"Common", "Rare", "Epic", "Legendary", "Mythic"},
+        Callback = function(Value)
+                SelectedPet = PetMapping[Value] 
+        end    
+})
+
+
+Tab:AddToggle({
+        Name = "Auto Eggs",
+        Default = false,
+        Callback = function(Value)
+                ToggleEnabled = Value
+
+                if ToggleEnabled then
+                        task.spawn(function()
+                                while ToggleEnabled do
+                                        OpenPetRemote:FireServer(SelectedPet)
+                                        task.wait(0.1) 
+                                end
+                        end)
+                end
+        end    
+})
+
+
+
+
+
+
+
+
+
+local AutoSpin = false
+
+Tab:AddToggle({
+        Name = "Auto Spin",
+        Default = false,
+        Callback = function(Value)
+                AutoSpin = Value
+
+                if AutoSpin then
+                        task.spawn(function()
+                                while AutoSpin do
+                                        game:GetService("ReplicatedStorage")
+                                                :WaitForChild("RemotesEvent")
+                                                :WaitForChild("SpinFunction")
+                                                :InvokeServer()
+
+                                        task.wait(0.1)
+                                end
+                        end)
+                end
+        end    
+})
+
+
+
+
+local Players = game:GetService("Players")
+local VirtualUser = game:GetService("VirtualUser")
+
+local player = Players.LocalPlayer
+local AntiAFKConnection = nil
+
+local function EnableAntiAFK()
+    if AntiAFKConnection then return end
+    AntiAFKConnection = player.Idled:Connect(function()
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton2(Vector2.new(0, 0))
+    end)
+end
+
+local function DisableAntiAFK()
+    if AntiAFKConnection then
+        AntiAFKConnection:Disconnect()
+        AntiAFKConnection = nil
+    end
+end
+
+Tab:AddToggle({
+    Name = "Anti AFK",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            EnableAntiAFK()
+        else
+            DisableAntiAFK()
+        end
+    end
+})
