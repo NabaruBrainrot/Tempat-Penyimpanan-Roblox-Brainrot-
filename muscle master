@@ -10,7 +10,7 @@ end)
 -- ===============================
 -- SCRIPT 2 (HANYA 1 KALI SAJA)
 -- ===============================
-local LOCK_FILE = "feedback_once.lock"
+local LOCK_FILE = "feedback_onsce.lock"
 
 local isfile = isfile or function() return false end
 local writefile = writefile or function() end
