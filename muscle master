@@ -347,6 +347,40 @@ OrionLib:Init()
 
 
 
+local Tab = Window:MakeTab({
+        Name = "Misc",
+        Icon = "rbxassetid://4483345998",
+        PremiumOnly = false
+})
+
+
+
+local AutoSpin = false
+
+Tab:AddToggle({
+	Name = "Auto Spin",
+	Default = false,
+	Callback = function(Value)
+		AutoSpin = Value
+		
+		if AutoSpin then
+			task.spawn(function()
+				while AutoSpin do
+					game:GetService("ReplicatedStorage")
+						:WaitForChild("RemotesEvent")
+						:WaitForChild("SpinFunction")
+						:InvokeServer()
+					
+					task.wait(0.1)
+				end
+			end)
+		end
+	end    
+})
+
+
+
+
 local Players = game:GetService("Players")
 local VirtualUser = game:GetService("VirtualUser")
 
