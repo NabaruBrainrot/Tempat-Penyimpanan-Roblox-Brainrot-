@@ -1,6 +1,4 @@
-
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/jensonhirst/Orion/main/source')))()
-
+local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/bananaGanteng/Legend/main/main.lua"))()
 
 local Window = OrionLib:MakeWindow({Name = "Legend", HidePremium = false, SaveConfig = true, ConfigFolder = "OrionTest"})
 
@@ -373,44 +371,44 @@ local SelectedPet = "common"
 local ToggleEnabled = false
 
 local OpenPetRemote = game:GetService("ReplicatedStorage")
-	:WaitForChild("RemotesEvent")
-	:WaitForChild("OpenPetEvent")
+        :WaitForChild("RemotesEvent")
+        :WaitForChild("OpenPetEvent")
 
 
 local PetMapping = {
-	Common = "common",
-	Rare = "rare",
-	Epic = "epic",
-	Legendary = "legendary",
-	Mythic = "mythic"
+        Common = "common",
+        Rare = "rare",
+        Epic = "epic",
+        Legendary = "legendary",
+        Mythic = "mythic"
 }
 
 
 Tab:AddDropdown({
-	Name = "Select Eggs",
-	Default = "Common",
-	Options = {"Common", "Rare", "Epic", "Legendary", "Mythic"},
-	Callback = function(Value)
-		SelectedPet = PetMapping[Value] 
-	end    
+        Name = "Select Eggs",
+        Default = "Common",
+        Options = {"Common", "Rare", "Epic", "Legendary", "Mythic"},
+        Callback = function(Value)
+                SelectedPet = PetMapping[Value] 
+        end    
 })
 
 
 Tab:AddToggle({
-	Name = "Auto Eggs",
-	Default = false,
-	Callback = function(Value)
-		ToggleEnabled = Value
-		
-		if ToggleEnabled then
-			task.spawn(function()
-				while ToggleEnabled do
-					OpenPetRemote:FireServer(SelectedPet)
-					task.wait(0.1) 
-				end
-			end)
-		end
-	end    
+        Name = "Auto Eggs",
+        Default = false,
+        Callback = function(Value)
+                ToggleEnabled = Value
+
+                if ToggleEnabled then
+                        task.spawn(function()
+                                while ToggleEnabled do
+                                        OpenPetRemote:FireServer(SelectedPet)
+                                        task.wait(0.1) 
+                                end
+                        end)
+                end
+        end    
 })
 
 
@@ -424,24 +422,24 @@ Tab:AddToggle({
 local AutoSpin = false
 
 Tab:AddToggle({
-	Name = "Auto Spin",
-	Default = false,
-	Callback = function(Value)
-		AutoSpin = Value
-		
-		if AutoSpin then
-			task.spawn(function()
-				while AutoSpin do
-					game:GetService("ReplicatedStorage")
-						:WaitForChild("RemotesEvent")
-						:WaitForChild("SpinFunction")
-						:InvokeServer()
-					
-					task.wait(0.1)
-				end
-			end)
-		end
-	end    
+        Name = "Auto Spin",
+        Default = false,
+        Callback = function(Value)
+                AutoSpin = Value
+
+                if AutoSpin then
+                        task.spawn(function()
+                                while AutoSpin do
+                                        game:GetService("ReplicatedStorage")
+                                                :WaitForChild("RemotesEvent")
+                                                :WaitForChild("SpinFunction")
+                                                :InvokeServer()
+
+                                        task.wait(0.1)
+                                end
+                        end)
+                end
+        end    
 })
 
 
@@ -479,4 +477,3 @@ Tab:AddToggle({
         end
     end
 })
-
