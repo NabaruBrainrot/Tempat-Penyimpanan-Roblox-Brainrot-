@@ -1,140 +1,552 @@
--- =========================
--- GUI Copy Fixed YouTube Name
--- =========================
-local TweenService = game:GetService("TweenService")
-
-local fixedName = "@FaDhenGaming-ge8fo"
-
-local gui = Instance.new("ScreenGui")
-gui.Name = "CopyGui"
-gui.ResetOnSpawn = false
 pcall(function()
-    gui.Parent = game:GetService("CoreGui")
+    local cg = game:GetService("CoreGui"):FindFirstChild("PersistentToggleGui")
+    if cg then cg:Destroy() end
+
+    local pg = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("PremiumDeliveryGUI")
+    if pg then pg:Destroy() end
 end)
 
--- Frame utama
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 370, 0, 200)
-frame.Position = UDim2.new(0.5, 0, 0.41, 0)
-frame.AnchorPoint = Vector2.new(0.5, 0.5)
-frame.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-frame.Active = true
-frame.Draggable = true
-frame.Parent = gui
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
 
-local border = Instance.new("UIStroke", frame)
-border.Thickness = 1.5
-border.Color = Color3.fromRGB(80, 80, 100)
-border.Transparency = 0.3
+-- ================= FLOAT BUTTON =================
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "PersistentToggleGui"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = CoreGui
 
--- Title (lebih bagus & natural)
-local desc = Instance.new("TextLabel", frame)
-desc.Size = UDim2.new(0.9, 0, 0, 30)
-desc.Position = UDim2.new(0.05, 0, 0.1, 0)
-desc.BackgroundTransparency = 1
-desc.Text = "new script update check on my youTube"
-desc.Font = Enum.Font.Gotham
-desc.TextColor3 = Color3.fromRGB(235, 235, 235)
-desc.TextSize = 18
-desc.TextWrapped = true
+local toggleImageBtn = Instance.new("ImageButton")
+toggleImageBtn.Name = "HoverButton"
+toggleImageBtn.Size = UDim2.new(0, 55, 0, 55)
+toggleImageBtn.Position = UDim2.new(0, 10, 0.2, 0)
+toggleImageBtn.Image = "rbxassetid://108846514953006"
+toggleImageBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+toggleImageBtn.BackgroundTransparency = 0.7
+toggleImageBtn.Active = true
+toggleImageBtn.Draggable = true
+toggleImageBtn.Parent = ScreenGui
 
--- TextBox (boleh diubah user)
-local textbox = Instance.new("TextBox", frame)
-textbox.Size = UDim2.new(0.9, 0, 0, 45)
-textbox.Position = UDim2.new(0.05, 0, 0.32, 0)
-textbox.PlaceholderText = "@FaDhenGaming-ge8fo"
-textbox.Font = Enum.Font.Gotham
-textbox.Text = fixedName
-textbox.TextSize = 18
-textbox.TextColor3 = Color3.new(1, 1, 1)
-textbox.TextXAlignment = Enum.TextXAlignment.Center
-textbox.BackgroundColor3 = Color3.fromRGB(50, 50, 65)
-textbox.Parent = frame
-Instance.new("UICorner", textbox).CornerRadius = UDim.new(0, 8)
+Instance.new("UICorner", toggleImageBtn).CornerRadius = UDim.new(0, 9)
 
-local stroke = Instance.new("UIStroke", textbox)
-stroke.Color = Color3.fromRGB(80, 80, 100)
-stroke.Thickness = 1
+local stroke = Instance.new("UIStroke", toggleImageBtn)
+stroke.Thickness = 3
+stroke.Color = Color3.fromRGB(255, 255, 255)
+stroke.Transparency = 0.5
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
--- Info label
-local infoLabel = Instance.new("TextLabel", frame)
-infoLabel.Size = UDim2.new(0.9, 0, 0, 25)
-infoLabel.Position = UDim2.new(0.05, 0, 0.55, 0)
-infoLabel.BackgroundTransparency = 1
-infoLabel.Text = "paste to YouTube then get new script "
-infoLabel.Font = Enum.Font.Gotham
-infoLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-infoLabel.TextSize = 16
-infoLabel.TextTransparency = 1
-infoLabel.Visible = false
+toggleImageBtn.MouseEnter:Connect(function()
+    TweenService:Create(toggleImageBtn, TweenInfo.new(0.15), {
+        Size = UDim2.new(0, 60, 0, 60)
+    }):Play()
+end)
 
-local showingInfo = false
+toggleImageBtn.MouseLeave:Connect(function()
+    TweenService:Create(toggleImageBtn, TweenInfo.new(0.15), {
+        Size = UDim2.new(0, 55, 0, 55)
+    }):Play()
+end)
 
--- Tombol helper
-local function createButton(parent, text, pos)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0.9, 0, 0, 40)
-    btn.Position = pos
-    btn.Text = text
-    btn.Font = Enum.Font.Gotham
-    btn.TextSize = 18
-    btn.TextColor3 = Color3.fromRGB(230, 230, 230)
-    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 65)
-    btn.AutoButtonColor = false
-    btn.Parent = parent
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
+-- ================= TARGET GUI (ANTI LAG) =================
+local TARGET_SIZE = UDim2.new(0, 500, 0, 340)
+local targetFrame
+local isOpen = false
+local preloaded = false
 
-    local stroke = Instance.new("UIStroke", btn)
-    stroke.Thickness = 1
-    stroke.Color = Color3.fromRGB(80, 80, 100)
-    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+task.spawn(function()
+    while not targetFrame do
+        local screenGui = CoreGui:FindFirstChild("ScreenGui")
+        if screenGui then
+            for _, v in ipairs(screenGui:GetChildren()) do
+                if v:IsA("Frame") and v.Size == TARGET_SIZE then
+                    targetFrame = v
+                    targetFrame.Visible = true
+                    task.wait()
+                    targetFrame.Visible = false
+                    preloaded = true
+                    break
+                end
+            end
+        end
+        task.wait(0.25)
+    end
+end)
 
-    btn.MouseEnter:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.12), {
-            BackgroundColor3 = Color3.fromRGB(60, 60, 80)
-        }):Play()
-    end)
+toggleImageBtn.MouseButton1Click:Connect(function()
+    if not targetFrame or not preloaded then return end
+    isOpen = not isOpen
+    targetFrame.Visible = isOpen
+end)
 
-    btn.MouseLeave:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.12), {
-            BackgroundColor3 = Color3.fromRGB(50, 50, 65)
-        }):Play()
-    end)
+-- ================= FLUENT =================
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
-    return btn
+local Window = Fluent:CreateWindow({
+    Title = "Survive Lava for Brainrot" .. Fluent.Version,
+    SubTitle = "RrLva",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(500, 340),
+    Acrylic = true,
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.LeftControl
+})
+
+-- ================= TABS =================
+local Tabs = {
+    Main = Window:AddTab({ Title = "Main" }),
+    Misc = Window:AddTab({ Title = "Misc" }),
+
+
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+}
+
+local Options = Fluent.Options
+
+-- ================= MAIN COMPONENTS =================
+
+-- =========================
+-- SERVICES
+-- =========================
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
+
+local char
+local hrp
+
+-- =========================
+-- STATE
+-- =========================
+local SelectedZone = "Mythic"
+local AutoFarm = false
+local HasTeleported = false
+
+-- =========================
+-- CHARACTER SETUP (ANTI RESET)
+-- =========================
+local function setupCharacter(character)
+        char = character
+        hrp = char:WaitForChild("HumanoidRootPart")
+        HasTeleported = false
 end
 
--- Tombol Copy (selalu copy fixedName)
-local copyBtn = createButton(frame, "copy to clipboard", UDim2.new(0.05, 0, 0.72, 0))
+if player.Character then
+        setupCharacter(player.Character)
+end
 
-copyBtn.MouseButton1Click:Connect(function()
-    setclipboard(fixedName)
+player.CharacterAdded:Connect(setupCharacter)
 
-    pcall(function()
-        game.StarterGui:SetCore("SendNotification", {
-            Title = "succes",
-            Text = "Copied youtube name",
-            Duration = 3
-        })
-    end)
+-- =========================
+-- ZONE PATH
+-- =========================
+local locations = {
+        Common = workspace.GameFolder.Brainrots.Common,
+        Rare = workspace.GameFolder.Brainrots.Rare,
+        Epic = workspace.GameFolder.Brainrots.Epic,
+        Legendary = workspace.GameFolder.Brainrots.Legendary,
 
-    if not showingInfo then
-        showingInfo = true
-        infoLabel.Visible = true
+        Mythic = workspace.GameFolder.Brainrots.Mythic,
+        Celestial = workspace.GameFolder.Brainrots.Celestial,
+        Secret = workspace.GameFolder.Brainrots.Secret
+}
 
-        TweenService:Create(infoLabel, TweenInfo.new(0.25), {
-            TextTransparency = 0
-        }):Play()
+-- =========================
+-- PARSE CASH
+-- =========================
+local function parseCash(text)
+        if not text then return 0 end
+        text = text:lower()
 
-        task.delay(10, function()
-            TweenService:Create(infoLabel, TweenInfo.new(0.35), {
-                TextTransparency = 1
-            }):Play()
-            task.wait(0.35)
-            infoLabel.Visible = false
-            showingInfo = false
+        local num = tonumber(text:match("%$([%d%.]+)")) or 0
+        if text:find("m") then
+                return num * 1_000_000
+        elseif text:find("k") then
+                return num * 1_000
+        end
+        return num
+end
+
+-- =========================
+-- TELEPORT LOGIC
+-- =========================
+local function teleportZone(zone)
+        if HasTeleported then return end
+        if not hrp then return end
+
+        local folder = locations[zone]
+        if not folder then return end
+
+        local highest = 0
+        local targetRoot = nil
+
+        for _, model in ipairs(folder:GetChildren()) do
+                if model:IsA("Model") then
+                        local root = model:FindFirstChild("RootPart")
+                        if root then
+                                local cash =
+                                        root:FindFirstChild("BrainrotAtt")
+                                        and root.BrainrotAtt:FindFirstChild("BillboardGui")
+                                        and root.BrainrotAtt.BillboardGui:FindFirstChild("Cash")
+
+                                if cash and cash:IsA("TextLabel") then
+                                        local value = parseCash(cash.Text)
+                                        if value > highest then
+                                                highest = value
+                                                targetRoot = root
+                                        end
+                                end
+                        end
+                end
+        end
+
+        if targetRoot then
+                HasTeleported = true
+
+                -- 🔼 STEP 1: TELEPORT KE ATAS 100 STUDS (LANGSUNG)
+                hrp.CFrame = hrp.CFrame + Vector3.new(0, 100, 0)
+
+                task.wait(0.1)
+
+                -- 🎯 STEP 2: TELEPORT KE TARGET (LANGSUNG)
+                hrp.CFrame = targetRoot.CFrame + Vector3.new(0, 3, 0)
+        end
+end
+
+-- =========================
+-- DROPDOWN
+-- =========================
+Tabs.Main:AddDropdown("Zone", {
+        Title = "Select Brainrot",
+        Values = {
+                "Epic",
+                "Legendary",
+                "Mythic",
+                "Secret",
+                "Celestial"
+        },
+        Default = "Epic",
+        Multi = false
+})
+
+Options.Zone:OnChanged(function(Value)
+        SelectedZone = Value
+end)
+
+-- =========================
+-- TOGGLE
+-- =========================
+Tabs.Main:AddToggle("AutoFarm", {
+        Title = "Auto Farm",
+        Default = false
+})
+
+Options.AutoFarm:OnChanged(function(Value)
+        AutoFarm = Value
+
+        if Value then
+                HasTeleported = false
+                task.spawn(function()
+                        while AutoFarm do
+                                teleportZone(SelectedZone)
+                                task.wait(0.3)
+                        end
+                end)
+        end
+end)
+
+
+
+
+Tabs.Main:AddButton({
+    Title = "Tp Brainrot",
+    Description = "Teleport to the Required Brainrot Rebirth",
+    Callback = function()
+
+        local Players = game:GetService("Players")
+        local TweenService = game:GetService("TweenService")
+
+        local player = Players.LocalPlayer
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+
+        local label = player.PlayerGui
+            :WaitForChild("HUD")
+            :WaitForChild("Rebirth")
+            :WaitForChild("InsiderFrame")
+            :WaitForChild("Insider")
+            :WaitForChild("Brainrots")
+            :WaitForChild("RebirthReward")
+            :WaitForChild("NameText")
+
+        local brainrotsFolder = workspace
+            :WaitForChild("GameFolder")
+            :WaitForChild("Brainrots")
+
+        local function clean(str)
+            return str:lower()
+                :gsub("%s+", "")
+                :gsub("%p", "")
+        end
+
+        local function getAllModels(folder, list)
+            for _, obj in ipairs(folder:GetChildren()) do
+                if obj:IsA("Model") then
+                    table.insert(list, obj)
+                end
+                getAllModels(obj, list)
+            end
+        end
+
+        local function tweenTo(cf)
+            TweenService:Create(
+                hrp,
+                TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+                { CFrame = cf }
+            ):Play()
+        end
+
+        local text = clean(label.Text)
+        if text == "" then return end
+
+        local models = {}
+        getAllModels(brainrotsFolder, models)
+
+        for _, model in ipairs(models) do
+            local modelName = clean(model.Name)
+
+            if modelName:sub(1, #text) == text then
+                local targetPart = model:FindFirstChild("HumanoidRootPart")
+                    or model:FindFirstChildWhichIsA("BasePart")
+
+                if targetPart then
+                    -- teleport langsung ke atas
+                    hrp.CFrame = targetPart.CFrame + Vector3.new(0, 100, 0)
+
+                    task.wait(0.05)
+
+                    -- tween ke target
+                    tweenTo(targetPart.CFrame + Vector3.new(0, 3, 0))
+
+                    print("Teleport ke:", model.Name)
+                    return
+                end
+            end
+        end
+
+        warn("Model tidak ditemukan:", label.Text)
+
+    end
+})
+
+
+
+
+
+
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+Tabs.Main:AddButton({
+    Title = "SafeZone",
+    Description = "Teleport SafeZone",
+    Callback = function()
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+
+        local tweenInfo = TweenInfo.new(
+            0.25, -- DURASI (makin kecil makin cepat)
+            Enum.EasingStyle.Linear,
+            Enum.EasingDirection.Out
+        )
+
+        local goal = {
+            CFrame = CFrame.new(-0.602, 30.567, -24.122)
+        }
+
+        local tween = TweenService:Create(hrp, tweenInfo, goal)
+        tween:Play()
+    end
+})
+
+
+-----Misc 
+-- =========================
+-- CLAIM LOOP SYSTEM
+-- =========================
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local claimParts = {}
+local claimEnabled = false
+
+local function addIfClaim(obj)
+    if obj:IsA("BasePart") and obj.Name == "Claim" then
+        claimParts[obj] = true
+    end
+end
+
+local function removeIfClaim(obj)
+    if claimParts[obj] then
+        claimParts[obj] = nil
+    end
+end
+
+-- initial scan
+for _, obj in ipairs(workspace:GetDescendants()) do
+    addIfClaim(obj)
+end
+
+workspace.DescendantAdded:Connect(addIfClaim)
+workspace.DescendantRemoving:Connect(removeIfClaim)
+
+-- =========================
+-- TOGGLE FLUENT
+-- =========================
+local ClaimToggle = Tabs.Misc:AddToggle("ClaimLoop", {
+    Title = "Collect Cash",
+    Default = false
+})
+
+ClaimToggle:OnChanged(function(Value)
+    claimEnabled = Value
+end)
+
+Options.ClaimLoop:SetValue(false)
+
+-- =========================
+-- LOOP
+-- =========================
+task.spawn(function()
+    while true do
+        if claimEnabled then
+            local character = player.Character
+            local hrp = character and character:FindFirstChild("HumanoidRootPart")
+
+            if hrp then
+                for claim, _ in pairs(claimParts) do
+                    if claim and claim.Parent then
+                        firetouchinterest(hrp, claim, 0)
+                        firetouchinterest(hrp, claim, 1)
+                    end
+                end
+            end
+        end
+
+        task.wait(0.03)
+    end
+end)
+
+
+
+
+
+local AutoSpeed = false
+
+local Toggle = Tabs.Misc:AddToggle("AutoSpeed", {
+    Title = "Buy 10 Speed",
+    Default = false
+})
+
+Toggle:OnChanged(function(Value)
+    AutoSpeed = Value
+
+    if Value then
+        task.spawn(function()
+            while AutoSpeed do
+                local args = {
+                    "Speed",
+                    10
+                }
+
+                game:GetService("ReplicatedStorage")
+                    :WaitForChild("Events")
+                    :WaitForChild("Speed")
+                    :InvokeServer(unpack(args))
+
+                task.wait(0.05)
+            end
         end)
     end
 end)
+
+
+
+-- =========================
+-- STATE
+-- =========================
+local AntiAFK = false
+
+-- =========================
+-- TOGGLE (FLUENT STYLE)
+-- =========================
+Tabs.Misc:AddToggle("AntiAFK", {
+    Title = "Anti AFK",
+    Default = false
+})
+
+Options.AntiAFK:OnChanged(function(Value)
+    AntiAFK = Value
+
+    if Value then
+        task.spawn(function()
+            local Players = game:GetService("Players")
+            local VirtualUser = game:GetService("VirtualUser")
+            local player = Players.LocalPlayer
+
+            while AntiAFK do
+                VirtualUser:CaptureController()
+                VirtualUser:ClickButton2(Vector2.new())
+                task.wait(60) -- kirim input tiap 60 detik (ringan & aman)
+            end
+        end)
+    end
+end)
+
+
+
+
+
+
+
+-- 🔘 BUTTON
+Tabs.Misc:AddButton({
+    Title = "InfJump",
+    Description = "",
+    Callback = function()
+        print("Button ditekan")
+
+        loadstring(game:HttpGet(
+            "https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/BoostJump"
+        ))()
+    end
+})
+
+
+
+
+
+-- ================= SAVE / INTERFACE =================
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+
+InterfaceManager:SetFolder("FluentScriptHub")
+SaveManager:SetFolder("FluentScriptHub/specific-game")
+
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+
+Window:SelectTab(1)
+
+Fluent:Notify({
+    Title = "Universal X",
+    Content = "script executed",
+    Duration = 5
+})
+
+SaveManager:LoadAutoloadConfig()
