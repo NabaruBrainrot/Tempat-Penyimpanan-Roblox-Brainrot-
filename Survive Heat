@@ -1,0 +1,263 @@
+local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/bananaGanteng/Legend/refs/heads/main/BedahNih.lua"))()
+
+local Window = OrionLib:MakeWindow({Name = "Legend", HidePremium = false, SaveConfig = true, ConfigFolder = "OrionTest"})
+
+
+local Tab = Window:MakeTab({
+        Name = "Farm",
+        Icon = "rbxassetid://4483345998",
+        PremiumOnly = false
+})
+
+
+
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local root = character:WaitForChild("HumanoidRootPart")
+
+local AreasFolder = workspace:WaitForChild("Areas")
+
+local targetCFrame = CFrame.new(
+	-3.02829838, 234.471222, 2582.17432,
+	-0.989847302, 1.06742686e-08, -0.142135039,
+	-5.01862463e-09, 1, 1.10049854e-07,
+	0.142135039, 1.09645867e-07, -0.989847302
+)
+
+local enabled = false
+local wasEnabled = false -- IMPORTANT FIX
+local selectedFolder = "Mythic"
+local mainThread = nil
+
+math.randomseed(tick())
+
+-- ======================
+-- UPDATE CHARACTER AFTER RESPAWN
+-- ======================
+local function updateCharacter()
+	character = player.Character or player.CharacterAdded:Wait()
+	root = character:WaitForChild("HumanoidRootPart")
+end
+
+player.CharacterAdded:Connect(function()
+	task.wait(0.2)
+	updateCharacter()
+end)
+
+-- ======================
+-- Tween Function
+-- ======================
+local function tweenTo(cf, time)
+	if not root then return end
+	
+	local tween = TweenService:Create(
+		root,
+		TweenInfo.new(time, Enum.EasingStyle.Linear),
+		{CFrame = cf}
+	)
+	tween:Play()
+	tween.Completed:Wait()
+end
+
+-- ======================
+-- MAIN LOOP
+-- ======================
+local function startFarm()
+	if mainThread then return end
+	
+	mainThread = task.spawn(function()
+		while enabled do
+			
+			local currentFolder = AreasFolder:FindFirstChild(selectedFolder)
+			
+			if currentFolder then
+				local models = {}
+
+				for _, v in pairs(currentFolder:GetChildren()) do
+					if v:IsA("Model") then
+						table.insert(models, v)
+					end
+				end
+
+				if #models > 0 then
+					local randomModel = models[math.random(1, #models)]
+					local modelCFrame = randomModel.PrimaryPart
+						and randomModel.PrimaryPart.CFrame
+						or randomModel:GetPivot()
+
+					-- 🚀 Tween ke model
+					tweenTo(modelCFrame, 0.15)
+
+					-- ⏳ Diam 0.5 + Auto Proximity
+					local startTime = tick()
+					while tick() - startTime < 0.5 and enabled do
+						for _, obj in pairs(randomModel:GetDescendants()) do
+							if obj:IsA("ProximityPrompt") and obj.Name == "CatchBrainrot" then
+								fireproximityprompt(obj)
+							end
+						end
+						task.wait()
+					end
+
+					-- 🔁 Balik ke base
+					tweenTo(targetCFrame, 0.15)
+				end
+			end
+
+			task.wait(0.1)
+		end
+		
+		mainThread = nil
+	end)
+end
+
+local function stopFarm()
+	if not wasEnabled then return end -- FIX supaya tidak reset saat pertama load
+	
+	enabled = false
+	
+	local hum = character:FindFirstChildOfClass("Humanoid")
+	if hum then
+		hum.Health = 0
+	end
+	
+	mainThread = nil
+	wasEnabled = false
+end
+
+-- ======================
+-- DROPDOWN
+-- ======================
+Tab:AddDropdown({
+	Name = "Select Area",
+	Options = {"Mythic", "Secret", "Celestial"},
+	Default = "Mythic",
+	Callback = function(val)
+		selectedFolder = val
+	end
+})
+
+-- ======================
+-- TOGGLE
+-- ======================
+Tab:AddToggle({
+	Name = "Auto Brainrot",
+	Default = false,
+	Callback = function(val)
+		enabled = val
+		
+		if val then
+			wasEnabled = true -- tandai sudah pernah ON
+			startFarm()
+		else
+			stopFarm()
+		end
+	end
+})
+
+
+
+
+
+
+local AutoCollect = false
+
+Tab:AddToggle({
+	Name = "Auto Collect",
+	Default = false,
+	Callback = function(Value)
+		AutoCollect = Value
+	end    
+})
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local plotsFolder = workspace:WaitForChild("Plots")
+
+local character
+local root
+
+local function setupCharacter(char)
+	character = char
+	root = character:WaitForChild("HumanoidRootPart")
+end
+
+-- pertama kali
+setupCharacter(player.Character or player.CharacterAdded:Wait())
+
+-- setiap reset
+player.CharacterAdded:Connect(function(char)
+	setupCharacter(char)
+end)
+
+task.spawn(function()
+	while true do
+		if AutoCollect and root then
+			for _, obj in pairs(plotsFolder:GetDescendants()) do
+				if obj:IsA("BasePart") and obj.Name == "CashCollector" then
+					firetouchinterest(root, obj, 0)
+					firetouchinterest(root, obj, 1)
+				end
+			end
+		end
+		task.wait(0.5)
+	end
+end)
+
+
+
+
+local AutoSpin = false
+
+Tab:AddToggle({
+	Name = "Spin Wheel",
+	Default = false,
+	Callback = function(Value)
+		AutoSpin = Value
+	end    
+})
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local remote = ReplicatedStorage:WaitForChild("ByteNetReliable")
+
+task.spawn(function()
+	while true do
+		if AutoSpin then
+			local args = {
+				buffer.fromstring("\015")
+			}
+			remote:FireServer(unpack(args))
+		end
+		task.wait(0.1)
+	end
+end)
+
+
+
+
+local AntiAFK = false
+
+Tab:AddToggle({
+	Name = "Mode AFK",
+	Default = false,
+	Callback = function(Value)
+		AntiAFK = Value
+	end    
+})
+
+local Players = game:GetService("Players")
+local VirtualUser = game:GetService("VirtualUser")
+
+local player = Players.LocalPlayer
+
+player.Idled:Connect(function()
+	if AntiAFK then
+		VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+		task.wait(1)
+		VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+	end
+end)
