@@ -1,0 +1,120 @@
+--// SERVICES
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+--// FOLDER
+local cheeseFolder = workspace.GameFolder.CheeseFolder
+
+--// CHARACTER
+local hrp
+
+local function updateChar(char)
+    hrp = char:WaitForChild("HumanoidRootPart")
+end
+
+if player.Character then
+    updateChar(player.Character)
+end
+
+player.CharacterAdded:Connect(updateChar)
+
+--// HAPUS GUI LAMA
+pcall(function()
+    player.PlayerGui:FindFirstChild("LuckyBlockGUI"):Destroy()
+end)
+
+--// GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "LuckyBlockGUI"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Parent = gui
+frame.Size = UDim2.new(0, 141, 0, 83)
+frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+frame.AnchorPoint = Vector2.new(0.5, 0.5)
+frame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+
+local title = Instance.new("TextLabel")
+title.Parent = frame
+title.Size = UDim2.new(1, 0, 0, 20)
+title.BackgroundTransparency = 1
+title.Text = "Cheese Farm"
+title.TextColor3 = Color3.new(1,1,1)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 13
+
+local garis = Instance.new("Frame")
+garis.Parent = frame
+garis.Size = UDim2.new(1, -16, 0, 1)
+garis.Position = UDim2.new(0, 8, 0, 20)
+garis.BackgroundColor3 = Color3.fromRGB(60,60,60)
+garis.BorderSizePixel = 0
+
+local button = Instance.new("TextButton")
+button.Parent = frame
+button.Size = UDim2.new(0.9, 0, 0, 27)
+button.Position = UDim2.new(0.05, 0, 0, 34)
+button.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+button.Text = "▶ Start"
+button.TextColor3 = Color3.new(1,1,1)
+button.Font = Enum.Font.GothamSemibold
+button.TextSize = 11
+button.AutoButtonColor = false
+Instance.new("UICorner", button).CornerRadius = UDim.new(0, 5)
+
+-- Hover Effect
+button.MouseEnter:Connect(function()
+    button.BackgroundColor3 = Color3.fromRGB(60, 60, 90)
+end)
+
+button.MouseLeave:Connect(function()
+    button.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+end)
+
+--// TOGGLE
+local running = false
+
+button.MouseButton1Click:Connect(function()
+    running = not running
+
+    if running then
+        button.Text = "■ Stop"
+    else
+        button.Text = "▶ Start"
+    end
+end)
+
+--// AUTO TELEPORT LOOP
+task.spawn(function()
+    while true do
+        task.wait(0.03)
+
+        if running and hrp then
+
+            for _, model in ipairs(cheeseFolder:GetChildren()) do
+
+                if not running then break end
+
+                if model:IsA("Model") then
+
+                    local part = model:FindFirstChildWhichIsA("BasePart")
+
+                    if part and hrp then
+                        hrp.CFrame = part.CFrame
+                        task.wait(0.2)
+                    end
+
+                end
+
+            end
+
+        end
+    end
+end)
