@@ -3,6 +3,9 @@ local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/bana
 local Window = OrionLib:MakeWindow({Name = "Legend", HidePremium = false, SaveConfig = true, ConfigFolder = "OrionTest"})
 
 
+
+
+
 local Tab = Window:MakeTab({
         Name = "Farm",
         Icon = "rbxassetid://4483345998",
@@ -11,13 +14,18 @@ local Tab = Window:MakeTab({
 
 
 
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer  -- pastikan ini LocalScript
-
--- Tambahkan paragraf dengan nama player
-Tab:AddParagraph("Lunar Hub", "Welcome, " .. player.Name)
 
 
+
+
+
+
+
+
+
+local Section = Tab:AddSection({
+    Name = "Menu 1"
+})
 -- =========================
 -- SERVICES & PLAYER
 -- =========================
@@ -351,19 +359,274 @@ OrionLib:Init()
 
 
 
+---Tabs Player
+local Tab = Window:MakeTab({
+        Name = "Player",
+        Icon = "rbxassetid://4483345998",
+        PremiumOnly = false
+})
+
+
+local Section = Tab:AddSection({
+    Name = "Menu 2"
+})
+
+
+
+-- Kill playet Select
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local runningKill = false
+local whitelist = {}
+
+-- 🎯 TARGET TERPILIH
+local selectedPlayerName = nil
+
+-- =========================
+-- TOOL
+-- =========================
+local function EquipTool(toolName)
+    local backpack = player:FindFirstChild("Backpack")
+    if backpack then
+        local tool = backpack:FindFirstChild(toolName)
+        if tool and player.Character and not player.Character:FindFirstChild(toolName) then
+            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:EquipTool(tool)
+            end
+        end
+    end
+end
+
+-- =========================
+-- AMBIL CFRAME TANGAN
+-- =========================
+local function GetHandCFrame()
+    local character = player.Character
+    if not character then return end
+
+    -- R15
+    local rightHand = character:FindFirstChild("RightHand")
+    if rightHand then
+        return rightHand.CFrame
+    end
+
+    -- R6 fallback
+    local rightArm = character:FindFirstChild("Right Arm")
+    if rightArm then
+        return rightArm.CFrame
+    end
+end
+
+-- =========================
+-- TARGET LOGIC (STRICT 1 PLAYER)
+-- =========================
+local function FindAndMoveTarget()
+    if not selectedPlayerName then return end
+
+    local handCFrame = GetHandCFrame()
+    if not handCFrame then return end
+
+    local target = Players:FindFirstChild(selectedPlayerName)
+    if not target then return end
+    if whitelist[target.Name] then return end
+    if not target.Character then return end
+
+    local targetHRP = target.Character:FindFirstChild("HumanoidRootPart")
+    if not targetHRP then return end
+
+    -- 📌 BAWA TARGET KE TANGAN
+    targetHRP.CFrame = handCFrame * CFrame.new(0, 0, -1)
+end
+
+-- =========================
+-- MAIN LOOP
+-- =========================
+local function AutoKill()
+    while runningKill do
+        FindAndMoveTarget()
+        EquipTool("Punch")
+
+        local combat = player.Character and player.Character:FindFirstChild("Punch")
+        if combat then
+            combat:Activate()
+        end
+
+        task.wait(0.1)
+    end
+end
+
+-- =========================
+-- UI : DROPDOWN PLAYER
+-- =========================
+local function GetPlayerList()
+    local list = {}
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= player then
+            table.insert(list, plr.Name)
+        end
+    end
+    return list
+end
+
+local PlayerDropdown = Tab:AddDropdown({
+    Name = "Select Player",
+    Default = nil,
+    Options = GetPlayerList(),
+    Callback = function(Value)
+        selectedPlayerName = Value
+        print("Target aktif:", Value)
+    end
+})
+
+-- =========================
+-- REFRESH DROPDOWN (FIX UTAMA)
+-- =========================
+local function RefreshPlayerDropdown()
+    local options = GetPlayerList()
+
+    if PlayerDropdown.Refresh then
+        PlayerDropdown:Refresh(options, true)
+    elseif PlayerDropdown.SetOptions then
+        PlayerDropdown:SetOptions(options)
+    end
+end
+
+-- paksa sync awal
+task.wait()
+RefreshPlayerDropdown()
+
+-- =========================
+-- PLAYER JOIN / LEAVE (AKURAT)
+-- =========================
+Players.PlayerAdded:Connect(function(plr)
+    task.wait(0.1)
+    RefreshPlayerDropdown()
+end)
+
+Players.PlayerRemoving:Connect(function(plr)
+    task.wait()
+    RefreshPlayerDropdown()
+
+    if selectedPlayerName == plr.Name then
+        selectedPlayerName = nil
+    end
+end)
+
+-- =========================
+-- UI : TOGGLE AUTOKILL
+-- =========================
+Tab:AddToggle({
+    Name = "Kill Player",
+    Default = false,
+    Callback = function(Value)
+        runningKill = Value
+        if Value then
+            task.spawn(AutoKill)
+        end
+    end
+})
+
+
+
+
+---kil all
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local runningKill = false
+local whitelist = {}
+
+local function EquipTool(toolName)
+    local backpack = player:FindFirstChild("Backpack")
+    if backpack then
+        local tool = backpack:FindFirstChild(toolName)
+        if tool and not player.Character:FindFirstChild(toolName) then
+            local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:EquipTool(tool)
+            end
+        end
+    end
+end
+
+local function GetHandCFrame()
+    local character = player.Character
+    if not character then return end
+
+    -- R15
+    local rightHand = character:FindFirstChild("RightHand")
+    if rightHand then
+        return rightHand.CFrame
+    end
+
+    -- R6 fallback
+    local rightArm = character:FindFirstChild("Right Arm")
+    if rightArm then
+        return rightArm.CFrame
+    end
+end
+
+local function FindAndMoveTargets()
+    local handCFrame = GetHandCFrame()
+    if not handCFrame then return end
+
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= player
+        and not whitelist[plr.Name]
+        and plr.Character
+        and plr.Character:FindFirstChild("HumanoidRootPart") then
+
+            -- 📌 Bawa target ke tangan
+            plr.Character.HumanoidRootPart.CFrame =
+                handCFrame * CFrame.new(0, 0, -1)
+        end
+    end
+end
+
+local function AutoKill()
+    while runningKill do
+        FindAndMoveTargets()
+        EquipTool("Punch")
+
+        local combat = player.Character and player.Character:FindFirstChild("Punch")
+        if combat then
+            combat:Activate()
+        end
+
+        task.wait(0.1)
+    end
+end
+
+-- ✅ Toggle Auto Kill
+Tab:AddToggle({
+    Name = "Auto Kill",
+    Default = false,
+    Callback = function(Value)
+        runningKill = Value
+        if Value then
+            task.spawn(AutoKill)
+        end
+    end
+})
 
 
 
 
 
 
-
+---Tabs Misc
 local Tab = Window:MakeTab({
         Name = "Misc",
         Icon = "rbxassetid://4483345998",
         PremiumOnly = false
 })
 
+
+
+local Section = Tab:AddSection({
+    Name = "Menu 3"
+})
 
 
 
@@ -477,3 +740,7 @@ Tab:AddToggle({
         end
     end
 })
+
+
+
+
