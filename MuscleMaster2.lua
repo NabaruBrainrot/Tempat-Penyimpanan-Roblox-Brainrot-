@@ -96,8 +96,8 @@ local Window = Fluent:CreateWindow({
 local Tabs = {
     Farm     = Window:AddTab({ Title = "Farm",     Icon = "sprout"   }),
     Combat   = Window:AddTab({ Title = "Combat",   Icon = "sword"    }),
-    Quest    = Window:AddTab({ Title = "Quest",    Icon = "scroll"   }),
     Misc     = Window:AddTab({ Title = "Misc",     Icon = "star"     }),
+    Quest    = Window:AddTab({ Title = "Quest",    Icon = "scroll"   }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" }),
 }
 
@@ -310,6 +310,22 @@ AutoGlitchToggle:OnChanged(function()
         end
     else
         stopAllGlitch()
+    end
+end)
+
+-- AUTO SPIN
+local AutoSpin = false
+
+local AutoSpinToggle = Tabs.Farm:AddToggle("AutoSpin", { Title = "Auto Spin", Default = false })
+AutoSpinToggle:OnChanged(function()
+    AutoSpin = Options.AutoSpin.Value
+    if AutoSpin then
+        task.spawn(function()
+            while AutoSpin do
+                RemotesEvent:WaitForChild("SpinFunction"):InvokeServer()
+                task.wait(0.1)
+            end
+        end)
     end
 end)
 
@@ -590,21 +606,17 @@ AutoEggsToggle:OnChanged(function()
     end
 end)
 
--- AUTO SPIN
-local AutoSpin = false
+-- 🔘 BUTTON
+Tabs.Misc:AddButton({
+    Title = "Auto Sell",
+    Description = "",
+    Callback = function()
+        print("open sell pets Ui")
 
-local AutoSpinToggle = Tabs.Misc:AddToggle("AutoSpin", { Title = "Auto Spin", Default = false })
-AutoSpinToggle:OnChanged(function()
-    AutoSpin = Options.AutoSpin.Value
-    if AutoSpin then
-        task.spawn(function()
-            while AutoSpin do
-                RemotesEvent:WaitForChild("SpinFunction"):InvokeServer()
-                task.wait(0.1)
-            end
-        end)
+        loadstring(game:HttpGet(
+            "https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/SellPets"))()
     end
-end)
+})
 
 -- ANTI AFK
 local VirtualUser = game:GetService("VirtualUser")
