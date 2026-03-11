@@ -96,9 +96,8 @@ local Window = Fluent:CreateWindow({
 local Tabs = {
     Farm     = Window:AddTab({ Title = "Farm",     Icon = "sprout"   }),
     Combat   = Window:AddTab({ Title = "Combat",   Icon = "sword"    }),
-    Quest    = Window:AddTab({ Title = "Quest",    Icon = "scroll"   }),
     Misc     = Window:AddTab({ Title = "Misc",     Icon = "star"     }),
-    Guest    = Window:AddTab({ Title = "Guest",    Icon = "user"     }),
+    Quest    = Window:AddTab({ Title = "Quest",    Icon = "scroll"   }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" }),
 }
 
