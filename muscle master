@@ -3,9 +3,9 @@
 local kodeRahasia = "SJHG-5T9U-QW2E-AS84-PL37-NM65"
 local linkKeyURL = "https://direct-link.net/1365093/7q20TsQcGj82"
 local statusFile = "fadhen_code.TheJusDd2inginBrsa3sswh"
-local trialFile = "fadhen2_trial.tmp"
+local trialFile = "fadhen3_trial.tmp"
 local KEY_VALID_SECONDS = 432000 -- 24 jam
-local TRIAL_DURATION = 600 -- 30 menit
+local TRIAL_DURATION = 3600 -- 30 menit
 
 local isfile = isfile or function() return false end
 local readfile = readfile or function() return "" end
