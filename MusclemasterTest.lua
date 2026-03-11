@@ -585,8 +585,8 @@ end)
 
 -- 🔘 BUTTON
 Tabs.Misc:AddButton({
-    Title = "Auto Sell",
-    Description = "Click to open Sell Pets Ui",
+    Title = "Auto Selling Pets",
+    Description = "CLICK TO SHOW UI",
     Callback = function()
         print("open sell pets Ui")
 
@@ -626,6 +626,125 @@ AntiAFKToggle:OnChanged(function()
 end)
 
 -- ===========================================================
+-- ✨ GUEST SECTION (di bawah Misc)
+-- ===========================================================
+
+Tabs.Misc:AddParagraph({
+    Title = "━━━━━━━━━━━━ 👤 GUEST ━━━━━━━━━━━━",
+    Content = ""
+})
+
+-- 🎭 Fungsi ganti nama jadi Guest
+local GuestNameEnabled = false
+
+local function SetGuestName(enabled)
+    local player = game:GetService("Players").LocalPlayer
+    if enabled then
+        -- Tampilkan nama "Guest" di atas kepala karakter
+        if player.Character then
+            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.DisplayName = "Guest"
+            end
+        end
+        -- Juga set saat karakter baru spawn
+        player.CharacterAdded:Connect(function(char)
+            if GuestNameEnabled then
+                local hum = char:WaitForChild("Humanoid")
+                hum.DisplayName = "Guest"
+            end
+        end)
+    else
+        if player.Character then
+            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.DisplayName = player.DisplayName
+            end
+        end
+    end
+end
+
+local GuestNameToggle = Tabs.Misc:AddToggle("GuestName", {
+    Title = "👤  Guest Name",
+    Description = "Ubah display name karakter menjadi 'Guest'",
+    Default = false
+})
+GuestNameToggle:OnChanged(function()
+    GuestNameEnabled = Options.GuestName.Value
+    SetGuestName(GuestNameEnabled)
+end)
+
+-- 👕 Fungsi pakai appearance Guest (karakter putih polos)
+local GuestLookEnabled = false
+
+local function ApplyGuestLook(enabled)
+    local Players = game:GetService("Players")
+    local player = Players.LocalPlayer
+    if enabled then
+        -- Reset deskripsi tampilan ke default (tanpa aksesori/pakaian)
+        local desc = Players:GetHumanoidDescriptionFromUserId(1) -- userId 1 = Roblox default
+        if player.Character then
+            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:ApplyDescription(desc)
+            end
+        end
+        Fluent:Notify({
+            Title = "✅ Guest Look",
+            Content = "Tampilan Guest berhasil diterapkan!",
+            Duration = 3
+        })
+    else
+        -- Kembalikan tampilan asli
+        local desc = Players:GetHumanoidDescriptionFromUserId(player.UserId)
+        if player.Character then
+            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:ApplyDescription(desc)
+            end
+        end
+        Fluent:Notify({
+            Title = "🔄 Guest Look",
+            Content = "Tampilan asli dikembalikan.",
+            Duration = 3
+        })
+    end
+end
+
+local GuestLookToggle = Tabs.Misc:AddToggle("GuestLook", {
+    Title = "👕  Guest Look",
+    Description = "Terapkan tampilan karakter Guest (putih polos)",
+    Default = false
+})
+GuestLookToggle:OnChanged(function()
+    GuestLookEnabled = Options.GuestLook.Value
+    ApplyGuestLook(GuestLookEnabled)
+end)
+
+-- 🚶 Guest Walk Speed
+local GuestWalkEnabled = false
+
+local function SetGuestWalk(enabled)
+    local player = game:GetService("Players").LocalPlayer
+    if player.Character then
+        local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = enabled and 8 or 16
+        end
+    end
+end
+
+local GuestWalkToggle = Tabs.Misc:AddToggle("GuestWalk", {
+    Title = "🚶  Guest Walk Speed",
+    Description = "Set kecepatan jalan seperti Guest (lambat)",
+    Default = false
+})
+GuestWalkToggle:OnChanged(function()
+    GuestWalkEnabled = Options.GuestWalk.Value
+    SetGuestWalk(GuestWalkEnabled)
+end)
+
+-- ===========================================================
 -- SETTINGS TAB
 -- ===========================================================
 SaveManager:SetLibrary(Fluent)
@@ -640,7 +759,7 @@ SaveManager:BuildConfigSection(Tabs.Settings)
 Window:SelectTab(1)
 
 Fluent:Notify({
-    Title = "Legend",
-    Content = "Script berhasil dimuat!",
-    Duration = 5
+    Title = "🏋️ Muscle Master Premium",
+    Content = "✅ Script berhasil dimuat! Selamat menggunakan.",
+    Duration = 6
 })
