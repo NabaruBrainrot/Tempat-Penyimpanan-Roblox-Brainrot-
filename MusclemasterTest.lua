@@ -1,3 +1,4 @@
+
 pcall(function()
     local cg = game:GetService("CoreGui"):FindFirstChild("PersistentToggleGui")
     if cg then cg:Destroy() end
@@ -84,7 +85,7 @@ local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.
 
 local Window = Fluent:CreateWindow({
     Title = "Muscle Master",
-    SubTitle = "Premium",
+    SubTitle = "by FaDhen",
     TabWidth = 160,
     Size = UDim2.fromOffset(500, 340),
     Acrylic = true,
@@ -93,13 +94,19 @@ local Window = Fluent:CreateWindow({
 })
 
 local Tabs = {
-    Farm    = Window:AddTab({ Title = "Farm",   Icon = "sprout" }),
-    Player  = Window:AddTab({ Title = "Player", Icon = "user" }),
-    Misc    = Window:AddTab({ Title = "Misc",   Icon = "star" }),
-    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+    Farm     = Window:AddTab({ Title = "Farm",     Icon = "sprout"   }),
+    Combat   = Window:AddTab({ Title = "Combat",   Icon = "sword"    }),
+    Quest    = Window:AddTab({ Title = "Quest",    Icon = "scroll"   }),
+    Misc     = Window:AddTab({ Title = "Misc",     Icon = "star"     }),
+    Guest    = Window:AddTab({ Title = "Guest",    Icon = "user"     }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" }),
 }
 
 local Options = Fluent.Options
+
+-- ================= SERVICES =================
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RemotesEvent = ReplicatedStorage:WaitForChild("RemotesEvent")
 
 -- ===========================================================
 --  TAB FARM
@@ -147,8 +154,7 @@ local function RunScriptBelow10()
         CFrame.new(-94.2546463, 5.02033472, -35.0815392).Position
     }
     local MachinesFolder = workspace:WaitForChild("MachinesFolder")
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local MachineRemote = ReplicatedStorage.RemotesEvent.MachineActiveEvent
+    local MachineRemote = RemotesEvent.MachineActiveEvent
     local prompts = GetPrompts(MachinesFolder, TARGET_POSITIONS)
     if #prompts == 0 then return end
 
@@ -175,8 +181,7 @@ local function RunScriptAboveOrEqual10()
         Vector3.new(2743.69092, 11.6664858, 258.496918),
     }
     local MachinesFolder = workspace:WaitForChild("MachinesFolder")
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local MachineRemote = ReplicatedStorage.RemotesEvent.MachineActiveEvent
+    local MachineRemote = RemotesEvent.MachineActiveEvent
     local prompts = GetPrompts(MachinesFolder, TARGET_POSITIONS)
     if #prompts == 0 then return end
 
@@ -197,8 +202,7 @@ end
 
 local AutoFarmToggle = Tabs.Farm:AddToggle("AutoFarm", { Title = "Auto Farm", Default = false })
 AutoFarmToggle:OnChanged(function()
-    local Value = Options.AutoFarm.Value
-    if Value then
+    if Options.AutoFarm.Value then
         stopAll()
         AutoFarmEnabled = true
         if rebirths.Value < 10 then
@@ -211,10 +215,7 @@ AutoFarmToggle:OnChanged(function()
     end
 end)
 
--- ===========================================================
 -- AUTO GLITCH
--- ===========================================================
-
 local AutoGlitchEnabled = false
 local glitchThreads = {}
 local rng2 = Random.new()
@@ -252,8 +253,7 @@ local function RunGlitchBelow10()
         CFrame.new(-24.1162872, 3.47935009, 44.4185333),
     }
     local MachinesFolder = workspace:WaitForChild("MachinesFolder")
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local MachineRemote = ReplicatedStorage.RemotesEvent.MachineActiveEvent
+    local MachineRemote = RemotesEvent.MachineActiveEvent
     local prompts = CollectPrompts(MachinesFolder, TARGET_POSITIONS)
     if #prompts == 0 then return end
 
@@ -280,8 +280,7 @@ local function RunGlitchAbove10()
         CFrame.new(2584.5542, 4.78257084, 289.732025),
     }
     local MachinesFolder = workspace:WaitForChild("MachinesFolder")
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local MachineRemote = ReplicatedStorage.RemotesEvent.MachineActiveEvent
+    local MachineRemote = RemotesEvent.MachineActiveEvent
     local prompts = CollectPrompts(MachinesFolder, TARGET_POSITIONS)
     if #prompts == 0 then return end
 
@@ -302,8 +301,7 @@ end
 
 local AutoGlitchToggle = Tabs.Farm:AddToggle("AutoGlitch", { Title = "Auto Glitch", Default = false })
 AutoGlitchToggle:OnChanged(function()
-    local Value = Options.AutoGlitch.Value
-    if Value then
+    if Options.AutoGlitch.Value then
         stopAllGlitch()
         AutoGlitchEnabled = true
         if rebirths.Value <= 10 then
@@ -316,11 +314,7 @@ AutoGlitchToggle:OnChanged(function()
     end
 end)
 
-
-
--- ===========================================================
 -- AUTO SPIN
--- ===========================================================
 local AutoSpin = false
 
 local AutoSpinToggle = Tabs.Farm:AddToggle("AutoSpin", { Title = "Auto Spin", Default = false })
@@ -329,25 +323,15 @@ AutoSpinToggle:OnChanged(function()
     if AutoSpin then
         task.spawn(function()
             while AutoSpin do
-                game:GetService("ReplicatedStorage")
-                    :WaitForChild("RemotesEvent")
-                    :WaitForChild("SpinFunction")
-                    :InvokeServer()
+                RemotesEvent:WaitForChild("SpinFunction"):InvokeServer()
                 task.wait(0.1)
             end
         end)
     end
 end)
 
--- =============================
-
-
-
--- ===========================================================
 -- AUTO REBIRTH
--- ===========================================================
 local AutoRebirth = false
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local AutoRebirthToggle = Tabs.Farm:AddToggle("AutoRebirth", { Title = "Auto Rebirth", Default = false })
 AutoRebirthToggle:OnChanged(function()
@@ -357,17 +341,14 @@ end)
 task.spawn(function()
     while true do
         if AutoRebirth then
-            ReplicatedStorage
-                :WaitForChild("RemotesEvent")
-                :WaitForChild("RebirthEvent")
-                :FireServer()
+            RemotesEvent:WaitForChild("RebirthEvent"):FireServer()
         end
         task.wait(0.05)
     end
 end)
 
 -- ===========================================================
--- SELECT PLAYER KILL
+--  TAB COMBAT (dulu Player)
 -- ===========================================================
 local playerService = game:GetService("Players")
 local localPly = playerService.LocalPlayer
@@ -403,9 +384,7 @@ local function AutoKillOne()
         TeleportToTarget()
         EquipTool("Punch")
         local combat = localPly.Character and localPly.Character:FindFirstChild("Punch")
-        if combat then
-            combat:Activate()
-        end
+        if combat then combat:Activate() end
         task.wait(0.05)
     end
 end
@@ -420,7 +399,7 @@ local function GetPlayerList()
     return list
 end
 
-local PlayerDropdown = Tabs.Player:AddDropdown("SelectPlayer", {
+local PlayerDropdown = Tabs.Combat:AddDropdown("SelectPlayer", {
     Title = "Select Player",
     Values = GetPlayerList(),
     Multi = false,
@@ -451,8 +430,7 @@ playerService.PlayerRemoving:Connect(function(plr)
     end
 end)
 
--- Toggle Kill Player
-local KillPlayerToggle = Tabs.Player:AddToggle("KillPlayer", { Title = "Kill Player", Default = false })
+local KillPlayerToggle = Tabs.Combat:AddToggle("KillPlayer", { Title = "Kill Player", Default = false })
 KillPlayerToggle:OnChanged(function()
     runningKill = Options.KillPlayer.Value
     if runningKill then
@@ -460,7 +438,6 @@ KillPlayerToggle:OnChanged(function()
     end
 end)
 
--- Auto-restart saat respawn (Kill Player)
 localPly.CharacterAdded:Connect(function()
     task.wait(1)
     if Options.KillPlayer.Value then
@@ -469,23 +446,8 @@ localPly.CharacterAdded:Connect(function()
     end
 end)
 
--- ===========================================================
 -- AUTO KILL ALL
--- ===========================================================
 local runningKillAll = false
-
-local function EquipToolAll(toolName)
-    local backpack = localPly:FindFirstChild("Backpack")
-    if backpack then
-        local tool = backpack:FindFirstChild(toolName)
-        if tool and localPly.Character and not localPly.Character:FindFirstChild(toolName) then
-            local humanoid = localPly.Character:FindFirstChildOfClass("Humanoid")
-            if humanoid then
-                humanoid:EquipTool(tool)
-            end
-        end
-    end
-end
 
 local function TeleportKillTargets()
     for _, plr in ipairs(playerService:GetPlayers()) do
@@ -496,21 +458,16 @@ local function TeleportKillTargets()
         and plr.Character:FindFirstChild("HumanoidRootPart")
         and localPly.Character
         and localPly.Character:FindFirstChild("HumanoidRootPart") then
-
             local startTime = tick()
-
             while tick() - startTime < 0.5 and runningKillAll do
                 local myHRP = localPly.Character.HumanoidRootPart
                 local targetHRP = plr.Character.HumanoidRootPart
                 myHRP.CFrame = targetHRP.CFrame
-                EquipToolAll("Punch")
+                EquipTool("Punch")
                 local combat = localPly.Character:FindFirstChild("Punch")
-                if combat then
-                    combat:Activate()
-                end
+                if combat then combat:Activate() end
                 task.wait(0.05)
             end
-
         end
     end
 end
@@ -522,7 +479,7 @@ local function AutoKillAll()
     end
 end
 
-local AutoKillToggle = Tabs.Player:AddToggle("AutoKill", { Title = "Auto Kill", Default = false })
+local AutoKillToggle = Tabs.Combat:AddToggle("AutoKill", { Title = "Auto Kill", Default = false })
 AutoKillToggle:OnChanged(function()
     runningKillAll = Options.AutoKill.Value
     if runningKillAll then
@@ -530,7 +487,6 @@ AutoKillToggle:OnChanged(function()
     end
 end)
 
--- Auto-restart saat respawn (Auto Kill All)
 localPly.CharacterAdded:Connect(function()
     task.wait(1)
     if Options.AutoKill.Value then
@@ -540,14 +496,84 @@ localPly.CharacterAdded:Connect(function()
 end)
 
 -- ===========================================================
+--  TAB QUEST
+-- ===========================================================
+
+-- [1] REDEEM CODE
+Tabs.Quest:AddToggle("CollectCode", {
+    Title = "Redeem Code",
+    Description = "Redeem all codes automatically",
+    Default = false,
+    Callback = function(state)
+        if state then
+            task.spawn(function()
+                local remote = RemotesEvent:WaitForChild("CodeEnterEvent")
+                local codes = {"Speedyblox", "MuscleDezz300", "Strongblox"}
+                for _, code in ipairs(codes) do
+                    if not Options.CollectCode.Value then break end
+                    remote:FireServer(code)
+                    task.wait(2)
+                end
+                Options.CollectCode:SetValue(false)
+            end)
+        end
+    end
+})
+
+-- [2] COLLECT CHEST
+Tabs.Quest:AddToggle("CollectChest", {
+    Title = "Collect Chest",
+    Description = "Claim all chests automatically",
+    Default = false,
+    Callback = function(state)
+        if state then
+            task.spawn(function()
+                local remote = RemotesEvent:WaitForChild("ChestClaimEvent")
+                local chests = {
+                    "Legend Chest", "Big Chest", "Stone Chest",
+                    "Frost Chest", "Master Chest", "Emperor Chest",
+                    "Ocean Chest", "Chest"
+                }
+                for _, chest in ipairs(chests) do
+                    if not Options.CollectChest.Value then break end
+                    remote:FireServer(chest)
+                    task.wait(2)
+                end
+                Options.CollectChest:SetValue(false)
+            end)
+        end
+    end
+})
+
+-- [3] COLLECT REWARD
+Tabs.Quest:AddToggle("CollectReward", {
+    Title = "Collect Reward",
+    Description = "Automatic reward claims while active",
+    Default = false,
+    Callback = function(state)
+        if state then
+            task.spawn(function()
+                local remote = RemotesEvent:WaitForChild("rewardClaim")
+                local rewards = {"reward1", "reward2", "reward3", "reward4", "reward5"}
+                while Options.CollectReward.Value do
+                    for _, reward in ipairs(rewards) do
+                        if not Options.CollectReward.Value then break end
+                        remote:FireServer(reward)
+                        task.wait(2)
+                    end
+                end
+            end)
+        end
+    end
+})
+
+-- ===========================================================
 --  TAB MISC
 -- ===========================================================
 local SelectedPet = "common"
 local ToggleEggsEnabled = false
 
-local OpenPetRemote = game:GetService("ReplicatedStorage")
-    :WaitForChild("RemotesEvent")
-    :WaitForChild("OpenPetEvent")
+local OpenPetRemote = RemotesEvent:WaitForChild("OpenPetEvent")
 
 local PetMapping = {
     Common    = "common",
@@ -581,12 +607,10 @@ AutoEggsToggle:OnChanged(function()
     end
 end)
 
-
-
 -- 🔘 BUTTON
 Tabs.Misc:AddButton({
-    Title = "Auto Selling Pets",
-    Description = "CLICK TO SHOW UI",
+    Title = "Auto Sell",
+    Description = "",
     Callback = function()
         print("open sell pets Ui")
 
@@ -595,9 +619,7 @@ Tabs.Misc:AddButton({
     end
 })
 
-
-
--- ===========================================================
+-- ANTI AFK
 local VirtualUser = game:GetService("VirtualUser")
 local AntiAFKConnection = nil
 
@@ -626,125 +648,6 @@ AntiAFKToggle:OnChanged(function()
 end)
 
 -- ===========================================================
--- ✨ GUEST SECTION (di bawah Misc)
--- ===========================================================
-
-Tabs.Misc:AddParagraph({
-    Title = "━━━━━━━━━━━━ 👤 GUEST ━━━━━━━━━━━━",
-    Content = ""
-})
-
--- 🎭 Fungsi ganti nama jadi Guest
-local GuestNameEnabled = false
-
-local function SetGuestName(enabled)
-    local player = game:GetService("Players").LocalPlayer
-    if enabled then
-        -- Tampilkan nama "Guest" di atas kepala karakter
-        if player.Character then
-            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-            if humanoid then
-                humanoid.DisplayName = "Guest"
-            end
-        end
-        -- Juga set saat karakter baru spawn
-        player.CharacterAdded:Connect(function(char)
-            if GuestNameEnabled then
-                local hum = char:WaitForChild("Humanoid")
-                hum.DisplayName = "Guest"
-            end
-        end)
-    else
-        if player.Character then
-            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-            if humanoid then
-                humanoid.DisplayName = player.DisplayName
-            end
-        end
-    end
-end
-
-local GuestNameToggle = Tabs.Misc:AddToggle("GuestName", {
-    Title = "👤  Guest Name",
-    Description = "Ubah display name karakter menjadi 'Guest'",
-    Default = false
-})
-GuestNameToggle:OnChanged(function()
-    GuestNameEnabled = Options.GuestName.Value
-    SetGuestName(GuestNameEnabled)
-end)
-
--- 👕 Fungsi pakai appearance Guest (karakter putih polos)
-local GuestLookEnabled = false
-
-local function ApplyGuestLook(enabled)
-    local Players = game:GetService("Players")
-    local player = Players.LocalPlayer
-    if enabled then
-        -- Reset deskripsi tampilan ke default (tanpa aksesori/pakaian)
-        local desc = Players:GetHumanoidDescriptionFromUserId(1) -- userId 1 = Roblox default
-        if player.Character then
-            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-            if humanoid then
-                humanoid:ApplyDescription(desc)
-            end
-        end
-        Fluent:Notify({
-            Title = "✅ Guest Look",
-            Content = "Tampilan Guest berhasil diterapkan!",
-            Duration = 3
-        })
-    else
-        -- Kembalikan tampilan asli
-        local desc = Players:GetHumanoidDescriptionFromUserId(player.UserId)
-        if player.Character then
-            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-            if humanoid then
-                humanoid:ApplyDescription(desc)
-            end
-        end
-        Fluent:Notify({
-            Title = "🔄 Guest Look",
-            Content = "Tampilan asli dikembalikan.",
-            Duration = 3
-        })
-    end
-end
-
-local GuestLookToggle = Tabs.Misc:AddToggle("GuestLook", {
-    Title = "👕  Guest Look",
-    Description = "Terapkan tampilan karakter Guest (putih polos)",
-    Default = false
-})
-GuestLookToggle:OnChanged(function()
-    GuestLookEnabled = Options.GuestLook.Value
-    ApplyGuestLook(GuestLookEnabled)
-end)
-
--- 🚶 Guest Walk Speed
-local GuestWalkEnabled = false
-
-local function SetGuestWalk(enabled)
-    local player = game:GetService("Players").LocalPlayer
-    if player.Character then
-        local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid.WalkSpeed = enabled and 8 or 16
-        end
-    end
-end
-
-local GuestWalkToggle = Tabs.Misc:AddToggle("GuestWalk", {
-    Title = "🚶  Guest Walk Speed",
-    Description = "Set kecepatan jalan seperti Guest (lambat)",
-    Default = false
-})
-GuestWalkToggle:OnChanged(function()
-    GuestWalkEnabled = Options.GuestWalk.Value
-    SetGuestWalk(GuestWalkEnabled)
-end)
-
--- ===========================================================
 -- SETTINGS TAB
 -- ===========================================================
 SaveManager:SetLibrary(Fluent)
@@ -759,7 +662,7 @@ SaveManager:BuildConfigSection(Tabs.Settings)
 Window:SelectTab(1)
 
 Fluent:Notify({
-    Title = "🏋️ Muscle Master Premium",
-    Content = "✅ Script berhasil dimuat! Selamat menggunakan.",
-    Duration = 6
+    Title = "Muscle Master",
+    Content = "Script loaded successfully!",
+    Duration = 5
 })
