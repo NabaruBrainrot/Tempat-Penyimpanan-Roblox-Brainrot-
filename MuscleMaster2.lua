@@ -539,31 +539,6 @@ Tabs.Quest:AddToggle("CollectCode", {
 
 
 
--- [2] COLLECT CHEST
-Tabs.Quest:AddToggle("CollectChest", {
-    Title = "Collect Chest",
-    Description = "Claim all chests automatically",
-    Default = false,
-    Callback = function(state)
-        if state then
-            task.spawn(function()
-                local remote = RemotesEvent:WaitForChild("ChestClaimEvent")
-                local chests = {
-                    "Legend Chest", "Big Chest", "Stone Chest",
-                    "Frost Chest", "Master Chest", "Emperor Chest",
-                    "Ocean Chest", "Chest"
-                }
-                for _, chest in ipairs(chests) do
-                    if not Options.CollectChest.Value then break end
-                    remote:FireServer(chest)
-                    task.wait(2)
-                end
-                Options.CollectChest:SetValue(false)
-            end)
-        end
-    end
-})
-
 
 
 -- [3] COLLECT REWARD
@@ -587,6 +562,35 @@ Tabs.Quest:AddToggle("CollectReward", {
         end
     end
 })
+
+
+-- ANTI AFK
+local VirtualUser = game:GetService("VirtualUser")
+local AntiAFKConnection = nil
+
+local function EnableAntiAFK()
+    if AntiAFKConnection then return end
+    AntiAFKConnection = localPly.Idled:Connect(function()
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton2(Vector2.new(0, 0))
+    end)
+end
+
+local function DisableAntiAFK()
+    if AntiAFKConnection then
+        AntiAFKConnection:Disconnect()
+        AntiAFKConnection = nil
+    end
+end
+
+local AntiAFKToggle = Tabs.Quest:AddToggle("AntiAFK", { Title = "Anti AFK", Default = false })
+AntiAFKToggle:OnChanged(function()
+    if Options.AntiAFK.Value then
+        EnableAntiAFK()
+    else
+        DisableAntiAFK()
+    end
+end)
 
 
 
@@ -630,6 +634,76 @@ AutoEggsToggle:OnChanged(function()
     end
 end)
 
+
+-- ================= INSTANT HATCH SCRIPT =================
+local OpenPetEvent = RemotesEvent:WaitForChild("OpenPetEvent")
+
+local instantHatchEnabled = false
+local hatchLoop = nil
+local hatchConnection = nil
+
+local function disableConnections()
+    for _, v in pairs(getconnections(OpenPetEvent.OnClientEvent)) do
+        v:Disable()
+    end
+end
+
+local function enableInstantHatch()
+    disableConnections()
+
+    hatchLoop = task.spawn(function()
+        while instantHatchEnabled do
+            task.wait(1)
+            disableConnections()
+        end
+    end)
+
+    hatchConnection = OpenPetEvent.OnClientEvent:Connect(function(petName, eggModel)
+        if not instantHatchEnabled then return end
+        if not petName or not eggModel then return end
+        pcall(function()
+            eggModel.Transparency = 1
+        end)
+    end)
+
+    print("Instant Hatch: ENABLED")
+end
+
+local function disableInstantHatch()
+    if hatchLoop then
+        task.cancel(hatchLoop)
+        hatchLoop = nil
+    end
+
+    if hatchConnection then
+        hatchConnection:Disconnect()
+        hatchConnection = nil
+    end
+
+    for _, v in pairs(getconnections(OpenPetEvent.OnClientEvent)) do
+        v:Enable()
+    end
+
+    print("Instant Hatch: DISABLED")
+end
+
+
+local InstantHatchToggle = Tabs.Misc:AddToggle("InstantHatch", {
+    Title = "Instant Hatch",
+    Description = "Toggle Instant Hatch (No Animation)",
+    Default = false
+})
+
+InstantHatchToggle:OnChanged(function()
+    instantHatchEnabled = Options.InstantHatch.Value
+    if instantHatchEnabled then
+        enableInstantHatch()
+    else
+        disableInstantHatch()
+    end
+end)
+
+
 -- 🔘 BUTTON
 Tabs.Misc:AddButton({
     Title = "Auto Sell",
@@ -642,33 +716,8 @@ Tabs.Misc:AddButton({
     end
 })
 
--- ANTI AFK
-local VirtualUser = game:GetService("VirtualUser")
-local AntiAFKConnection = nil
 
-local function EnableAntiAFK()
-    if AntiAFKConnection then return end
-    AntiAFKConnection = localPly.Idled:Connect(function()
-        VirtualUser:CaptureController()
-        VirtualUser:ClickButton2(Vector2.new(0, 0))
-    end)
-end
 
-local function DisableAntiAFK()
-    if AntiAFKConnection then
-        AntiAFKConnection:Disconnect()
-        AntiAFKConnection = nil
-    end
-end
-
-local AntiAFKToggle = Tabs.Misc:AddToggle("AntiAFK", { Title = "Anti AFK", Default = false })
-AntiAFKToggle:OnChanged(function()
-    if Options.AntiAFK.Value then
-        EnableAntiAFK()
-    else
-        DisableAntiAFK()
-    end
-end)
 
 -- ===========================================================
 -- SETTINGS TAB
