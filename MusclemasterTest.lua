@@ -1,3 +1,4 @@
+
 pcall(function()
     local cg = game:GetService("CoreGui"):FindFirstChild("PersistentToggleGui")
     if cg then cg:Destroy() end
@@ -84,7 +85,7 @@ local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.
 
 local Window = Fluent:CreateWindow({
     Title = "Muscle Master",
-    SubTitle = "by FaDhen",
+    SubTitle = "Premium",
     TabWidth = 160,
     Size = UDim2.fromOffset(500, 340),
     Acrylic = true,
@@ -93,11 +94,10 @@ local Window = Fluent:CreateWindow({
 })
 
 local Tabs = {
-    Farm     = Window:AddTab({ Title = "Farm",     Icon = "sprout"   }),
-    Combat   = Window:AddTab({ Title = "Combat",   Icon = "sword"    }),
-    Misc     = Window:AddTab({ Title = "Misc",     Icon = "star"     }),
-    Quest    = Window:AddTab({ Title = "Quest",    Icon = "scroll"   }),
-    Feedback = Window:AddTab({ Title = "Feedback", Icon = "message-circle" }),
+    Farm     = Window:AddTab({ Title = "MAIN",     Icon = "sprout"   }),
+    Combat   = Window:AddTab({ Title = "KILLER",   Icon = "sword"    }),
+    Misc     = Window:AddTab({ Title = "Eggs",     Icon = "star"     }),
+    Quest    = Window:AddTab({ Title = "QUEST",    Icon = "scroll"   }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" }),
 }
 
@@ -106,38 +106,15 @@ local Options = Fluent.Options
 -- ================= SERVICES =================
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RemotesEvent = ReplicatedStorage:WaitForChild("RemotesEvent")
-local HttpService = game:GetService("HttpService")
-
--- ================= FEEDBACK VARIABLES =================
-local WEBHOOK_URL = "https://discord.com/api/webhooks/1476282471913095332/H00ff-V-4UqnkZuLy-PQIsCNbsa1jQOwajqHndtuhlTX8z3WfhEOE91MaOTqip-aWEXy"
-local player = Players.LocalPlayer
-
--- Detect country via IP (optional, fallback if fails)
-local countryName = "Unknown"
-local countryEmoji = "🌍"
-pcall(function()
-    local res = request({ Url = "https://ipapi.co/json/", Method = "GET" })
-    if res and res.Body then
-        local data = HttpService:JSONDecode(res.Body)
-        if data.country_name then countryName = data.country_name end
-        if data.country_code then
-            -- Convert country code to emoji flag
-            local code = data.country_code:upper()
-            local a = 0x1F1E6 + (string.byte(code, 1) - string.byte("A"))
-            local b = 0x1F1E6 + (string.byte(code, 2) - string.byte("A"))
-            countryEmoji = utf8.char(a) .. utf8.char(b)
-        end
-    end
-end)
 
 -- ===========================================================
 --  TAB FARM
 -- ===========================================================
 
-local PlayersService = game:GetService("Players")
-local localPlayer = PlayersService.LocalPlayer
-local leaderstats = localPlayer:WaitForChild("leaderstats")
-local rebirths = leaderstats:WaitForChild("Rebirths")
+
+-- AUTO FARM
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 
 local AutoFarmEnabled = false
 local runningThreads = {}
@@ -151,69 +128,64 @@ local function stopAll()
     table.clear(runningThreads)
 end
 
-local function GetPrompts(MachinesFolder, positions)
+local function GetPrompts(folder, positions)
     local EPSILON = 0.01
     local prompts = {}
-    for _, obj in ipairs(MachinesFolder:GetDescendants()) do
+
+    for _, obj in ipairs(folder:GetDescendants()) do
         if obj:IsA("BasePart") then
             local pos = obj.Position
+
             for _, target in ipairs(positions) do
                 if (pos - target).Magnitude < EPSILON then
                     local prompt = obj:FindFirstChild("ProximityPromptMachine")
+
                     if prompt and prompt:IsA("ProximityPrompt") then
-                        prompts[#prompts+1] = prompt
+                        table.insert(prompts, prompt)
                     end
                 end
             end
         end
     end
+
     return prompts
 end
 
-local function RunScriptBelow10()
-    local TARGET_POSITIONS = {
-        CFrame.new(-120.774185, 5.02033472, -56.9413261).Position,
-        CFrame.new(-94.2546463, 5.02033472, -35.0815392).Position
-    }
-    local MachinesFolder = workspace:WaitForChild("MachinesFolder")
-    local MachineRemote = RemotesEvent.MachineActiveEvent
-    local prompts = GetPrompts(MachinesFolder, TARGET_POSITIONS)
-    if #prompts == 0 then return end
 
-    table.insert(runningThreads, task.spawn(function()
-        while AutoFarmEnabled do
-            local prompt = prompts[rng:NextInteger(1, #prompts)]
-            if prompt and prompt.Enabled then fireproximityprompt(prompt) end
-            task.wait(0.1)
-        end
-    end))
-    table.insert(runningThreads, task.spawn(function()
-        while AutoFarmEnabled do
-            MachineRemote:FireServer()
-            task.wait(0.1)
-        end
-    end))
-end
+local function RunAutoFarm()
 
-local function RunScriptAboveOrEqual10()
     local TARGET_POSITIONS = {
         Vector3.new(2747.89795, 7.65916204, 105.534966),
         Vector3.new(2747.89795, 7.65916204, 126.657951),
         Vector3.new(2743.69092, 11.6664858, 233.435394),
         Vector3.new(2743.69092, 11.6664858, 258.496918),
     }
+
     local MachinesFolder = workspace:WaitForChild("MachinesFolder")
     local MachineRemote = RemotesEvent.MachineActiveEvent
+
     local prompts = GetPrompts(MachinesFolder, TARGET_POSITIONS)
     if #prompts == 0 then return end
 
     table.insert(runningThreads, task.spawn(function()
         while AutoFarmEnabled do
-            local prompt = prompts[rng:NextInteger(1, #prompts)]
-            if prompt and prompt.Enabled then fireproximityprompt(prompt) end
-            task.wait(0.1)
+
+            local character = player.Character
+            local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+
+            -- hanya jalan saat tidak duduk
+            if humanoid and humanoid.SeatPart == nil then
+                local prompt = prompts[rng:NextInteger(1,#prompts)]
+
+                if prompt and prompt.Enabled then
+                    fireproximityprompt(prompt)
+                end
+            end
+
+            task.wait(0.3)
         end
     end))
+
     table.insert(runningThreads, task.spawn(function()
         while AutoFarmEnabled do
             MachineRemote:FireServer()
@@ -222,22 +194,34 @@ local function RunScriptAboveOrEqual10()
     end))
 end
 
-local AutoFarmToggle = Tabs.Farm:AddToggle("AutoFarm", { Title = "Auto Farm", Default = false })
+
+local AutoFarmToggle = Tabs.Farm:AddToggle("AutoFarm", {
+    Title = "Auto Farm",
+    Default = false
+})
+
 AutoFarmToggle:OnChanged(function()
+
     if Options.AutoFarm.Value then
         stopAll()
         AutoFarmEnabled = true
-        if rebirths.Value < 10 then
-            RunScriptBelow10()
-        else
-            RunScriptAboveOrEqual10()
-        end
+        RunAutoFarm()
     else
         stopAll()
     end
+
 end)
 
+
+
+
+
+
+
 -- AUTO GLITCH
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
 local AutoGlitchEnabled = false
 local glitchThreads = {}
 local rng2 = Random.new()
@@ -253,66 +237,60 @@ end
 local function CollectPrompts(folder, positions)
     local EPSILON = 0.01
     local prompts = {}
+
     for _, obj in ipairs(folder:GetDescendants()) do
         if obj:IsA("BasePart") then
             local pos = obj.Position
+
             for _, cf in ipairs(positions) do
                 if (pos - cf.Position).Magnitude < EPSILON then
                     local prompt = obj:FindFirstChild("ProximityPromptMachine")
+
                     if prompt and prompt:IsA("ProximityPrompt") then
-                        prompts[#prompts+1] = prompt
+                        table.insert(prompts, prompt)
                     end
                 end
             end
         end
     end
+
     return prompts
 end
 
-local function RunGlitchBelow10()
-    local TARGET_POSITIONS = {
-        CFrame.new(-41.5637741, 3.47935009, 44.4185333),
-        CFrame.new(-24.1162872, 3.47935009, 44.4185333),
-    }
-    local MachinesFolder = workspace:WaitForChild("MachinesFolder")
-    local MachineRemote = RemotesEvent.MachineActiveEvent
-    local prompts = CollectPrompts(MachinesFolder, TARGET_POSITIONS)
-    if #prompts == 0 then return end
+local function RunAutoGlitch()
 
-    table.insert(glitchThreads, task.spawn(function()
-        while AutoGlitchEnabled do
-            local prompt = prompts[rng2:NextInteger(1, #prompts)]
-            if prompt and prompt.Enabled then fireproximityprompt(prompt) end
-            task.wait(0.1)
-        end
-    end))
-    table.insert(glitchThreads, task.spawn(function()
-        while AutoGlitchEnabled do
-            MachineRemote:FireServer()
-            task.wait(0.1)
-        end
-    end))
-end
-
-local function RunGlitchAbove10()
     local TARGET_POSITIONS = {
         CFrame.new(2712.48022, 3.71804452, 299.783295),
         CFrame.new(2691.11182, 3.71804452, 299.783295),
         CFrame.new(2613.02808, 4.78257084, 289.732025),
         CFrame.new(2584.5542, 4.78257084, 289.732025),
     }
+
     local MachinesFolder = workspace:WaitForChild("MachinesFolder")
     local MachineRemote = RemotesEvent.MachineActiveEvent
+
     local prompts = CollectPrompts(MachinesFolder, TARGET_POSITIONS)
     if #prompts == 0 then return end
 
     table.insert(glitchThreads, task.spawn(function()
         while AutoGlitchEnabled do
-            local prompt = prompts[rng2:NextInteger(1, #prompts)]
-            if prompt and prompt.Enabled then fireproximityprompt(prompt) end
-            task.wait(0.1)
+
+            local character = player.Character
+            local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+
+            -- Jalankan hanya saat tidak duduk
+            if humanoid and humanoid.SeatPart == nil then
+                local prompt = prompts[rng2:NextInteger(1,#prompts)]
+
+                if prompt and prompt.Enabled then
+                    fireproximityprompt(prompt)
+                end
+            end
+
+            task.wait(0.3)
         end
     end))
+
     table.insert(glitchThreads, task.spawn(function()
         while AutoGlitchEnabled do
             MachineRemote:FireServer()
@@ -321,20 +299,29 @@ local function RunGlitchAbove10()
     end))
 end
 
-local AutoGlitchToggle = Tabs.Farm:AddToggle("AutoGlitch", { Title = "Auto Glitch", Default = false })
+
+local AutoGlitchToggle = Tabs.Farm:AddToggle("AutoGlitch", {
+    Title = "Auto Glitch",
+    Default = false
+})
+
 AutoGlitchToggle:OnChanged(function()
+
     if Options.AutoGlitch.Value then
         stopAllGlitch()
         AutoGlitchEnabled = true
-        if rebirths.Value <= 10 then
-            RunGlitchBelow10()
-        else
-            RunGlitchAbove10()
-        end
+        RunAutoGlitch()
     else
         stopAllGlitch()
     end
+
 end)
+
+
+
+
+
+
 
 -- AUTO SPIN
 local AutoSpin = false
@@ -351,6 +338,8 @@ AutoSpinToggle:OnChanged(function()
         end)
     end
 end)
+
+
 
 -- AUTO REBIRTH
 local AutoRebirth = false
@@ -369,8 +358,10 @@ task.spawn(function()
     end
 end)
 
+
+
 -- ===========================================================
---  TAB COMBAT
+--  TAB COMBAT (dulu Player)
 -- ===========================================================
 local playerService = game:GetService("Players")
 local localPly = playerService.LocalPlayer
@@ -468,6 +459,8 @@ localPly.CharacterAdded:Connect(function()
     end
 end)
 
+
+
 -- AUTO KILL ALL
 local runningKillAll = false
 
@@ -521,6 +514,8 @@ end)
 --  TAB QUEST
 -- ===========================================================
 
+
+
 -- [1] REDEEM CODE
 Tabs.Quest:AddToggle("CollectCode", {
     Title = "Redeem Code",
@@ -541,6 +536,8 @@ Tabs.Quest:AddToggle("CollectCode", {
         end
     end
 })
+
+
 
 -- [2] COLLECT CHEST
 Tabs.Quest:AddToggle("CollectChest", {
@@ -567,6 +564,8 @@ Tabs.Quest:AddToggle("CollectChest", {
     end
 })
 
+
+
 -- [3] COLLECT REWARD
 Tabs.Quest:AddToggle("CollectReward", {
     Title = "Collect Reward",
@@ -588,6 +587,8 @@ Tabs.Quest:AddToggle("CollectReward", {
         end
     end
 })
+
+
 
 -- ===========================================================
 --  TAB MISC
@@ -616,28 +617,9 @@ EggsDropdown:OnChanged(function(Value)
     SelectedPet = PetMapping[Value]
 end)
 
-local AutoEggsToggle = Tabs.Misc:AddToggle("AutoEggs", { Title = "Auto Eggs", Default = false })
-AutoEggsToggle:OnChanged(function()
-    ToggleEggsEnabled = Options.AutoEggs.Value
-    if ToggleEggsEnabled then
-        task.spawn(function()
-            while ToggleEggsEnabled do
-                OpenPetRemote:FireServer(SelectedPet)
-                task.wait(0.1)
-            end
-        end)
-    end
-end)
-
-Tabs.Misc:AddButton({
-    Title = "Auto Sell",
-    Description = "",
-    Callback = function()
-        print("open sell pets Ui")
-        loadstring(game:HttpGet(
-            "https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/SellPets"))()
-    end
-})
+-- ===========================================================
+-- SETTINGS TAB
+-- ===========================================================
 
 -- ANTI AFK
 local VirtualUser = game:GetService("VirtualUser")
@@ -658,7 +640,7 @@ local function DisableAntiAFK()
     end
 end
 
-local AntiAFKToggle = Tabs.Misc:AddToggle("AntiAFK", { Title = "Anti AFK", Default = false })
+local AntiAFKToggle = Tabs.Settings:AddToggle("AntiAFK", { Title = "Anti AFK", Default = false })
 AntiAFKToggle:OnChanged(function()
     if Options.AntiAFK.Value then
         EnableAntiAFK()
@@ -667,183 +649,101 @@ AntiAFKToggle:OnChanged(function()
     end
 end)
 
--- ===========================================================
---  TAB FEEDBACK
--- ===========================================================
-
-Tabs.Feedback:AddParagraph({
-    Title   = "Send Feedback 📩",
-    Content = "Is the script not working? Found a bug?\nWrite your message below and send it directly to the developer!"
-})
-
-if not request then
-    Tabs.Feedback:AddParagraph({
-        Title   = "⚠️ Feedback Unavailable",
-        Content = "Your executor does not support HTTP requests.\nFeedback cannot be sent. Please use an executor that supports http_request or syn.request."
-    })
-end
-
-local FeedbackInput = Tabs.Feedback:AddInput("FeedbackInput", {
-    Title       = "Your Message",
-    Description = "Describe the issue.",
-    Default     = "",
-    Placeholder = "e.g. The auto-farm button is not working...",
-    Numeric     = false,
-    Finished    = false,
-    Callback    = function(Value)
-        -- live update
-    end
-})
-
-local isSending = false
-local lastSentTime = 0
-local COOLDOWN_SECONDS = 15
-
-Tabs.Feedback:AddButton({
-    Title       = "Send Feedback 📩",
-    Description = "Your feedback will be sent to the developer via Discord.",
-    Callback    = function()
-
-        if not request then
-            Fluent:Notify({
-                Title    = "❌ Not Supported",
-                Content  = "Your executor does not support HTTP requests. Cannot send feedback.",
-                Duration = 6
-            })
-            return
-        end
-
-        local now = os.time()
-        if isSending then
-            Fluent:Notify({
-                Title    = "⏳ Please Wait",
-                Content  = "Your feedback is still being sent...",
-                Duration = 3
-            })
-            return
-        end
-
-        if (now - lastSentTime) < COOLDOWN_SECONDS then
-            local remaining = COOLDOWN_SECONDS - (now - lastSentTime)
-            Fluent:Notify({
-                Title    = "⏳ Cooldown",
-                Content  = "Please wait " .. remaining .. " second(s) before sending again.",
-                Duration = 4
-            })
-            return
-        end
-
-        local msg = FeedbackInput.Value
-        if not msg or msg == "" or msg == "Default" then
-            Fluent:Notify({
-                Title    = "⚠️ Empty Message",
-                Content  = "Please write your feedback before sending!",
-                Duration = 4
-            })
-            return
-        end
-
-        if #msg < 5 then
-            Fluent:Notify({
-                Title    = "⚠️ Too Short",
-                Content  = "Your message is too short. Please describe the issue in more detail.",
-                Duration = 4
-            })
-            return
-        end
-
-        isSending = true
-
-        Fluent:Notify({
-            Title    = "📤 Sending...",
-            Content  = "Your feedback is being sent. Please wait.",
-            Duration = 3
-        })
-
+-- AUTO EGGS (Settings)
+local AutoEggsToggle = Tabs.Settings:AddToggle("AutoEggs", { Title = "Auto Eggs", Default = false })
+AutoEggsToggle:OnChanged(function()
+    ToggleEggsEnabled = Options.AutoEggs.Value
+    if ToggleEggsEnabled then
         task.spawn(function()
-            local success, err = pcall(function()
-                request({
-                    Url    = WEBHOOK_URL,
-                    Method = "POST",
-                    Headers = {
-                        ["Content-Type"] = "application/json"
-                    },
-                    Body = HttpService:JSONEncode({
-                        embeds = {
-                            {
-                                title = "📨 New Feedback",
-                                color = 5814783,
-                                fields = {
-                                    {
-                                        name   = "👤 Player",
-                                        value  = player.Name .. " (ID: " .. player.UserId .. ")",
-                                        inline = true
-                                    },
-                                    {
-                                        name   = "🌍 Country",
-                                        value  = countryEmoji .. " " .. countryName,
-                                        inline = true
-                                    },
-                                    {
-                                        name   = "🎮 Game",
-                                        value  = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,
-                                        inline = false
-                                    },
-                                    {
-                                        name   = "💬 Message",
-                                        value  = msg,
-                                        inline = false
-                                    }
-                                },
-                                footer = {
-                                    text = "Muscle Legend Script · FaDhen"
-                                },
-                                timestamp = DateTime.now():ToIsoDate()
-                            }
-                        }
-                    })
-                })
-            end)
-
-            isSending = false
-
-            if success then
-                lastSentTime = os.time()
-                FeedbackInput:SetValue("")
-                Fluent:Notify({
-                    Title      = "✅ Feedback Sent!",
-                    Content    = "Thank you, " .. player.Name .. "! Your feedback has been received.",
-                    SubContent = "The developer will review it soon.",
-                    Duration   = 6
-                })
-            else
-                Fluent:Notify({
-                    Title      = "❌ Failed to Send",
-                    Content    = "Something went wrong while sending your feedback.",
-                    SubContent = "Check your internet connection or try again later.",
-                    Duration   = 6
-                })
-                warn("[Feedback] Error:", err)
+            while ToggleEggsEnabled do
+                OpenPetRemote:FireServer(SelectedPet)
+                task.wait(0.1)
             end
         end)
     end
-})
+end)
 
-Tabs.Feedback:AddParagraph({
-    Title   = "ℹ️ Note",
-    Content = "Your feedback is anonymous to other players.\nOnly your username, country, and message are sent.\nPlease be respectful and descriptive!"
-})
+-- INSTANT HATCH
+local instantHatchEnabled = false
+local hatchLoop = nil
+local hatchConnection = nil
 
--- ===========================================================
---  SETTINGS
--- ===========================================================
+local function disableHatchConnections()
+    for _, v in pairs(getconnections(OpenPetRemote.OnClientEvent)) do
+        v:Disable()
+    end
+end
+
+local function enableInstantHatch()
+    disableHatchConnections()
+    hatchLoop = task.spawn(function()
+        while instantHatchEnabled do
+            task.wait(1)
+            disableHatchConnections()
+        end
+    end)
+    hatchConnection = OpenPetRemote.OnClientEvent:Connect(function(petName, eggModel)
+        if not instantHatchEnabled then return end
+        if not petName or not eggModel then return end
+        pcall(function()
+            eggModel.Transparency = 1
+        end)
+    end)
+    print("Instant Hatch: ENABLED")
+end
+
+local function disableInstantHatch()
+    if hatchLoop then
+        task.cancel(hatchLoop)
+        hatchLoop = nil
+    end
+    if hatchConnection then
+        hatchConnection:Disconnect()
+        hatchConnection = nil
+    end
+    for _, v in pairs(getconnections(OpenPetRemote.OnClientEvent)) do
+        v:Enable()
+    end
+    print("Instant Hatch: DISABLED")
+end
+
+local InstantHatchToggle = Tabs.Settings:AddToggle("InstantHatch", {
+    Title = "Instant Hatch",
+    Description = "Toggle Instant Hatch (No Animation)",
+    Default = false
+})
+InstantHatchToggle:OnChanged(function()
+    instantHatchEnabled = Options.InstantHatch.Value
+    if instantHatchEnabled then
+        enableInstantHatch()
+    else
+        disableInstantHatch()
+    end
+end)
+
+-- AUTO SELL (Settings)
+Tabs.Settings:AddButton({
+    Title = "Auto Sell",
+    Description = "",
+    Callback = function()
+        print("open sell pets Ui")
+        loadstring(game:HttpGet(
+            "https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/SellPets"))()
+    end
+})
 SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
 SaveManager:IgnoreThemeSettings()
 SaveManager:SetIgnoreIndexes({})
-InterfaceManager:SetFolder("MuscleMaster")
-SaveManager:SetFolder("MuscleMaster/configs")
+InterfaceManager:SetFolder("FluentScriptHub")
+SaveManager:SetFolder("FluentScriptHub/legend-game")
 InterfaceManager:BuildInterfaceSection(Tabs.Settings)
 SaveManager:BuildConfigSection(Tabs.Settings)
-SaveManager:LoadAutoloadConfig()
-Fluent:SelectTab(Tabs.Farm)
+
+Window:SelectTab(1)
+
+Fluent:Notify({
+    Title = "Muscle Master",
+    Content = "Loaded Succesfully!",
+    Duration = 5
+})
