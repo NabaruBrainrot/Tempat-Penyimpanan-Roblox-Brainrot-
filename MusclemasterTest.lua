@@ -94,10 +94,10 @@ local Window = Fluent:CreateWindow({
 })
 
 local Tabs = {
-    Farm     = Window:AddTab({ Title = "MAIN",     Icon = "sprout"   }),
-    Combat   = Window:AddTab({ Title = "KILLER",   Icon = "sword"    }),
-    Misc     = Window:AddTab({ Title = "Eggs",     Icon = "star"     }),
-    Quest    = Window:AddTab({ Title = "QUEST",    Icon = "scroll"   }),
+    Farm     = Window:AddTab({ Title = "Farm",     Icon = "sprout"   }),
+    Combat   = Window:AddTab({ Title = "Combat",   Icon = "sword"    }),
+    Misc     = Window:AddTab({ Title = "Misc",     Icon = "star"     }),
+    Quest    = Window:AddTab({ Title = "Quest",    Icon = "scroll"   }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" }),
 }
 
@@ -617,6 +617,103 @@ EggsDropdown:OnChanged(function(Value)
     SelectedPet = PetMapping[Value]
 end)
 
+local AutoEggsToggle = Tabs.Misc:AddToggle("AutoEggs", { Title = "Auto Eggs", Default = false })
+AutoEggsToggle:OnChanged(function()
+    ToggleEggsEnabled = Options.AutoEggs.Value
+    if ToggleEggsEnabled then
+        task.spawn(function()
+            while ToggleEggsEnabled do
+                OpenPetRemote:FireServer(SelectedPet)
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+-- 🔘 BUTTON
+Tabs.Misc:AddButton({
+    Title = "Auto Sell",
+    Description = "",
+    Callback = function()
+        print("open sell pets Ui")
+
+        loadstring(game:HttpGet(
+            "https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/SellPets"))()
+    end
+})
+
+-- ================= INSTANT HATCH SCRIPT =================
+local OpenPetEvent = RemotesEvent:WaitForChild("OpenPetEvent")
+
+local instantHatchEnabled = false
+local hatchLoop = nil
+local hatchConnection = nil
+
+local function disableConnections()
+    for _, v in pairs(getconnections(OpenPetEvent.OnClientEvent)) do
+        v:Disable()
+    end
+end
+
+local function enableInstantHatch()
+    disableConnections()
+
+    hatchLoop = task.spawn(function()
+        while instantHatchEnabled do
+            task.wait(1)
+            disableConnections()
+        end
+    end)
+
+    hatchConnection = OpenPetEvent.OnClientEvent:Connect(function(petName, eggModel)
+        if not instantHatchEnabled then return end
+        if not petName or not eggModel then return end
+        pcall(function()
+            eggModel.Transparency = 1
+        end)
+    end)
+
+    print("Instant Hatch: ENABLED")
+end
+
+local function disableInstantHatch()
+    if hatchLoop then
+        task.cancel(hatchLoop)
+        hatchLoop = nil
+    end
+
+    if hatchConnection then
+        hatchConnection:Disconnect()
+        hatchConnection = nil
+    end
+
+    for _, v in pairs(getconnections(OpenPetEvent.OnClientEvent)) do
+        v:Enable()
+    end
+
+    print("Instant Hatch: DISABLED")
+end
+
+Tabs.Misc:AddParagraph({
+    Title = "Egg Hatch",
+    Content = "Control egg hatching behavior below."
+})
+
+local InstantHatchToggle = Tabs.Misc:AddToggle("InstantHatch", {
+    Title = "Instant Hatch",
+    Description = "Toggle Instant Hatch (No Animation)",
+    Default = false
+})
+
+InstantHatchToggle:OnChanged(function()
+    instantHatchEnabled = Options.InstantHatch.Value
+    if instantHatchEnabled then
+        enableInstantHatch()
+    else
+        disableInstantHatch()
+    end
+end)
+
 -- ===========================================================
 -- SETTINGS TAB
 -- ===========================================================
@@ -648,89 +745,6 @@ AntiAFKToggle:OnChanged(function()
         DisableAntiAFK()
     end
 end)
-
--- AUTO EGGS (Settings)
-local AutoEggsToggle = Tabs.Settings:AddToggle("AutoEggs", { Title = "Auto Eggs", Default = false })
-AutoEggsToggle:OnChanged(function()
-    ToggleEggsEnabled = Options.AutoEggs.Value
-    if ToggleEggsEnabled then
-        task.spawn(function()
-            while ToggleEggsEnabled do
-                OpenPetRemote:FireServer(SelectedPet)
-                task.wait(0.1)
-            end
-        end)
-    end
-end)
-
--- INSTANT HATCH
-local instantHatchEnabled = false
-local hatchLoop = nil
-local hatchConnection = nil
-
-local function disableHatchConnections()
-    for _, v in pairs(getconnections(OpenPetRemote.OnClientEvent)) do
-        v:Disable()
-    end
-end
-
-local function enableInstantHatch()
-    disableHatchConnections()
-    hatchLoop = task.spawn(function()
-        while instantHatchEnabled do
-            task.wait(1)
-            disableHatchConnections()
-        end
-    end)
-    hatchConnection = OpenPetRemote.OnClientEvent:Connect(function(petName, eggModel)
-        if not instantHatchEnabled then return end
-        if not petName or not eggModel then return end
-        pcall(function()
-            eggModel.Transparency = 1
-        end)
-    end)
-    print("Instant Hatch: ENABLED")
-end
-
-local function disableInstantHatch()
-    if hatchLoop then
-        task.cancel(hatchLoop)
-        hatchLoop = nil
-    end
-    if hatchConnection then
-        hatchConnection:Disconnect()
-        hatchConnection = nil
-    end
-    for _, v in pairs(getconnections(OpenPetRemote.OnClientEvent)) do
-        v:Enable()
-    end
-    print("Instant Hatch: DISABLED")
-end
-
-local InstantHatchToggle = Tabs.Settings:AddToggle("InstantHatch", {
-    Title = "Instant Hatch",
-    Description = "Toggle Instant Hatch (No Animation)",
-    Default = false
-})
-InstantHatchToggle:OnChanged(function()
-    instantHatchEnabled = Options.InstantHatch.Value
-    if instantHatchEnabled then
-        enableInstantHatch()
-    else
-        disableInstantHatch()
-    end
-end)
-
--- AUTO SELL (Settings)
-Tabs.Settings:AddButton({
-    Title = "Auto Sell",
-    Description = "",
-    Callback = function()
-        print("open sell pets Ui")
-        loadstring(game:HttpGet(
-            "https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/SellPets"))()
-    end
-})
 SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
 SaveManager:IgnoreThemeSettings()
