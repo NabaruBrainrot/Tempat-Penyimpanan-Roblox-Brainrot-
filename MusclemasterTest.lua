@@ -110,7 +110,7 @@ local RemotesEvent = ReplicatedStorage:WaitForChild("RemotesEvent")
 local HttpService = game:GetService("HttpService")
 
 -- ================= FEEDBACK VARIABLES =================
-local WEBHOOK_URL = "https://discord.com/api/webhooks/ISI_WEBHOOK_KAMU_DISINI"
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1476282471913095332/H00ff-V-4UqnkZuLy-PQIsCNbsa1jQOwajqHndtuhlTX8z3WfhEOE91MaOTqip-aWEXy"
 local player = Players.LocalPlayer
 
 -- Detect country via IP (optional, fallback if fails)
@@ -686,7 +686,7 @@ end
 
 local FeedbackInput = Tabs.Feedback:AddInput("FeedbackInput", {
     Title       = "Your Message",
-    Description = "Describe the issue.",
+    Description = "Describe the issue or leave your feedback here.",
     Default     = "",
     Placeholder = "e.g. The auto-farm button is not working...",
     Numeric     = false,
@@ -834,3 +834,17 @@ Tabs.Feedback:AddParagraph({
     Title   = "ℹ️ Note",
     Content = "Your feedback is anonymous to other players.\nOnly your username, country, and message are sent.\nPlease be respectful and descriptive!"
 })
+
+-- ===========================================================
+--  SETTINGS
+-- ===========================================================
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+InterfaceManager:SetFolder("MuscleMaster")
+SaveManager:SetFolder("MuscleMaster/configs")
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+SaveManager:LoadAutoloadConfig()
+Fluent:SelectTab(Tabs.Farm)
