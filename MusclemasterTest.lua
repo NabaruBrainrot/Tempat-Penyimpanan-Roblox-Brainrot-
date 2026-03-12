@@ -589,6 +589,35 @@ Tabs.Quest:AddToggle("CollectReward", {
 })
 
 
+-- ANTI AFK
+local VirtualUser = game:GetService("VirtualUser")
+local AntiAFKConnection = nil
+
+local function EnableAntiAFK()
+    if AntiAFKConnection then return end
+    AntiAFKConnection = localPly.Idled:Connect(function()
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton2(Vector2.new(0, 0))
+    end)
+end
+
+local function DisableAntiAFK()
+    if AntiAFKConnection then
+        AntiAFKConnection:Disconnect()
+        AntiAFKConnection = nil
+    end
+end
+
+local AntiAFKToggle = Tabs.Quest:AddToggle("AntiAFK", { Title = "Anti AFK", Default = false })
+AntiAFKToggle:OnChanged(function()
+    if Options.AntiAFK.Value then
+        EnableAntiAFK()
+    else
+        DisableAntiAFK()
+    end
+end)
+
+
 
 -- ===========================================================
 --  TAB MISC
@@ -630,17 +659,6 @@ AutoEggsToggle:OnChanged(function()
     end
 end)
 
--- 🔘 BUTTON
-Tabs.Misc:AddButton({
-    Title = "Auto Sell",
-    Description = "",
-    Callback = function()
-        print("open sell pets Ui")
-
-        loadstring(game:HttpGet(
-            "https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/SellPets"))()
-    end
-})
 
 -- ================= INSTANT HATCH SCRIPT =================
 local OpenPetEvent = RemotesEvent:WaitForChild("OpenPetEvent")
@@ -710,37 +728,25 @@ InstantHatchToggle:OnChanged(function()
     end
 end)
 
+
+-- 🔘 BUTTON
+Tabs.Misc:AddButton({
+    Title = "Auto Sell",
+    Description = "",
+    Callback = function()
+        print("open sell pets Ui")
+
+        loadstring(game:HttpGet(
+            "https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/SellPets"))()
+    end
+})
+
+
+
+
 -- ===========================================================
 -- SETTINGS TAB
 -- ===========================================================
-
--- ANTI AFK
-local VirtualUser = game:GetService("VirtualUser")
-local AntiAFKConnection = nil
-
-local function EnableAntiAFK()
-    if AntiAFKConnection then return end
-    AntiAFKConnection = localPly.Idled:Connect(function()
-        VirtualUser:CaptureController()
-        VirtualUser:ClickButton2(Vector2.new(0, 0))
-    end)
-end
-
-local function DisableAntiAFK()
-    if AntiAFKConnection then
-        AntiAFKConnection:Disconnect()
-        AntiAFKConnection = nil
-    end
-end
-
-local AntiAFKToggle = Tabs.Settings:AddToggle("AntiAFK", { Title = "Anti AFK", Default = false })
-AntiAFKToggle:OnChanged(function()
-    if Options.AntiAFK.Value then
-        EnableAntiAFK()
-    else
-        DisableAntiAFK()
-    end
-end)
 SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
 SaveManager:IgnoreThemeSettings()
