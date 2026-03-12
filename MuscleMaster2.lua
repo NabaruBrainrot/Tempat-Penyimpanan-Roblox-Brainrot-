@@ -85,7 +85,7 @@ local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.
 
 local Window = Fluent:CreateWindow({
     Title = "Muscle Master",
-    SubTitle = "by FaDhen",
+    SubTitle = "Premium",
     TabWidth = 160,
     Size = UDim2.fromOffset(500, 340),
     Acrylic = true,
@@ -111,10 +111,10 @@ local RemotesEvent = ReplicatedStorage:WaitForChild("RemotesEvent")
 --  TAB FARM
 -- ===========================================================
 
-local PlayersService = game:GetService("Players")
-local localPlayer = PlayersService.LocalPlayer
-local leaderstats = localPlayer:WaitForChild("leaderstats")
-local rebirths = leaderstats:WaitForChild("Rebirths")
+
+-- AUTO FARM
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 
 local AutoFarmEnabled = false
 local runningThreads = {}
@@ -128,69 +128,64 @@ local function stopAll()
     table.clear(runningThreads)
 end
 
-local function GetPrompts(MachinesFolder, positions)
+local function GetPrompts(folder, positions)
     local EPSILON = 0.01
     local prompts = {}
-    for _, obj in ipairs(MachinesFolder:GetDescendants()) do
+
+    for _, obj in ipairs(folder:GetDescendants()) do
         if obj:IsA("BasePart") then
             local pos = obj.Position
+
             for _, target in ipairs(positions) do
                 if (pos - target).Magnitude < EPSILON then
                     local prompt = obj:FindFirstChild("ProximityPromptMachine")
+
                     if prompt and prompt:IsA("ProximityPrompt") then
-                        prompts[#prompts+1] = prompt
+                        table.insert(prompts, prompt)
                     end
                 end
             end
         end
     end
+
     return prompts
 end
 
-local function RunScriptBelow10()
-    local TARGET_POSITIONS = {
-        CFrame.new(-120.774185, 5.02033472, -56.9413261).Position,
-        CFrame.new(-94.2546463, 5.02033472, -35.0815392).Position
-    }
-    local MachinesFolder = workspace:WaitForChild("MachinesFolder")
-    local MachineRemote = RemotesEvent.MachineActiveEvent
-    local prompts = GetPrompts(MachinesFolder, TARGET_POSITIONS)
-    if #prompts == 0 then return end
 
-    table.insert(runningThreads, task.spawn(function()
-        while AutoFarmEnabled do
-            local prompt = prompts[rng:NextInteger(1, #prompts)]
-            if prompt and prompt.Enabled then fireproximityprompt(prompt) end
-            task.wait(0.1)
-        end
-    end))
-    table.insert(runningThreads, task.spawn(function()
-        while AutoFarmEnabled do
-            MachineRemote:FireServer()
-            task.wait(0.1)
-        end
-    end))
-end
+local function RunAutoFarm()
 
-local function RunScriptAboveOrEqual10()
     local TARGET_POSITIONS = {
         Vector3.new(2747.89795, 7.65916204, 105.534966),
         Vector3.new(2747.89795, 7.65916204, 126.657951),
         Vector3.new(2743.69092, 11.6664858, 233.435394),
         Vector3.new(2743.69092, 11.6664858, 258.496918),
     }
+
     local MachinesFolder = workspace:WaitForChild("MachinesFolder")
     local MachineRemote = RemotesEvent.MachineActiveEvent
+
     local prompts = GetPrompts(MachinesFolder, TARGET_POSITIONS)
     if #prompts == 0 then return end
 
     table.insert(runningThreads, task.spawn(function()
         while AutoFarmEnabled do
-            local prompt = prompts[rng:NextInteger(1, #prompts)]
-            if prompt and prompt.Enabled then fireproximityprompt(prompt) end
-            task.wait(0.1)
+
+            local character = player.Character
+            local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+
+            -- hanya jalan saat tidak duduk
+            if humanoid and humanoid.SeatPart == nil then
+                local prompt = prompts[rng:NextInteger(1,#prompts)]
+
+                if prompt and prompt.Enabled then
+                    fireproximityprompt(prompt)
+                end
+            end
+
+            task.wait(0.3)
         end
     end))
+
     table.insert(runningThreads, task.spawn(function()
         while AutoFarmEnabled do
             MachineRemote:FireServer()
@@ -199,22 +194,34 @@ local function RunScriptAboveOrEqual10()
     end))
 end
 
-local AutoFarmToggle = Tabs.Farm:AddToggle("AutoFarm", { Title = "Auto Farm", Default = false })
+
+local AutoFarmToggle = Tabs.Farm:AddToggle("AutoFarm", {
+    Title = "Auto Farm",
+    Default = false
+})
+
 AutoFarmToggle:OnChanged(function()
+
     if Options.AutoFarm.Value then
         stopAll()
         AutoFarmEnabled = true
-        if rebirths.Value < 10 then
-            RunScriptBelow10()
-        else
-            RunScriptAboveOrEqual10()
-        end
+        RunAutoFarm()
     else
         stopAll()
     end
+
 end)
 
+
+
+
+
+
+
 -- AUTO GLITCH
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
 local AutoGlitchEnabled = false
 local glitchThreads = {}
 local rng2 = Random.new()
@@ -230,66 +237,60 @@ end
 local function CollectPrompts(folder, positions)
     local EPSILON = 0.01
     local prompts = {}
+
     for _, obj in ipairs(folder:GetDescendants()) do
         if obj:IsA("BasePart") then
             local pos = obj.Position
+
             for _, cf in ipairs(positions) do
                 if (pos - cf.Position).Magnitude < EPSILON then
                     local prompt = obj:FindFirstChild("ProximityPromptMachine")
+
                     if prompt and prompt:IsA("ProximityPrompt") then
-                        prompts[#prompts+1] = prompt
+                        table.insert(prompts, prompt)
                     end
                 end
             end
         end
     end
+
     return prompts
 end
 
-local function RunGlitchBelow10()
-    local TARGET_POSITIONS = {
-        CFrame.new(-41.5637741, 3.47935009, 44.4185333),
-        CFrame.new(-24.1162872, 3.47935009, 44.4185333),
-    }
-    local MachinesFolder = workspace:WaitForChild("MachinesFolder")
-    local MachineRemote = RemotesEvent.MachineActiveEvent
-    local prompts = CollectPrompts(MachinesFolder, TARGET_POSITIONS)
-    if #prompts == 0 then return end
+local function RunAutoGlitch()
 
-    table.insert(glitchThreads, task.spawn(function()
-        while AutoGlitchEnabled do
-            local prompt = prompts[rng2:NextInteger(1, #prompts)]
-            if prompt and prompt.Enabled then fireproximityprompt(prompt) end
-            task.wait(0.1)
-        end
-    end))
-    table.insert(glitchThreads, task.spawn(function()
-        while AutoGlitchEnabled do
-            MachineRemote:FireServer()
-            task.wait(0.1)
-        end
-    end))
-end
-
-local function RunGlitchAbove10()
     local TARGET_POSITIONS = {
         CFrame.new(2712.48022, 3.71804452, 299.783295),
         CFrame.new(2691.11182, 3.71804452, 299.783295),
         CFrame.new(2613.02808, 4.78257084, 289.732025),
         CFrame.new(2584.5542, 4.78257084, 289.732025),
     }
+
     local MachinesFolder = workspace:WaitForChild("MachinesFolder")
     local MachineRemote = RemotesEvent.MachineActiveEvent
+
     local prompts = CollectPrompts(MachinesFolder, TARGET_POSITIONS)
     if #prompts == 0 then return end
 
     table.insert(glitchThreads, task.spawn(function()
         while AutoGlitchEnabled do
-            local prompt = prompts[rng2:NextInteger(1, #prompts)]
-            if prompt and prompt.Enabled then fireproximityprompt(prompt) end
-            task.wait(0.1)
+
+            local character = player.Character
+            local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+
+            -- Jalankan hanya saat tidak duduk
+            if humanoid and humanoid.SeatPart == nil then
+                local prompt = prompts[rng2:NextInteger(1,#prompts)]
+
+                if prompt and prompt.Enabled then
+                    fireproximityprompt(prompt)
+                end
+            end
+
+            task.wait(0.3)
         end
     end))
+
     table.insert(glitchThreads, task.spawn(function()
         while AutoGlitchEnabled do
             MachineRemote:FireServer()
@@ -298,20 +299,29 @@ local function RunGlitchAbove10()
     end))
 end
 
-local AutoGlitchToggle = Tabs.Farm:AddToggle("AutoGlitch", { Title = "Auto Glitch", Default = false })
+
+local AutoGlitchToggle = Tabs.Farm:AddToggle("AutoGlitch", {
+    Title = "Auto Glitch",
+    Default = false
+})
+
 AutoGlitchToggle:OnChanged(function()
+
     if Options.AutoGlitch.Value then
         stopAllGlitch()
         AutoGlitchEnabled = true
-        if rebirths.Value <= 10 then
-            RunGlitchBelow10()
-        else
-            RunGlitchAbove10()
-        end
+        RunAutoGlitch()
     else
         stopAllGlitch()
     end
+
 end)
+
+
+
+
+
+
 
 -- AUTO SPIN
 local AutoSpin = false
@@ -329,6 +339,8 @@ AutoSpinToggle:OnChanged(function()
     end
 end)
 
+
+
 -- AUTO REBIRTH
 local AutoRebirth = false
 
@@ -345,6 +357,8 @@ task.spawn(function()
         task.wait(0.05)
     end
 end)
+
+
 
 -- ===========================================================
 --  TAB COMBAT (dulu Player)
@@ -445,6 +459,8 @@ localPly.CharacterAdded:Connect(function()
     end
 end)
 
+
+
 -- AUTO KILL ALL
 local runningKillAll = false
 
@@ -498,6 +514,8 @@ end)
 --  TAB QUEST
 -- ===========================================================
 
+
+
 -- [1] REDEEM CODE
 Tabs.Quest:AddToggle("CollectCode", {
     Title = "Redeem Code",
@@ -518,6 +536,8 @@ Tabs.Quest:AddToggle("CollectCode", {
         end
     end
 })
+
+
 
 -- [2] COLLECT CHEST
 Tabs.Quest:AddToggle("CollectChest", {
@@ -544,6 +564,8 @@ Tabs.Quest:AddToggle("CollectChest", {
     end
 })
 
+
+
 -- [3] COLLECT REWARD
 Tabs.Quest:AddToggle("CollectReward", {
     Title = "Collect Reward",
@@ -565,6 +587,8 @@ Tabs.Quest:AddToggle("CollectReward", {
         end
     end
 })
+
+
 
 -- ===========================================================
 --  TAB MISC
@@ -662,6 +686,6 @@ Window:SelectTab(1)
 
 Fluent:Notify({
     Title = "Muscle Master",
-    Content = "Script loaded successfully!",
+    Content = "Loaded Succesfully!",
     Duration = 5
 })
