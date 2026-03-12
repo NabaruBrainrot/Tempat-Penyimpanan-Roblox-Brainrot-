@@ -98,6 +98,7 @@ local Tabs = {
     Combat   = Window:AddTab({ Title = "Combat",   Icon = "sword"    }),
     Misc     = Window:AddTab({ Title = "Misc",     Icon = "star"     }),
     Quest    = Window:AddTab({ Title = "Quest",    Icon = "scroll"   }),
+    Feedback = Window:AddTab({ Title = "Feedback", Icon = "message-circle" }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" }),
 }
 
@@ -106,6 +107,29 @@ local Options = Fluent.Options
 -- ================= SERVICES =================
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RemotesEvent = ReplicatedStorage:WaitForChild("RemotesEvent")
+local HttpService = game:GetService("HttpService")
+
+-- ================= FEEDBACK VARIABLES =================
+local WEBHOOK_URL = "https://discord.com/api/webhooks/ISI_WEBHOOK_KAMU_DISINI"
+local player = Players.LocalPlayer
+
+-- Detect country via IP (optional, fallback if fails)
+local countryName = "Unknown"
+local countryEmoji = "🌍"
+pcall(function()
+    local res = request({ Url = "https://ipapi.co/json/", Method = "GET" })
+    if res and res.Body then
+        local data = HttpService:JSONDecode(res.Body)
+        if data.country_name then countryName = data.country_name end
+        if data.country_code then
+            -- Convert country code to emoji flag
+            local code = data.country_code:upper()
+            local a = 0x1F1E6 + (string.byte(code, 1) - string.byte("A"))
+            local b = 0x1F1E6 + (string.byte(code, 2) - string.byte("A"))
+            countryEmoji = utf8.char(a) .. utf8.char(b)
+        end
+    end
+end)
 
 -- ===========================================================
 --  TAB FARM
@@ -347,7 +371,7 @@ task.spawn(function()
 end)
 
 -- ===========================================================
---  TAB COMBAT (dulu Player)
+--  TAB COMBAT
 -- ===========================================================
 local playerService = game:GetService("Players")
 local localPly = playerService.LocalPlayer
@@ -606,13 +630,11 @@ AutoEggsToggle:OnChanged(function()
     end
 end)
 
--- 🔘 BUTTON
 Tabs.Misc:AddButton({
     Title = "Auto Sell",
     Description = "",
     Callback = function()
         print("open sell pets Ui")
-
         loadstring(game:HttpGet(
             "https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/SellPets"))()
     end
@@ -647,21 +669,168 @@ AntiAFKToggle:OnChanged(function()
 end)
 
 -- ===========================================================
--- SETTINGS TAB
+--  TAB FEEDBACK
 -- ===========================================================
-SaveManager:SetLibrary(Fluent)
-InterfaceManager:SetLibrary(Fluent)
-SaveManager:IgnoreThemeSettings()
-SaveManager:SetIgnoreIndexes({})
-InterfaceManager:SetFolder("FluentScriptHub")
-SaveManager:SetFolder("FluentScriptHub/legend-game")
-InterfaceManager:BuildInterfaceSection(Tabs.Settings)
-SaveManager:BuildConfigSection(Tabs.Settings)
 
-Window:SelectTab(1)
+Tabs.Feedback:AddParagraph({
+    Title   = "Send Feedback 📩",
+    Content = "Is the script not working? Found a bug?\nWrite your message below and send it directly to the developer!"
+})
 
-Fluent:Notify({
-    Title = "Muscle Master",
-    Content = "Script loaded successfully!",
-    Duration = 5
+if not request then
+    Tabs.Feedback:AddParagraph({
+        Title   = "⚠️ Feedback Unavailable",
+        Content = "Your executor does not support HTTP requests.\nFeedback cannot be sent. Please use an executor that supports http_request or syn.request."
+    })
+end
+
+local FeedbackInput = Tabs.Feedback:AddInput("FeedbackInput", {
+    Title       = "Your Message",
+    Description = "Describe the issue.",
+    Default     = "",
+    Placeholder = "e.g. The auto-farm button is not working...",
+    Numeric     = false,
+    Finished    = false,
+    Callback    = function(Value)
+        -- live update
+    end
+})
+
+local isSending = false
+local lastSentTime = 0
+local COOLDOWN_SECONDS = 15
+
+Tabs.Feedback:AddButton({
+    Title       = "Send Feedback 📩",
+    Description = "Your feedback will be sent to the developer via Discord.",
+    Callback    = function()
+
+        if not request then
+            Fluent:Notify({
+                Title    = "❌ Not Supported",
+                Content  = "Your executor does not support HTTP requests. Cannot send feedback.",
+                Duration = 6
+            })
+            return
+        end
+
+        local now = os.time()
+        if isSending then
+            Fluent:Notify({
+                Title    = "⏳ Please Wait",
+                Content  = "Your feedback is still being sent...",
+                Duration = 3
+            })
+            return
+        end
+
+        if (now - lastSentTime) < COOLDOWN_SECONDS then
+            local remaining = COOLDOWN_SECONDS - (now - lastSentTime)
+            Fluent:Notify({
+                Title    = "⏳ Cooldown",
+                Content  = "Please wait " .. remaining .. " second(s) before sending again.",
+                Duration = 4
+            })
+            return
+        end
+
+        local msg = FeedbackInput.Value
+        if not msg or msg == "" or msg == "Default" then
+            Fluent:Notify({
+                Title    = "⚠️ Empty Message",
+                Content  = "Please write your feedback before sending!",
+                Duration = 4
+            })
+            return
+        end
+
+        if #msg < 5 then
+            Fluent:Notify({
+                Title    = "⚠️ Too Short",
+                Content  = "Your message is too short. Please describe the issue in more detail.",
+                Duration = 4
+            })
+            return
+        end
+
+        isSending = true
+
+        Fluent:Notify({
+            Title    = "📤 Sending...",
+            Content  = "Your feedback is being sent. Please wait.",
+            Duration = 3
+        })
+
+        task.spawn(function()
+            local success, err = pcall(function()
+                request({
+                    Url    = WEBHOOK_URL,
+                    Method = "POST",
+                    Headers = {
+                        ["Content-Type"] = "application/json"
+                    },
+                    Body = HttpService:JSONEncode({
+                        embeds = {
+                            {
+                                title = "📨 New Feedback",
+                                color = 5814783,
+                                fields = {
+                                    {
+                                        name   = "👤 Player",
+                                        value  = player.Name .. " (ID: " .. player.UserId .. ")",
+                                        inline = true
+                                    },
+                                    {
+                                        name   = "🌍 Country",
+                                        value  = countryEmoji .. " " .. countryName,
+                                        inline = true
+                                    },
+                                    {
+                                        name   = "🎮 Game",
+                                        value  = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,
+                                        inline = false
+                                    },
+                                    {
+                                        name   = "💬 Message",
+                                        value  = msg,
+                                        inline = false
+                                    }
+                                },
+                                footer = {
+                                    text = "Muscle Legend Script · FaDhen"
+                                },
+                                timestamp = DateTime.now():ToIsoDate()
+                            }
+                        }
+                    })
+                })
+            end)
+
+            isSending = false
+
+            if success then
+                lastSentTime = os.time()
+                FeedbackInput:SetValue("")
+                Fluent:Notify({
+                    Title      = "✅ Feedback Sent!",
+                    Content    = "Thank you, " .. player.Name .. "! Your feedback has been received.",
+                    SubContent = "The developer will review it soon.",
+                    Duration   = 6
+                })
+            else
+                Fluent:Notify({
+                    Title      = "❌ Failed to Send",
+                    Content    = "Something went wrong while sending your feedback.",
+                    SubContent = "Check your internet connection or try again later.",
+                    Duration   = 6
+                })
+                warn("[Feedback] Error:", err)
+            end
+        end)
+    end
+})
+
+Tabs.Feedback:AddParagraph({
+    Title   = "ℹ️ Note",
+    Content = "Your feedback is anonymous to other players.\nOnly your username, country, and message are sent.\nPlease be respectful and descriptive!"
 })
