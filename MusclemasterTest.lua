@@ -539,31 +539,6 @@ Tabs.Quest:AddToggle("CollectCode", {
 
 
 
--- [2] COLLECT CHEST
-Tabs.Quest:AddToggle("CollectChest", {
-    Title = "Collect Chest",
-    Description = "Claim all chests automatically",
-    Default = false,
-    Callback = function(state)
-        if state then
-            task.spawn(function()
-                local remote = RemotesEvent:WaitForChild("ChestClaimEvent")
-                local chests = {
-                    "Legend Chest", "Big Chest", "Stone Chest",
-                    "Frost Chest", "Master Chest", "Emperor Chest",
-                    "Ocean Chest", "Chest"
-                }
-                for _, chest in ipairs(chests) do
-                    if not Options.CollectChest.Value then break end
-                    remote:FireServer(chest)
-                    task.wait(2)
-                end
-                Options.CollectChest:SetValue(false)
-            end)
-        end
-    end
-})
-
 
 
 -- [3] COLLECT REWARD
