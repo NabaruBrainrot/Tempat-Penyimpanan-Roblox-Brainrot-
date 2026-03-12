@@ -1,4 +1,3 @@
-
 pcall(function()
     local cg = game:GetService("CoreGui"):FindFirstChild("PersistentToggleGui")
     if cg then cg:Destroy() end
@@ -686,7 +685,7 @@ end
 
 local FeedbackInput = Tabs.Feedback:AddInput("FeedbackInput", {
     Title       = "Your Message",
-    Description = "Describe the issue or leave your feedback here.",
+    Description = "Describe the issue.",
     Default     = "",
     Placeholder = "e.g. The auto-farm button is not working...",
     Numeric     = false,
