@@ -694,10 +694,6 @@ local function disableInstantHatch()
     print("Instant Hatch: DISABLED")
 end
 
-Tabs.Misc:AddParagraph({
-    Title = "Egg Hatch",
-    Content = "Control egg hatching behavior below."
-})
 
 local InstantHatchToggle = Tabs.Misc:AddToggle("InstantHatch", {
     Title = "Instant Hatch",
