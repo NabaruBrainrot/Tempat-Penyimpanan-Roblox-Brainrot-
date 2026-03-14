@@ -103,225 +103,138 @@ local Tabs = {
 
 local Options = Fluent.Options
 
--- ================= SERVICES =================
+-- ================= SERVICES (SHARED) =================
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RemotesEvent = ReplicatedStorage:WaitForChild("RemotesEvent")
+local RemotesEvent      = ReplicatedStorage:WaitForChild("RemotesEvent", 10)
+local machineactive     = RemotesEvent:WaitForChild("MachineActiveFunction", 10)
+local MachineActiveEvent = RemotesEvent:WaitForChild("MachineActiveEvent", 10)
+local spinfu            = RemotesEvent:WaitForChild("SpinFunction", 10)
+local LocalPlayer       = Players.LocalPlayer
+local machineuse        = LocalPlayer:WaitForChild("Machineuse", 10)
+local machinesFolder    = workspace:WaitForChild("MachinesFolder", 10)
+
+if not machineactive or not MachineActiveEvent or not spinfu then
+    warn("[Script] Gagal menemukan RemoteEvents!")
+    -- tidak pakai return agar toggle tetap muncul
+end
 
 -- ===========================================================
 --  TAB FARM
 -- ===========================================================
 
-
--- AUTO FARM
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-
-local AutoFarmEnabled = false
-local runningThreads = {}
-local rng = Random.new()
-
-local function stopAll()
-    AutoFarmEnabled = false
-    for _, t in ipairs(runningThreads) do
-        if t then task.cancel(t) end
-    end
-    table.clear(runningThreads)
-end
-
-local function GetPrompts(folder, positions)
-    local EPSILON = 0.01
-    local prompts = {}
-
-    for _, obj in ipairs(folder:GetDescendants()) do
-        if obj:IsA("BasePart") then
-            local pos = obj.Position
-
-            for _, target in ipairs(positions) do
-                if (pos - target).Magnitude < EPSILON then
-                    local prompt = obj:FindFirstChild("ProximityPromptMachine")
-
-                    if prompt and prompt:IsA("ProximityPrompt") then
-                        table.insert(prompts, prompt)
-                    end
-                end
-            end
-        end
-    end
-
-    return prompts
-end
-
-
-local function RunAutoFarm()
-
-    local TARGET_POSITIONS = {
-        Vector3.new(2747.89795, 7.65916204, 105.534966),
-        Vector3.new(2747.89795, 7.65916204, 126.657951),
-        Vector3.new(2743.69092, 11.6664858, 233.435394),
-        Vector3.new(2743.69092, 11.6664858, 258.496918),
-    }
-
-    local MachinesFolder = workspace:WaitForChild("MachinesFolder")
-    local MachineRemote = RemotesEvent.MachineActiveEvent
-
-    local prompts = GetPrompts(MachinesFolder, TARGET_POSITIONS)
-    if #prompts == 0 then return end
-
-    table.insert(runningThreads, task.spawn(function()
-        while AutoFarmEnabled do
-
-            local character = player.Character
-            local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-
-            -- hanya jalan saat tidak duduk
-            if humanoid and humanoid.SeatPart == nil then
-                local prompt = prompts[rng:NextInteger(1,#prompts)]
-
-                if prompt and prompt.Enabled then
-                    fireproximityprompt(prompt)
-                end
-            end
-
-            task.wait(0.3)
-        end
-    end))
-
-    table.insert(runningThreads, task.spawn(function()
-        while AutoFarmEnabled do
-            MachineRemote:FireServer()
-            task.wait(0.05)
-        end
-    end))
-end
-
-
+-- AUTO FARM (Bench Press + Pull Ups)
 local AutoFarmToggle = Tabs.Farm:AddToggle("AutoFarm", {
     Title = "Auto Farm",
     Default = false
 })
 
-AutoFarmToggle:OnChanged(function()
-
-    if Options.AutoFarm.Value then
-        stopAll()
-        AutoFarmEnabled = true
-        RunAutoFarm()
-    else
-        stopAll()
+local farmMachines = {}
+local farmTargetNames = {
+    ["Bench Press Muscle Emperor"] = true,
+    ["Pull Ups Muscle Emperor"] = true,
+}
+for _, v in ipairs(machinesFolder:GetChildren()) do
+    if farmTargetNames[v.Name] then
+        table.insert(farmMachines, v)
     end
+end
 
+local farmCooldown = {}
+local FARM_COOLDOWN = 0.5
+
+local function tryUseFarmMachine(machine)
+    local now = tick()
+    if (now - (farmCooldown[machine] or 0)) < FARM_COOLDOWN then return end
+    farmCooldown[machine] = now
+    local ok, err = pcall(function()
+        machineactive:InvokeServer(machine, true)
+    end)
+    if not ok then
+        warn("[AutoFarm] Gagal invoke:", machine.Name, "-", err)
+    end
+end
+
+task.spawn(function()
+    while true do
+        task.wait(0.01)
+        if not AutoFarmToggle.Value then continue end
+
+        if machineuse.Value == nil then
+            task.wait(1)
+            for _, machine in ipairs(farmMachines) do
+                if not AutoFarmToggle.Value then break end
+                if machineuse.Value ~= nil then break end
+                tryUseFarmMachine(machine)
+                task.wait(0.5)
+            end
+        else
+            local ok, err = pcall(function()
+                MachineActiveEvent:FireServer()
+            end)
+            if not ok then
+                warn("[AutoFarm] FireServer gagal:", err)
+                task.wait(0.5)
+            end
+        end
+    end
 end)
 
-
-
-
-
-
-
--- AUTO GLITCH
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-
-local AutoGlitchEnabled = false
-local glitchThreads = {}
-local rng2 = Random.new()
-
-local function stopAllGlitch()
-    AutoGlitchEnabled = false
-    for _, t in ipairs(glitchThreads) do
-        if t then task.cancel(t) end
-    end
-    table.clear(glitchThreads)
-end
-
-local function CollectPrompts(folder, positions)
-    local EPSILON = 0.01
-    local prompts = {}
-
-    for _, obj in ipairs(folder:GetDescendants()) do
-        if obj:IsA("BasePart") then
-            local pos = obj.Position
-
-            for _, cf in ipairs(positions) do
-                if (pos - cf.Position).Magnitude < EPSILON then
-                    local prompt = obj:FindFirstChild("ProximityPromptMachine")
-
-                    if prompt and prompt:IsA("ProximityPrompt") then
-                        table.insert(prompts, prompt)
-                    end
-                end
-            end
-        end
-    end
-
-    return prompts
-end
-
-local function RunAutoGlitch()
-
-    local TARGET_POSITIONS = {
-        CFrame.new(2712.48022, 3.71804452, 299.783295),
-        CFrame.new(2691.11182, 3.71804452, 299.783295),
-        CFrame.new(2613.02808, 4.78257084, 289.732025),
-        CFrame.new(2584.5542, 4.78257084, 289.732025),
-    }
-
-    local MachinesFolder = workspace:WaitForChild("MachinesFolder")
-    local MachineRemote = RemotesEvent.MachineActiveEvent
-
-    local prompts = CollectPrompts(MachinesFolder, TARGET_POSITIONS)
-    if #prompts == 0 then return end
-
-    table.insert(glitchThreads, task.spawn(function()
-        while AutoGlitchEnabled do
-
-            local character = player.Character
-            local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-
-            -- Jalankan hanya saat tidak duduk
-            if humanoid and humanoid.SeatPart == nil then
-                local prompt = prompts[rng2:NextInteger(1,#prompts)]
-
-                if prompt and prompt.Enabled then
-                    fireproximityprompt(prompt)
-                end
-            end
-
-            task.wait(0.3)
-        end
-    end))
-
-    table.insert(glitchThreads, task.spawn(function()
-        while AutoGlitchEnabled do
-            MachineRemote:FireServer()
-            task.wait(0.05)
-        end
-    end))
-end
-
-
+-- AUTO GLITCH (Squat + Rock Squat)
 local AutoGlitchToggle = Tabs.Farm:AddToggle("AutoGlitch", {
     Title = "Auto Glitch",
     Default = false
 })
 
-AutoGlitchToggle:OnChanged(function()
-
-    if Options.AutoGlitch.Value then
-        stopAllGlitch()
-        AutoGlitchEnabled = true
-        RunAutoGlitch()
-    else
-        stopAllGlitch()
+local glitchMachines = {}
+local glitchTargetNames = {
+    ["Squat Muscle Emperor"] = true,
+    ["Rock Squat Muscle Emperor"] = true,
+}
+for _, v in ipairs(machinesFolder:GetChildren()) do
+    if glitchTargetNames[v.Name] then
+        table.insert(glitchMachines, v)
     end
+end
 
+local glitchCooldown = {}
+local GLITCH_COOLDOWN = 0.5
+
+local function tryUseGlitchMachine(machine)
+    local now = tick()
+    if (now - (glitchCooldown[machine] or 0)) < GLITCH_COOLDOWN then return end
+    glitchCooldown[machine] = now
+    local ok, err = pcall(function()
+        machineactive:InvokeServer(machine, true)
+    end)
+    if not ok then
+        warn("[AutoGlitch] Gagal invoke:", machine.Name, "-", err)
+    end
+end
+
+task.spawn(function()
+    while true do
+        task.wait(0.01)
+        if not AutoGlitchToggle.Value then continue end
+
+        if machineuse.Value == nil then
+            task.wait(1)
+            for _, machine in ipairs(glitchMachines) do
+                if not AutoGlitchToggle.Value then break end
+                if machineuse.Value ~= nil then break end
+                tryUseGlitchMachine(machine)
+                task.wait(0.5)
+            end
+        else
+            local ok, err = pcall(function()
+                MachineActiveEvent:FireServer()
+            end)
+            if not ok then
+                warn("[AutoGlitch] FireServer gagal:", err)
+                task.wait(0.5)
+            end
+        end
+    end
 end)
-
-
-
-
-
-
 
 -- AUTO SPIN
 local AutoSpin = false
@@ -338,8 +251,6 @@ AutoSpinToggle:OnChanged(function()
         end)
     end
 end)
-
-
 
 -- AUTO REBIRTH
 local AutoRebirth = false
@@ -358,11 +269,10 @@ task.spawn(function()
     end
 end)
 
-
-
 -- ===========================================================
---  TAB COMBAT (dulu Player)
+--  TAB COMBAT
 -- ===========================================================
+
 local playerService = game:GetService("Players")
 local localPly = playerService.LocalPlayer
 
@@ -371,198 +281,151 @@ local whitelist = {}
 local selectedPlayerName = nil
 
 local function EquipTool(toolName)
-    local backpack = localPly:FindFirstChild("Backpack")
-    if backpack then
-        local tool = backpack:FindFirstChild(toolName)
-        if tool and localPly.Character and not localPly.Character:FindFirstChild(toolName) then
-            local humanoid = localPly.Character:FindFirstChildOfClass("Humanoid")
-            if humanoid then humanoid:EquipTool(tool) end
-        end
-    end
-end
-
-local function TeleportToTarget()
-    if not selectedPlayerName then return end
-    local target = playerService:FindFirstChild(selectedPlayerName)
-    if not target or whitelist[target.Name] then return end
-    if not target.Character or not localPly.Character then return end
-    local targetHRP = target.Character:FindFirstChild("HumanoidRootPart")
-    local myHRP = localPly.Character:FindFirstChild("HumanoidRootPart")
-    if not targetHRP or not myHRP then return end
-    myHRP.CFrame = targetHRP.CFrame
+	local backpack = localPly:FindFirstChild("Backpack")
+	if backpack then
+		local tool = backpack:FindFirstChild(toolName)
+		if tool and localPly.Character and not localPly.Character:FindFirstChild(toolName) then
+			local humanoid = localPly.Character:FindFirstChildOfClass("Humanoid")
+			if humanoid then humanoid:EquipTool(tool) end
+		end
+	end
 end
 
 local function AutoKillOne()
-    while runningKill do
-        TeleportToTarget()
-        EquipTool("Punch")
-        local combat = localPly.Character and localPly.Character:FindFirstChild("Punch")
-        if combat then combat:Activate() end
-        task.wait(0.05)
-    end
+	while runningKill do
+		if selectedPlayerName then
+			local target = playerService:FindFirstChild(selectedPlayerName)
+			if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart")
+				and localPly.Character and localPly.Character:FindFirstChild("HumanoidRootPart") then
+				local startTime = tick()
+				while tick() - startTime < 0.5 and runningKill do
+					local myHRP = localPly.Character.HumanoidRootPart
+					local targetHRP = target.Character.HumanoidRootPart
+					myHRP.CFrame = targetHRP.CFrame
+					EquipTool("Punch")
+					local combat = localPly.Character:FindFirstChild("Punch")
+					if combat then combat:Activate() end
+					task.wait(0.05)
+				end
+			end
+		end
+		task.wait(0.1)
+	end
 end
 
 local function GetPlayerList()
-    local list = {}
-    for _, plr in ipairs(playerService:GetPlayers()) do
-        if plr ~= localPly then
-            table.insert(list, plr.Name)
-        end
-    end
-    return list
+	local list = {}
+	for _, plr in ipairs(playerService:GetPlayers()) do
+		if plr ~= localPly then
+			table.insert(list, plr.Name)
+		end
+	end
+	return list
 end
 
 local PlayerDropdown = Tabs.Combat:AddDropdown("SelectPlayer", {
-    Title = "Select Player",
-    Values = GetPlayerList(),
-    Multi = false,
-    Default = 1,
+	Title = "Select Player",
+	Values = GetPlayerList(),
+	Multi = false,
+	Default = 1,
 })
 
 PlayerDropdown:OnChanged(function(Value)
-    selectedPlayerName = Value
+	selectedPlayerName = Value
 end)
 
 local function RefreshPlayerDropdown()
-    PlayerDropdown:SetValues(GetPlayerList())
+	PlayerDropdown:SetValues(GetPlayerList())
 end
 
 task.wait()
 RefreshPlayerDropdown()
 
 playerService.PlayerAdded:Connect(function()
-    task.wait(0.1)
-    RefreshPlayerDropdown()
+	task.wait(0.1)
+	RefreshPlayerDropdown()
 end)
 
 playerService.PlayerRemoving:Connect(function(plr)
-    task.wait()
-    RefreshPlayerDropdown()
-    if selectedPlayerName == plr.Name then
-        selectedPlayerName = nil
-    end
+	task.wait()
+	RefreshPlayerDropdown()
+	if selectedPlayerName == plr.Name then
+		selectedPlayerName = nil
+	end
 end)
 
 local KillPlayerToggle = Tabs.Combat:AddToggle("KillPlayer", { Title = "Kill Player", Default = false })
 KillPlayerToggle:OnChanged(function()
-    runningKill = Options.KillPlayer.Value
-    if runningKill then
-        task.spawn(AutoKillOne)
-    end
+	runningKill = Options.KillPlayer.Value
+	if runningKill then
+		game:GetService("ReplicatedStorage"):WaitForChild("RemotesEvent"):WaitForChild("SizeChanged"):FireServer(unpack({ 1 }))
+		task.spawn(AutoKillOne)
+	end
 end)
 
 localPly.CharacterAdded:Connect(function()
-    task.wait(1)
-    if Options.KillPlayer.Value then
-        runningKill = true
-        task.spawn(AutoKillOne)
-    end
+	task.wait(1)
+	if Options.KillPlayer.Value then
+		runningKill = true
+		game:GetService("ReplicatedStorage"):WaitForChild("RemotesEvent"):WaitForChild("SizeChanged"):FireServer(unpack({ 1 }))
+		task.spawn(AutoKillOne)
+	end
 end)
-
-
 
 -- AUTO KILL ALL
 local runningKillAll = false
 
 local function TeleportKillTargets()
-    for _, plr in ipairs(playerService:GetPlayers()) do
-        if runningKillAll
-        and plr ~= localPly
-        and not whitelist[plr.Name]
-        and plr.Character
-        and plr.Character:FindFirstChild("HumanoidRootPart")
-        and localPly.Character
-        and localPly.Character:FindFirstChild("HumanoidRootPart") then
-            local startTime = tick()
-            while tick() - startTime < 0.5 and runningKillAll do
-                local myHRP = localPly.Character.HumanoidRootPart
-                local targetHRP = plr.Character.HumanoidRootPart
-                myHRP.CFrame = targetHRP.CFrame
-                EquipTool("Punch")
-                local combat = localPly.Character:FindFirstChild("Punch")
-                if combat then combat:Activate() end
-                task.wait(0.05)
-            end
-        end
-    end
+	for _, plr in ipairs(playerService:GetPlayers()) do
+		if runningKillAll
+			and plr ~= localPly
+			and not whitelist[plr.Name]
+			and plr.Character
+			and plr.Character:FindFirstChild("HumanoidRootPart")
+			and localPly.Character
+			and localPly.Character:FindFirstChild("HumanoidRootPart") then
+			local startTime = tick()
+			while tick() - startTime < 0.5 and runningKillAll do
+				local myHRP = localPly.Character.HumanoidRootPart
+				local targetHRP = plr.Character.HumanoidRootPart
+				myHRP.CFrame = targetHRP.CFrame
+				EquipTool("Punch")
+				local combat = localPly.Character:FindFirstChild("Punch")
+				if combat then combat:Activate() end
+				task.wait(0.05)
+			end
+		end
+	end
 end
 
 local function AutoKillAll()
-    while runningKillAll do
-        TeleportKillTargets()
-        task.wait(0.1)
-    end
+	while runningKillAll do
+		TeleportKillTargets()
+		task.wait(0.1)
+	end
 end
 
 local AutoKillToggle = Tabs.Combat:AddToggle("AutoKill", { Title = "Auto Kill", Default = false })
 AutoKillToggle:OnChanged(function()
-    runningKillAll = Options.AutoKill.Value
-    if runningKillAll then
-        task.spawn(AutoKillAll)
-    end
+	runningKillAll = Options.AutoKill.Value
+	if runningKillAll then
+		game:GetService("ReplicatedStorage"):WaitForChild("RemotesEvent"):WaitForChild("SizeChanged"):FireServer(unpack({ 1 }))
+		task.spawn(AutoKillAll)
+	end
 end)
 
 localPly.CharacterAdded:Connect(function()
-    task.wait(1)
-    if Options.AutoKill.Value then
-        runningKillAll = true
-        task.spawn(AutoKillAll)
-    end
+	task.wait(1)
+	if Options.AutoKill.Value then
+		runningKillAll = true
+		game:GetService("ReplicatedStorage"):WaitForChild("RemotesEvent"):WaitForChild("SizeChanged"):FireServer(unpack({ 1 }))
+		task.spawn(AutoKillAll)
+	end
 end)
 
 -- ===========================================================
 --  TAB QUEST
 -- ===========================================================
-
-
-
--- [1] REDEEM CODE
-Tabs.Quest:AddToggle("CollectCode", {
-    Title = "Redeem Code",
-    Description = "Redeem all codes automatically",
-    Default = false,
-    Callback = function(state)
-        if state then
-            task.spawn(function()
-                local remote = RemotesEvent:WaitForChild("CodeEnterEvent")
-                local codes = {"Speedyblox", "MuscleDezz300", "Strongblox"}
-                for _, code in ipairs(codes) do
-                    if not Options.CollectCode.Value then break end
-                    remote:FireServer(code)
-                    task.wait(2)
-                end
-                Options.CollectCode:SetValue(false)
-            end)
-        end
-    end
-})
-
-
-
-
-
--- [3] COLLECT REWARD
-Tabs.Quest:AddToggle("CollectReward", {
-    Title = "Collect Reward",
-    Description = "Automatic reward claims while active",
-    Default = false,
-    Callback = function(state)
-        if state then
-            task.spawn(function()
-                local remote = RemotesEvent:WaitForChild("rewardClaim")
-                local rewards = {"reward1", "reward2", "reward3", "reward4", "reward5"}
-                while Options.CollectReward.Value do
-                    for _, reward in ipairs(rewards) do
-                        if not Options.CollectReward.Value then break end
-                        remote:FireServer(reward)
-                        task.wait(2)
-                    end
-                end
-            end)
-        end
-    end
-})
-
 
 -- ANTI AFK
 local VirtualUser = game:GetService("VirtualUser")
@@ -591,8 +454,6 @@ AntiAFKToggle:OnChanged(function()
         DisableAntiAFK()
     end
 end)
-
-
 
 -- ===========================================================
 --  TAB MISC
@@ -634,8 +495,7 @@ AutoEggsToggle:OnChanged(function()
     end
 end)
 
-
--- ================= INSTANT HATCH SCRIPT =================
+-- INSTANT HATCH
 local OpenPetEvent = RemotesEvent:WaitForChild("OpenPetEvent")
 
 local instantHatchEnabled = false
@@ -687,7 +547,6 @@ local function disableInstantHatch()
     print("Instant Hatch: DISABLED")
 end
 
-
 local InstantHatchToggle = Tabs.Misc:AddToggle("InstantHatch", {
     Title = "Instant Hatch",
     Description = "Toggle Instant Hatch (No Animation)",
@@ -703,21 +562,15 @@ InstantHatchToggle:OnChanged(function()
     end
 end)
 
-
--- 🔘 BUTTON
 Tabs.Misc:AddButton({
     Title = "Auto Sell",
     Description = "",
     Callback = function()
         print("open sell pets Ui")
-
         loadstring(game:HttpGet(
             "https://raw.githubusercontent.com/NabaruBrainrot/Tempat-Penyimpanan-Roblox-Brainrot-/refs/heads/main/SellPets"))()
     end
 })
-
-
-
 
 -- ===========================================================
 -- SETTINGS TAB
