@@ -1,5 +1,5 @@
 -- Konfigurasi
-local kodeRahasia = "SJHG-5T9U-QW2E-AS84-PL37-NM65"
+local kodeRahasia = "T3JHG-5T9U-QW2E-AS84-PL37-NM65"
 local linkKeyURL = "https://direct-link.net/1365093/7q20TsQcGj82"
 local statusFile = "fadhen_code.TheJusDinginBr5wh"
 local KEY_VALID_SECONDS = 259200 -- 24 jam
