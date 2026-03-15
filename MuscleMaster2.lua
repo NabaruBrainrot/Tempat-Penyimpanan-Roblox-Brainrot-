@@ -140,7 +140,7 @@ for _, v in ipairs(machinesFolder:GetChildren()) do
 end
 
 local farmCooldown = {}
-local FARM_COOLDOWN = 0.5
+local FARM_COOLDOWN = 0
 
 local function tryUseFarmMachine(machine)
     local now = tick()
@@ -197,7 +197,7 @@ for _, v in ipairs(machinesFolder:GetChildren()) do
 end
 
 local glitchCooldown = {}
-local GLITCH_COOLDOWN = 0.5
+local GLITCH_COOLDOWN = 0
 
 local function tryUseGlitchMachine(machine)
     local now = tick()
