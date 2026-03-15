@@ -48,7 +48,7 @@ toggleImageBtn.MouseLeave:Connect(function()
 end)
 
 -- ================= TARGET GUI (ANTI LAG) =================
-local TARGET_SIZE = UDim2.fromOffset(500, 340)
+local TARGET_SIZE = UDim2.fromOffset(490, 320)
 local targetFrame
 local isOpen = false
 local preloaded = false
@@ -85,17 +85,17 @@ local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.
 
 local Window = Fluent:CreateWindow({
     Title = "Muscle Master",
-    SubTitle = "Premium",
-    TabWidth = 160,
-    Size = UDim2.fromOffset(500, 340),
+    SubTitle = "",
+    TabWidth = 150,
+    Size = UDim2.fromOffset(490, 320),
     Acrylic = true,
     Theme = "Dark",
     MinimizeKey = Enum.KeyCode.LeftControl
 })
 
 local Tabs = {
-    Farm     = Window:AddTab({ Title = "Farm",     Icon = "sprout"   }),
-    Combat   = Window:AddTab({ Title = "Combat",   Icon = "sword"    }),
+    Farm     = Window:AddTab({ Title = "Main",     Icon = "sprout"   }),
+    Combat   = Window:AddTab({ Title = "Player",   Icon = "sword"    }),
     Misc     = Window:AddTab({ Title = "Misc",     Icon = "star"     }),
     Quest    = Window:AddTab({ Title = "Quest",    Icon = "scroll"   }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" }),
@@ -588,6 +588,6 @@ Window:SelectTab(1)
 
 Fluent:Notify({
     Title = "Muscle Master",
-    Content = "Loaded Succesfully!",
+    Content = "by fadhen",
     Duration = 5
 })
