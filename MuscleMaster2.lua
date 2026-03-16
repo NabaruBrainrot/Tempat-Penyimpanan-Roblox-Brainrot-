@@ -20,7 +20,7 @@ local toggleImageBtn = Instance.new("ImageButton")
 toggleImageBtn.Name = "HoverButton"
 toggleImageBtn.Size = UDim2.new(0, 55, 0, 55)
 toggleImageBtn.Position = UDim2.new(0, 10, 0.2, 0)
-toggleImageBtn.Image = "rbxassetid://108846514953006"
+toggleImageBtn.Image = "rbxassetid://105988616606103"
 toggleImageBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 toggleImageBtn.BackgroundTransparency = 0.7
 toggleImageBtn.Active = true
@@ -588,6 +588,6 @@ Window:SelectTab(1)
 
 Fluent:Notify({
     Title = "Muscle Master",
-    Content = "by fadhen",
+    Content = "by FaDhen",
     Duration = 5
 })
