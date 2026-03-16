@@ -1,0 +1,383 @@
+
+-- ============================================
+--         WindUI - Complete Script
+--         Ready to Execute
+-- ============================================
+
+local WindUI = loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"
+))()
+
+-- ============================================
+--               THEME SETUP
+-- ============================================
+
+WindUI:AddTheme({
+    Name = "MyTheme",
+
+    Accent      = Color3.fromHex("#18181b"),
+    Background  = Color3.fromHex("#101010"),
+    Outline     = Color3.fromHex("#FFFFFF"),
+    Text        = Color3.fromHex("#FFFFFF"),
+    Placeholder = Color3.fromHex("#7a7a7a"),
+    Button      = Color3.fromHex("#52525b"),
+    Icon        = Color3.fromHex("#a1a1aa"),
+})
+
+WindUI:SetTheme("MyTheme")
+
+-- ============================================
+--               WINDOW
+-- ============================================
+
+local Window = WindUI:CreateWindow({
+    Title  = "Workout Simulator 2",
+    Icon   = "zap",
+    Author = "by Angelia",
+    Folder = "Workout Simulator 2",
+
+    Size    = UDim2.fromOffset(580, 460),
+    MinSize = Vector2.new(560, 350),
+    MaxSize = Vector2.new(850, 560),
+
+    Transparent = true,
+    Theme       = "MyTheme",
+    Resizable   = true,
+})
+
+Window:Open()
+
+task.wait(0.5)
+
+-- ============================================
+--               TABS
+-- ============================================
+
+local HomeTab = Window:Tab({ Title = "Home", Icon = "house" })
+local MiscTab = Window:Tab({ Title = "Misc", Icon = "settings" })
+
+-- ============================================
+--          AUTO TOOL LOGIC (SHARED)
+-- ============================================
+
+local Players = game:GetService("Players")
+local player  = Players.LocalPlayer
+
+local autoWeightEnabled = false
+local autoSitupsEnabled = false
+local autoBoxingEnabled = false
+
+-- Unequip tool (kembalikan ke backpack)
+local function unequipTool(toolName)
+    local character = player.Character
+    if character then
+        local tool = character:FindFirstChild(toolName)
+        if tool then
+            tool.Parent = player.Backpack
+        end
+    end
+end
+
+-- Generic equip & loop function
+local function startAutoTool(toolName, getEnabled)
+    task.spawn(function()
+        while getEnabled() do
+            local character = player.Character
+            if character then
+                local backpack = player:FindFirstChild("Backpack")
+                local tool = (backpack and backpack:FindFirstChild(toolName))
+                           or character:FindFirstChild(toolName)
+
+                if tool then
+                    if tool.Parent ~= character then
+                        tool.Parent = character
+                    end
+                    if getEnabled() then
+                        tool:Activate()
+                    end
+                end
+            end
+            task.wait(0.01)
+        end
+
+        -- ✅ Saat loop selesai (toggle OFF), langsung unequip
+        unequipTool(toolName)
+    end)
+end
+
+-- ============================================
+--          HOME TAB - AUTO SECTION
+-- ============================================
+
+local AutoSection = HomeTab:Section({ Title = "Auto Farm" })
+
+-- Toggle: Auto Weight
+AutoSection:Toggle({
+    Title    = "Auto Weight",
+    Default  = false,
+    Callback = function(Value)
+        autoWeightEnabled = Value
+        if Value then
+            startAutoTool("Weight", function() return autoWeightEnabled end)
+
+            player.CharacterAdded:Connect(function()
+                task.wait(1)
+                if autoWeightEnabled then
+                    startAutoTool("Weight", function() return autoWeightEnabled end)
+                end
+            end)
+        end
+    end,
+})
+
+-- Toggle: Auto Situps
+AutoSection:Toggle({
+    Title    = "Auto Situps",
+    Default  = false,
+    Callback = function(Value)
+        autoSitupsEnabled = Value
+        if Value then
+            startAutoTool("Situps", function() return autoSitupsEnabled end)
+
+            player.CharacterAdded:Connect(function()
+                task.wait(1)
+                if autoSitupsEnabled then
+                    startAutoTool("Situps", function() return autoSitupsEnabled end)
+                end
+            end)
+        end
+    end,
+})
+
+-- Toggle: Auto Boxing
+AutoSection:Toggle({
+    Title    = "Auto Boxing",
+    Default  = false,
+    Callback = function(Value)
+        autoBoxingEnabled = Value
+        if Value then
+            startAutoTool("Boxing", function() return autoBoxingEnabled end)
+
+            player.CharacterAdded:Connect(function()
+                task.wait(1)
+                if autoBoxingEnabled then
+                    startAutoTool("Boxing", function() return autoBoxingEnabled end)
+                end
+            end)
+        end
+    end,
+})
+
+
+
+
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local strengthBoostEnabled = false
+local strengthConnection = nil
+local fakeValue = 0
+
+local kickTimer = nil
+
+local function startStrengthBoost()
+    if strengthConnection then
+        strengthConnection:Disconnect()
+        strengthConnection = nil
+    end
+
+    local leaderstats = player:WaitForChild("leaderstats")
+    local strength = leaderstats:WaitForChild("Strength")
+
+    fakeValue = math.max(fakeValue, strength.Value)
+    strength.Value = fakeValue
+
+    strengthConnection = strength:GetPropertyChangedSignal("Value"):Connect(function()
+        if strength.Value < fakeValue then
+            strength.Value = fakeValue
+        else
+            fakeValue = strength.Value
+        end
+    end)
+
+    -- Kick setelah 10 detik dengan pesan Exploit
+    kickTimer = task.delay(10, function()
+        if strengthBoostEnabled then
+            player:Kick("You tried to bypass system' Exploit Hacking")
+        end
+    end)
+
+    task.spawn(function()
+        while strengthBoostEnabled do
+            fakeValue += 1000
+            strength.Value = fakeValue
+            task.wait(0.05)
+        end
+    end)
+end
+
+local function stopStrengthBoost()
+    strengthBoostEnabled = false
+    if strengthConnection then
+        strengthConnection:Disconnect()
+        strengthConnection = nil
+    end
+    kickTimer = nil
+end
+
+player.CharacterAdded:Connect(function()
+    task.wait(1)
+    if strengthBoostEnabled then
+        startStrengthBoost()
+    end
+end)
+
+-- Toggle: Infinity Strength
+AutoSection:Toggle({
+    Title    = "Infinity Strength",
+    Default  = false,
+    Callback = function(Value)
+        strengthBoostEnabled = Value
+        if Value then
+            startStrengthBoost()
+        else
+            stopStrengthBoost()
+        end
+    end,
+})
+
+
+
+
+
+
+
+-- ============================================
+--               MISC TAB
+-- ============================================
+
+local MiscSection = MiscTab:Section({ Title = "Miscellaneous" })
+
+-- ✅ Anti-AFK Toggle
+local afkEnabled = false
+MiscSection:Toggle({
+    Title    = "Anti AFK",
+    Default  = false,
+    Callback = function(Value)
+        afkEnabled = Value
+        if Value then
+            task.spawn(function()
+                local VirtualUser = game:GetService("VirtualUser")
+                player.Idled:Connect(function()
+                    if afkEnabled then
+                        VirtualUser:CaptureController()
+                        VirtualUser:ClickButton2(Vector2.new())
+                    end
+                end)
+            end)
+        end
+    end,
+})
+
+MiscSection:Toggle({
+    Title    = "Infinite Jump",
+    Default  = false,
+    Callback = function(Value)
+        local uis = game:GetService("UserInputService")
+        if Value then
+            _G.InfJump = uis.JumpRequest:Connect(function()
+                local char = game.Players.LocalPlayer.Character
+                if char then
+                    local hrp = char:FindFirstChild("HumanoidRootPart")
+                    local hum = char:FindFirstChild("Humanoid")
+                    if hrp and hum and hum.FloorMaterial ~= Enum.Material.Air then
+                        hum:ChangeState(Enum.HumanoidStateType.Jumping)
+                    end
+                end
+            end)
+        else
+            if _G.InfJump then
+                _G.InfJump:Disconnect()
+            end
+        end
+    end,
+})
+
+MiscSection:Toggle({
+    Title    = "Speed Hack",
+    Default  = false,
+    Callback = function(Value)
+        local char = game.Players.LocalPlayer.Character
+        if char then
+            local hum = char:FindFirstChild("Humanoid")
+            if hum then
+                hum.WalkSpeed = Value and 50 or 16
+            end
+        end
+    end,
+})
+
+MiscSection:Slider({
+    Title   = "Walk Speed",
+    Min     = 300,
+    Max     = 500,
+    Default = 300,
+    Callback = function(Value)
+        local char = game.Players.LocalPlayer.Character
+        if char then
+            local hum = char:FindFirstChild("Humanoid")
+            if hum then
+                hum.WalkSpeed = Value
+            end
+        end
+    end,
+})
+
+MiscSection:Slider({
+    Title   = "Jump Power",
+    Min     = 100,
+    Max     = 500,
+    Default = 100,
+    Callback = function(Value)
+        local char = game.Players.LocalPlayer.Character
+        if char then
+            local hum = char:FindFirstChild("Humanoid")
+            if hum then
+                hum.JumpPower = Value
+            end
+        end
+    end,
+})
+
+MiscSection:Button({
+    Title    = "Reset Character",
+    Callback = function()
+        local char = game.Players.LocalPlayer.Character
+        if char then
+            local hum = char:FindFirstChild("Humanoid")
+            if hum then
+                hum.Health = 0
+            end
+        end
+    end,
+})
+
+MiscSection:Input({
+    Title       = "Chat Message",
+    Placeholder = "Type something...",
+    Callback    = function(Value)
+        game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(Value, "All")
+    end,
+})
+
+-- ============================================
+--               NOTIFICATION STARTUP
+-- ============================================
+
+WindUI:Notification({
+    Title    = "Script Loaded!",
+    Content  = "Angelia berhasil diload. Selamat menggunakan!",
+    Icon     = "check",
+    Duration = 5,
+})
