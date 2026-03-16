@@ -214,6 +214,8 @@ AutoSection:Toggle({
 
 local MiscSection = MiscTab:Section({ Title = "Miscellaneous" })
 
+
+
 -- ✅ Anti-AFK Toggle
 local afkEnabled = false
 MiscSection:Toggle({
@@ -235,29 +237,9 @@ MiscSection:Toggle({
     end,
 })
 
-MiscSection:Toggle({
-    Title    = "Infinite Jump",
-    Default  = false,
-    Callback = function(Value)
-        local uis = game:GetService("UserInputService")
-        if Value then
-            _G.InfJump = uis.JumpRequest:Connect(function()
-                local char = game.Players.LocalPlayer.Character
-                if char then
-                    local hrp = char:FindFirstChild("HumanoidRootPart")
-                    local hum = char:FindFirstChild("Humanoid")
-                    if hrp and hum and hum.FloorMaterial ~= Enum.Material.Air then
-                        hum:ChangeState(Enum.HumanoidStateType.Jumping)
-                    end
-                end
-            end)
-        else
-            if _G.InfJump then
-                _G.InfJump:Disconnect()
-            end
-        end
-    end,
-})
+
+
+
 
 MiscSection:Toggle({
     Title    = "Speed Hack",
@@ -267,43 +249,28 @@ MiscSection:Toggle({
         if char then
             local hum = char:FindFirstChild("Humanoid")
             if hum then
-                hum.WalkSpeed = Value and 50 or 16
+                hum.WalkSpeed = Value and 300 or 16
             end
         end
     end,
 })
 
-MiscSection:Slider({
-    Title   = "Walk Speed",
-    Min     = 300,
-    Max     = 500,
-    Default = 300,
+MiscSection:Toggle({
+    Title    = "Jump Power",
+    Default  = false,
     Callback = function(Value)
         local char = game.Players.LocalPlayer.Character
         if char then
             local hum = char:FindFirstChild("Humanoid")
             if hum then
-                hum.WalkSpeed = Value
+                hum.JumpPower = Value and 300 or 50
             end
         end
     end,
 })
 
-MiscSection:Slider({
-    Title   = "Jump Power",
-    Min     = 100,
-    Max     = 500,
-    Default = 100,
-    Callback = function(Value)
-        local char = game.Players.LocalPlayer.Character
-        if char then
-            local hum = char:FindFirstChild("Humanoid")
-            if hum then
-                hum.JumpPower = Value
-            end
-        end
-    end,
-})
+
+
 
 MiscSection:Button({
     Title    = "Reset Character",
