@@ -20,7 +20,7 @@ local toggleImageBtn = Instance.new("ImageButton")
 toggleImageBtn.Name = "HoverButton"
 toggleImageBtn.Size = UDim2.new(0, 55, 0, 55)
 toggleImageBtn.Position = UDim2.new(0, 10, 0.2, 0)
-toggleImageBtn.Image = "rbxassetid://108846514953006"
+toggleImageBtn.Image = "rbxassetid://105988616606103"
 toggleImageBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 toggleImageBtn.BackgroundTransparency = 0.7
 toggleImageBtn.Active = true
@@ -48,7 +48,7 @@ toggleImageBtn.MouseLeave:Connect(function()
 end)
 
 -- ================= TARGET GUI (ANTI LAG) =================
-local TARGET_SIZE = UDim2.new(0, 500, 0, 340)
+local TARGET_SIZE = UDim2.new(0, 490, 0, 320)
 local targetFrame
 local isOpen = false
 local preloaded = false
@@ -89,10 +89,10 @@ local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/d
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
 local Window = Fluent:CreateWindow({
-    Title = "Muscle Legend " .. Fluent.Version,
+    Title = "Fluent UI " .. Fluent.Version,
     SubTitle = "by FaDhen",
-    TabWidth = 160,
-    Size = UDim2.fromOffset(500, 340),
+    TabWidth = 150,
+    Size = UDim2.fromOffset(490, 320),
     Acrylic = true, -- The blur may be detectable, setting this to false disables blur entirely
     Theme = "Dark",
     MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
@@ -338,7 +338,7 @@ Window:SelectTab(1)
 Fluent:Notify({
     Title = "Fluent",
     Content = "The script has been loaded.",
-    Duration = 8
+    Duration = 5
 })
 
 -- You can use the SaveManager:LoadAutoloadConfig() to load a config
