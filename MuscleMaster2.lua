@@ -235,38 +235,169 @@ task.spawn(function()
     end
 end)
 
--- AUTO SPIN
-local AutoSpin = false
 
-local AutoSpinToggle = Tabs.Farm:AddToggle("AutoSpin", { Title = "Auto Spin", Default = false })
-AutoSpinToggle:OnChanged(function()
-    AutoSpin = Options.AutoSpin.Value
-    if AutoSpin then
-        task.spawn(function()
-            while AutoSpin do
-                RemotesEvent:WaitForChild("SpinFunction"):InvokeServer()
-                task.wait(0.1)
-            end
-        end)
+-- AUTO GLITCH V2
+local AutoGlitchToggle = Tabs.Farm:AddToggle("AutoGlitch", {
+    Title = "Auto Glitch V2",
+    Default = false
+})
+
+local glitchMachines = {}
+local glitchTargetNames = {
+    ["Squat Ocean"] = true,
+    ["Squat Ocean"] = true,
+}
+for _, v in ipairs(machinesFolder:GetChildren()) do
+    if glitchTargetNames[v.Name] then
+        table.insert(glitchMachines, v)
     end
-end)
+end
 
--- AUTO REBIRTH
-local AutoRebirth = false
+local glitchCooldown = {}
+local GLITCH_COOLDOWN = 0
 
-local AutoRebirthToggle = Tabs.Farm:AddToggle("AutoRebirth", { Title = "Auto Rebirth", Default = false })
-AutoRebirthToggle:OnChanged(function()
-    AutoRebirth = Options.AutoRebirth.Value
-end)
+local function tryUseGlitchMachine(machine)
+    local now = tick()
+    if (now - (glitchCooldown[machine] or 0)) < GLITCH_COOLDOWN then return end
+    glitchCooldown[machine] = now
+    local ok, err = pcall(function()
+        machineactive:InvokeServer(machine, true)
+    end)
+    if not ok then
+        warn("[AutoGlitch] Gagal invoke:", machine.Name, "-", err)
+    end
+end
 
 task.spawn(function()
     while true do
+        task.wait(0.01)
+        if not AutoGlitchToggle.Value then continue end
+
+        if machineuse.Value == nil then
+            task.wait(1)
+            for _, machine in ipairs(glitchMachines) do
+                if not AutoGlitchToggle.Value then break end
+                if machineuse.Value ~= nil then break end
+                tryUseGlitchMachine(machine)
+                task.wait(0.5)
+            end
+        else
+            local ok, err = pcall(function()
+                MachineActiveEvent:FireServer()
+            end)
+            if not ok then
+                warn("[AutoGlitch] FireServer gagal:", err)
+                task.wait(0.5)
+            end
+        end
+    end
+end)
+
+
+
+
+-- AUTO REBIRTH
+local AutoRebirth = false
+local ConfirmGui = nil
+
+-- ===== TOGGLE (deklarasi dulu sebelum fungsi GUI) =====
+local AutoRebirthToggle = Tabs.Farm:AddToggle("AutoRebirth", {
+    Title = "Auto Rebirth",
+    Default = false
+})
+
+-- ===== GUI FUNCTION =====
+local function CreateConfirmGui()
+    if ConfirmGui and ConfirmGui.Parent then return end
+
+    local ScreenGui = Instance.new("ScreenGui")
+    ConfirmGui = ScreenGui
+    ScreenGui.Name = "ConfirmRebirthGui"
+    ScreenGui.Parent = game.CoreGui
+    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    ScreenGui.DisplayOrder = 999999
+
+    local Frame = Instance.new("Frame")
+    Frame.Size = UDim2.new(0, 320, 0, 160)
+    Frame.Position = UDim2.new(0.5, -160, 0.5, -80)
+    Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    Frame.Parent = ScreenGui
+    Instance.new("UICorner", Frame)
+
+    local Stroke = Instance.new("UIStroke", Frame)
+    Stroke.Color = Color3.fromRGB(80, 80, 80)
+
+    local Title = Instance.new("TextLabel")
+    Title.Size = UDim2.new(1, 0, 0.5, 0)
+    Title.Text = "Enable Auto Rebirth?"
+    Title.TextColor3 = Color3.new(1, 1, 1)
+    Title.BackgroundTransparency = 1
+    Title.TextScaled = true
+    Title.Font = Enum.Font.GothamBold
+    Title.Parent = Frame
+
+    local YesBtn = Instance.new("TextButton")
+    YesBtn.Size = UDim2.new(0.45, 0, 0.35, 0)
+    YesBtn.Position = UDim2.new(0.05, 0, 0.6, 0)
+    YesBtn.Text = "YES"
+    YesBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+    YesBtn.TextColor3 = Color3.new(1, 1, 1)
+    YesBtn.TextScaled = true
+    YesBtn.Parent = Frame
+    Instance.new("UICorner", YesBtn)
+
+    local NoBtn = Instance.new("TextButton")
+    NoBtn.Size = UDim2.new(0.45, 0, 0.35, 0)
+    NoBtn.Position = UDim2.new(0.5, 0, 0.6, 0)
+    NoBtn.Text = "NO"
+    NoBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+    NoBtn.TextColor3 = Color3.new(1, 1, 1)
+    NoBtn.TextScaled = true
+    NoBtn.Parent = Frame
+    Instance.new("UICorner", NoBtn)
+
+    YesBtn.MouseButton1Click:Connect(function()
+        AutoRebirth = true
+        ScreenGui:Destroy()
+        ConfirmGui = nil
+    end)
+
+    NoBtn.MouseButton1Click:Connect(function()
+        AutoRebirth = false
+        ScreenGui:Destroy()
+        ConfirmGui = nil
+        -- SetValue sekarang aman karena toggle sudah dideklarasi di atas
+        AutoRebirthToggle:SetValue(false)
+    end)
+end
+
+-- ===== ON CHANGED =====
+AutoRebirthToggle:OnChanged(function()
+    if Options.AutoRebirth.Value then
+        CreateConfirmGui()
+    else
+        AutoRebirth = false
+        if ConfirmGui then
+            ConfirmGui:Destroy()
+            ConfirmGui = nil
+        end
+    end
+end)
+
+-- ===== LOOP =====
+task.spawn(function()
+    while true do
         if AutoRebirth then
-            RemotesEvent:WaitForChild("RebirthEvent"):FireServer()
+            if RemotesEvent and RemotesEvent:FindFirstChild("RebirthEvent") then
+                RemotesEvent:WaitForChild("RebirthEvent"):FireServer()
+            end
         end
         task.wait(0.05)
     end
 end)
+
+
+
 
 -- ===========================================================
 --  TAB COMBAT
@@ -453,6 +584,55 @@ AntiAFKToggle:OnChanged(function()
         DisableAntiAFK()
     end
 end)
+
+
+
+
+
+-- AUTO SPIN
+local AutoSpin = false
+
+local AutoSpinToggle = Tabs.Quest:AddToggle("AutoSpin", { Title = "Auto Spin", Default = false })
+AutoSpinToggle:OnChanged(function()
+    AutoSpin = Options.AutoSpin.Value
+    if AutoSpin then
+        task.spawn(function()
+            while AutoSpin do
+                RemotesEvent:WaitForChild("SpinFunction"):InvokeServer()
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+
+
+
+-- ================= SMALL SIZE TOGGLE
+local SmallSizeToggle = Tabs.Quest:AddToggle("SmallSize", {
+    Title = "Small Size",
+    Default = false
+})
+
+local firstRun = true
+
+SmallSizeToggle:OnChanged(function()
+    -- Skip trigger pertama saat script load
+    if firstRun then
+        firstRun = false
+        return
+    end
+
+    if Options.SmallSize.Value then
+        -- Toggle ON: aktifkan small size
+        game:GetService("ReplicatedStorage"):WaitForChild("RemotesEvent"):WaitForChild("SizeChanged"):FireServer(1e-13)
+    else
+        -- Toggle OFF: kembalikan ukuran normal
+        game:GetService("ReplicatedStorage"):WaitForChild("RemotesEvent"):WaitForChild("SizeChanged"):FireServer(1)
+    end
+end)
+
+
 
 -- ===========================================================
 --  TAB MISC
