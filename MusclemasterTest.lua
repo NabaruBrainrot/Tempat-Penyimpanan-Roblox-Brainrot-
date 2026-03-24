@@ -296,23 +296,108 @@ end)
 
 
 
-
 -- AUTO REBIRTH
 local AutoRebirth = false
+local ConfirmGui = nil
 
-local AutoRebirthToggle = Tabs.Farm:AddToggle("AutoRebirth", { Title = "Auto Rebirth", Default = false })
+-- ===== TOGGLE (deklarasi dulu sebelum fungsi GUI) =====
+local AutoRebirthToggle = Tabs.Farm:AddToggle("AutoRebirth", {
+    Title = "Auto Rebirth",
+    Default = false
+})
+
+-- ===== GUI FUNCTION =====
+local function CreateConfirmGui()
+    if ConfirmGui and ConfirmGui.Parent then return end
+
+    local ScreenGui = Instance.new("ScreenGui")
+    ConfirmGui = ScreenGui
+    ScreenGui.Name = "ConfirmRebirthGui"
+    ScreenGui.Parent = game.CoreGui
+    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    ScreenGui.DisplayOrder = 999999
+
+    local Frame = Instance.new("Frame")
+    Frame.Size = UDim2.new(0, 320, 0, 160)
+    Frame.Position = UDim2.new(0.5, -160, 0.5, -80)
+    Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    Frame.Parent = ScreenGui
+    Instance.new("UICorner", Frame)
+
+    local Stroke = Instance.new("UIStroke", Frame)
+    Stroke.Color = Color3.fromRGB(80, 80, 80)
+
+    local Title = Instance.new("TextLabel")
+    Title.Size = UDim2.new(1, 0, 0.5, 0)
+    Title.Text = "Enable Auto Rebirth?"
+    Title.TextColor3 = Color3.new(1, 1, 1)
+    Title.BackgroundTransparency = 1
+    Title.TextScaled = true
+    Title.Font = Enum.Font.GothamBold
+    Title.Parent = Frame
+
+    local YesBtn = Instance.new("TextButton")
+    YesBtn.Size = UDim2.new(0.45, 0, 0.35, 0)
+    YesBtn.Position = UDim2.new(0.05, 0, 0.6, 0)
+    YesBtn.Text = "YES"
+    YesBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+    YesBtn.TextColor3 = Color3.new(1, 1, 1)
+    YesBtn.TextScaled = true
+    YesBtn.Parent = Frame
+    Instance.new("UICorner", YesBtn)
+
+    local NoBtn = Instance.new("TextButton")
+    NoBtn.Size = UDim2.new(0.45, 0, 0.35, 0)
+    NoBtn.Position = UDim2.new(0.5, 0, 0.6, 0)
+    NoBtn.Text = "NO"
+    NoBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+    NoBtn.TextColor3 = Color3.new(1, 1, 1)
+    NoBtn.TextScaled = true
+    NoBtn.Parent = Frame
+    Instance.new("UICorner", NoBtn)
+
+    YesBtn.MouseButton1Click:Connect(function()
+        AutoRebirth = true
+        ScreenGui:Destroy()
+        ConfirmGui = nil
+    end)
+
+    NoBtn.MouseButton1Click:Connect(function()
+        AutoRebirth = false
+        ScreenGui:Destroy()
+        ConfirmGui = nil
+        -- SetValue sekarang aman karena toggle sudah dideklarasi di atas
+        AutoRebirthToggle:SetValue(false)
+    end)
+end
+
+-- ===== ON CHANGED =====
 AutoRebirthToggle:OnChanged(function()
-    AutoRebirth = Options.AutoRebirth.Value
+    if Options.AutoRebirth.Value then
+        CreateConfirmGui()
+    else
+        AutoRebirth = false
+        if ConfirmGui then
+            ConfirmGui:Destroy()
+            ConfirmGui = nil
+        end
+    end
 end)
 
+-- ===== LOOP =====
 task.spawn(function()
     while true do
         if AutoRebirth then
-            RemotesEvent:WaitForChild("RebirthEvent"):FireServer()
+            if RemotesEvent and RemotesEvent:FindFirstChild("RebirthEvent") then
+                RemotesEvent:WaitForChild("RebirthEvent"):FireServer()
+            end
         end
         task.wait(0.05)
     end
 end)
+
+
+
 
 -- ===========================================================
 --  TAB COMBAT
