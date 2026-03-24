@@ -235,21 +235,67 @@ task.spawn(function()
     end
 end)
 
--- AUTO SPIN
-local AutoSpin = false
 
-local AutoSpinToggle = Tabs.Farm:AddToggle("AutoSpin", { Title = "Auto Spin", Default = false })
-AutoSpinToggle:OnChanged(function()
-    AutoSpin = Options.AutoSpin.Value
-    if AutoSpin then
-        task.spawn(function()
-            while AutoSpin do
-                RemotesEvent:WaitForChild("SpinFunction"):InvokeServer()
-                task.wait(0.1)
+-- AUTO GLITCH V2
+local AutoGlitchToggle = Tabs.Farm:AddToggle("AutoGlitch", {
+    Title = "Auto Glitch V2",
+    Default = false
+})
+
+local glitchMachines = {}
+local glitchTargetNames = {
+    ["Squat Ocean"] = true,
+    ["Squat Ocean"] = true,
+}
+for _, v in ipairs(machinesFolder:GetChildren()) do
+    if glitchTargetNames[v.Name] then
+        table.insert(glitchMachines, v)
+    end
+end
+
+local glitchCooldown = {}
+local GLITCH_COOLDOWN = 0
+
+local function tryUseGlitchMachine(machine)
+    local now = tick()
+    if (now - (glitchCooldown[machine] or 0)) < GLITCH_COOLDOWN then return end
+    glitchCooldown[machine] = now
+    local ok, err = pcall(function()
+        machineactive:InvokeServer(machine, true)
+    end)
+    if not ok then
+        warn("[AutoGlitch] Gagal invoke:", machine.Name, "-", err)
+    end
+end
+
+task.spawn(function()
+    while true do
+        task.wait(0.01)
+        if not AutoGlitchToggle.Value then continue end
+
+        if machineuse.Value == nil then
+            task.wait(1)
+            for _, machine in ipairs(glitchMachines) do
+                if not AutoGlitchToggle.Value then break end
+                if machineuse.Value ~= nil then break end
+                tryUseGlitchMachine(machine)
+                task.wait(0.5)
             end
-        end)
+        else
+            local ok, err = pcall(function()
+                MachineActiveEvent:FireServer()
+            end)
+            if not ok then
+                warn("[AutoGlitch] FireServer gagal:", err)
+                task.wait(0.5)
+            end
+        end
     end
 end)
+
+
+
+
 
 -- AUTO REBIRTH
 local AutoRebirth = false
@@ -454,16 +500,64 @@ AntiAFKToggle:OnChanged(function()
     end
 end)
 
+
+
+
+
+-- AUTO SPIN
+local AutoSpin = false
+
+local AutoSpinToggle = Tabs.Quest:AddToggle("AutoSpin", { Title = "Auto Spin", Default = false })
+AutoSpinToggle:OnChanged(function()
+    AutoSpin = Options.AutoSpin.Value
+    if AutoSpin then
+        task.spawn(function()
+            while AutoSpin do
+                RemotesEvent:WaitForChild("SpinFunction"):InvokeServer()
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+
+
+
+-- ================= SMALL SIZE TOGGLE
+local SmallSizeToggle = Tabs.Quest:AddToggle("SmallSize", {
+    Title = "Small Size",
+    Default = false
+})
+
+local firstRun = true
+
+SmallSizeToggle:OnChanged(function()
+    -- Skip trigger pertama saat script load
+    if firstRun then
+        firstRun = false
+        return
+    end
+
+    if Options.SmallSize.Value then
+        -- Toggle ON: aktifkan small size
+        game:GetService("ReplicatedStorage"):WaitForChild("RemotesEvent"):WaitForChild("SizeChanged"):FireServer(1e-13)
+    else
+        -- Toggle OFF: kembalikan ukuran normal
+        game:GetService("ReplicatedStorage"):WaitForChild("RemotesEvent"):WaitForChild("SizeChanged"):FireServer(1)
+    end
+end)
+
+
+
 -- ===========================================================
 --  TAB MISC
 -- ===========================================================
-local SelectedPet = "common"
+local SelectedPet = "rare"
 local ToggleEggsEnabled = false
 
 local OpenPetRemote = RemotesEvent:WaitForChild("OpenPetEvent")
 
 local PetMapping = {
-    Common    = "common",
     Rare      = "rare",
     Epic      = "epic",
     Legendary = "legendary",
@@ -473,7 +567,7 @@ local PetMapping = {
 
 local EggsDropdown = Tabs.Misc:AddDropdown("SelectEggs", {
     Title = "Select Eggs",
-    Values = {"Common", "Rare", "Epic", "Legendary", "Mythic", "Master"},
+    Values = {"Rare", "Epic", "Legendary", "Mythic", "Master"},
     Multi = false,
     Default = 1,
 })
