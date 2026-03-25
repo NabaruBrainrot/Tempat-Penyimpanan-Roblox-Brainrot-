@@ -236,9 +236,10 @@ task.spawn(function()
 end)
 
 
--- AUTO GLITCH V2
+-- AUTO GLITCH V2 Fast
 local AutoGlitchToggle = Tabs.Farm:AddToggle("AutoGlitch", {
-    Title = "Auto Glitch V2",
+    Title = "Auto Glitch V2 Fast",
+    Description = "Reguired 1m Endurance",
     Default = false
 })
 
@@ -292,7 +293,6 @@ task.spawn(function()
         end
     end
 end)
-
 
 
 
