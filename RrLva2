@@ -1,5 +1,5 @@
 -- Konfigurasi
-local kodeRahasia = "T4JHG-5T9U-QW2E-AS84-PL37-NM65"
+local kodeRahasia = "T1JHG-5T9U-QW2E-AS84-PL37-NM65"
 local linkKeyURL = "https://rekonise.com/like-and-comment-dfj5k"
 local statusFile = "fadhen_code.TheJusDinginBra3sswh"
 local KEY_VALID_SECONDS = 259200 -- 24 jam
