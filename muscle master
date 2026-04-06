@@ -1,7 +1,7 @@
 -- Konfigurasi
 local kodeRahasia = ""
 pcall(function()
-    kodeRahasia = game:HttpGet("https://test-jjsploits-website-brown.vercel.app/key.txt")
+    kodeRahasia = game:HttpGet("https://my-key-site.vercel.app/key.txt")
 end)
 kodeRahasia = tostring(kodeRahasia):gsub("%s+", "")
 
