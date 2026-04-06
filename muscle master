@@ -1,5 +1,10 @@
 -- Konfigurasi
-local kodeRahasia = "y1JHG-5T9U-QW2E-AS84-PL37-NM65"
+local kodeRahasia = ""
+pcall(function()
+    kodeRahasia = game:HttpGet("https://test-jjsploits-website-brown.vercel.app/key.txt")
+end)
+kodeRahasia = tostring(kodeRahasia):gsub("%s+", "")
+
 local linkKeyURL = "https://direct-link.net/1365093/7q20TsQcGj82"
 local statusFile = "fadhen_code.TheJusDd2inginBrsa3sswh"
 local trialFile = "fadhen2_trial.tmp"
