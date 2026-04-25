@@ -111,7 +111,7 @@ getKeyBtn.MouseButton1Click:Connect(function()
         Duration = 3
     })
 
-    getKeyBtn.Text = "COPIED!"
+    getKeyBtn.Text = "GET KEY"
     task.wait(1)
     getKeyBtn.Text = "GET KEY"
 end)
